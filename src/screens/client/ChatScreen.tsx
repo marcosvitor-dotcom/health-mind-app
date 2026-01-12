@@ -90,11 +90,13 @@ export default function ChatScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <View style={styles.aiIndicator}>
-            <View style={styles.aiDot} />
-            <Text style={styles.aiText}>Assistente</Text>
+          <View style={styles.headerTextContainer}>
+            <View style={styles.aiIndicator}>
+              <View style={styles.aiDot} />
+              <Text style={styles.aiText}>Assistente</Text>
+            </View>
+            <Text style={styles.subtitle}>Seu diário pessoal</Text>
           </View>
-          <Text style={styles.subtitle}>Seu diário pessoal</Text>
         </View>
 
         <ScrollView
@@ -183,16 +185,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
-    alignItems: 'center',
   },
   logo: {
-    width: 60,
-    height: 60,
-    marginBottom: 8,
+    width: 50,
+    height: 50,
+    marginRight: 12,
+  },
+  headerTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   aiIndicator: {
     flexDirection: 'row',
@@ -213,7 +220,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     color: '#666',
-    marginTop: 4,
+    marginTop: 2,
   },
   messagesContainer: {
     flex: 1,

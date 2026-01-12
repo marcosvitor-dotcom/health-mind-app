@@ -9,16 +9,43 @@ import ReportsScreen from '../screens/psychologist/ReportsScreen';
 import AddClientScreen from '../screens/psychologist/AddClientScreen';
 import AnamneseFormScreen from '../screens/psychologist/AnamneseFormScreen';
 import ProfileScreen from '../screens/psychologist/ProfileScreen';
+import InvitePatientScreen from '../screens/psychologist/InvitePatientScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function ClientsStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ClientsList" component={ClientsScreen} />
-      <Stack.Screen name="AddClient" component={AddClientScreen} />
-      <Stack.Screen name="AnamneseForm" component={AnamneseFormScreen} />
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ClientsList"
+        component={ClientsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddClient"
+        component={AddClientScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AnamneseForm"
+        component={AnamneseFormScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InvitePatient"
+        component={InvitePatientScreen}
+        options={{
+          title: 'Convidar Paciente',
+          headerStyle: {
+            backgroundColor: '#50C878',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '600',
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 }

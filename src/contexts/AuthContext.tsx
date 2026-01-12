@@ -1,45 +1,144 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '../types';
+import * as authService from '../services/authService';
+import * as storage from '../utils/storage';
 
 interface AuthContextData {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const login = async (email: string, password: string, role: UserRole) => {
-    setLoading(true);
+  // Carregar usuário do storage ao iniciar
+  useEffect(() => {
+    loadStoredUser();
+  }, []);
+
+  /**
+   * Carregar usuário salvo no AsyncStorage
+   */
+  const loadStoredUser = async () => {
     try {
-      // Simulação de login - será substituído por autenticação real no futuro
-      const mockUser: User = {
-        id: '1',
-        name: role === 'clinic' ? 'Clínica Exemplo' :
-              role === 'psychologist' ? 'Dr. João Silva' :
-              'Maria Santos',
-        email,
-        role,
-        avatar: undefined,
-      };
+      setLoading(true);
+      const storedUser = await storage.getUser();
+      const token = await storage.getToken();
 
-      // Simula um delay de rede
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      setUser(mockUser);
+      if (storedUser && token) {
+        // Verificar se o token ainda é válido tentando buscar dados atualizados
+        try {
+          const updatedUser = await authService.getMe();
+          setUser(updatedUser);
+          await storage.setUser(updatedUser);
+        } catch (error) {
+          // Token inválido ou expirado - limpar storage
+          console.log('Token expirado, fazendo logout...');
+          await clearAuthData();
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuário:', error);
+      await clearAuthData();
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
+  /**
+   * Limpar dados de autenticação
+   */
+  const clearAuthData = async () => {
     setUser(null);
+    await storage.clearTokens();
+  };
+
+  /**
+   * Login de usuário
+   */
+  const login = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+
+      // Chamar API de login
+      const response = await authService.login(email, password);
+
+      if (response.success && response.data) {
+        const { user: userData, token, refreshToken } = response.data;
+
+        // Salvar tokens
+        await storage.setToken(token);
+        await storage.setRefreshToken(refreshToken);
+
+        // Normalizar user data (garantir que tenha 'id' além de '_id')
+        const normalizedUser: User = {
+          ...userData,
+          id: userData._id || userData.id,
+        };
+
+        // Salvar usuário
+        await storage.setUser(normalizedUser);
+        setUser(normalizedUser);
+      } else {
+        throw new Error(response.message || 'Erro ao fazer login');
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Logout de usuário
+   */
+  const logout = async () => {
+    try {
+      setLoading(true);
+
+      // Chamar API de logout (não crítico se falhar)
+      try {
+        await authService.logout();
+      } catch (error) {
+        console.log('Erro ao fazer logout na API (não crítico):', error);
+      }
+
+      // Limpar dados locais
+      await clearAuthData();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Atualizar dados do usuário
+   */
+  const refreshUserData = async () => {
+    try {
+      const updatedUser = await authService.getMe();
+
+      // Normalizar user data
+      const normalizedUser: User = {
+        ...updatedUser,
+        id: updatedUser._id || updatedUser.id,
+      };
+
+      setUser(normalizedUser);
+      await storage.setUser(normalizedUser);
+    } catch (error) {
+      console.error('Erro ao atualizar dados do usuário:', error);
+      throw error;
+    }
   };
 
   return (
@@ -50,6 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         login,
         logout,
+        refreshUserData,
       }}
     >
       {children}

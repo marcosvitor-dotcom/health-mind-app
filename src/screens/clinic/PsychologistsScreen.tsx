@@ -36,12 +36,21 @@ export default function PsychologistsScreen({ navigation }: any) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Psicólogos da Clínica</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AddPsychologist')}
-        >
-          <Ionicons name="add-circle" size={28} color="#4A90E2" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.inviteButton}
+            onPress={() => navigation.navigate('InvitePsychologist')}
+          >
+            <Ionicons name="mail" size={20} color="#fff" />
+            <Text style={styles.inviteButtonText}>Convidar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddPsychologist')}
+          >
+            <Ionicons name="add-circle" size={28} color="#4A90E2" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.list}>
@@ -108,6 +117,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: '#333',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4A90E2',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  inviteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   addButton: {
     padding: 4,

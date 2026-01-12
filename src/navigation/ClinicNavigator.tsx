@@ -7,15 +7,38 @@ import PsychologistsScreen from '../screens/clinic/PsychologistsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
 import AddPsychologistScreen from '../screens/clinic/AddPsychologistScreen';
+import InvitePsychologistScreen from '../screens/clinic/InvitePsychologistScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function PsychologistsStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="PsychologistsList" component={PsychologistsScreen} />
-      <Stack.Screen name="AddPsychologist" component={AddPsychologistScreen} />
+    <Stack.Navigator>
+      <Stack.Screen
+        name="PsychologistsList"
+        component={PsychologistsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddPsychologist"
+        component={AddPsychologistScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InvitePsychologist"
+        component={InvitePsychologistScreen}
+        options={{
+          title: 'Convidar Psicólogo',
+          headerStyle: {
+            backgroundColor: '#4A90E2',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '600',
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 }
