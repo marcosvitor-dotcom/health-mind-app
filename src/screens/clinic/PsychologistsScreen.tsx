@@ -38,6 +38,12 @@ export default function PsychologistsScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Psicólogos da Clínica</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
+            style={styles.invitationsButton}
+            onPress={() => navigation.navigate('Invitations')}
+          >
+            <Ionicons name="mail-open" size={20} color="#4A90E2" />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.inviteButton}
             onPress={() => navigation.navigate('InvitePsychologist')}
           >
@@ -122,6 +128,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  invitationsButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#E8F4FF',
   },
   inviteButton: {
     flexDirection: 'row',

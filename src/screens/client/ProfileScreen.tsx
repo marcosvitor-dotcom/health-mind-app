@@ -1,30 +1,42 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 
-export default function ProfileScreen() {
+interface ProfileScreenProps {
+  navigation: any;
+}
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView>
-      <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {user?.name
-              .split(' ')
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-          </Text>
-        </View>
+      <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('EditProfile')}>
+        {user?.avatar ? (
+          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        ) : (
+          <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <Text style={styles.avatarText}>
+              {user?.name
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2)}
+            </Text>
+          </View>
+        )}
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
-      </View>
+        <View style={styles.editProfileHint}>
+          <Text style={styles.editProfileText}>Toque para editar perfil</Text>
+          <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Meu Tratamento</Text>
@@ -152,15 +164,27 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    marginBottom: 12,
+  },
+  avatarPlaceholder: {
     backgroundColor: '#4A90E2',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
   },
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  editProfileHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  editProfileText: {
+    fontSize: 14,
+    color: '#4A90E2',
+    marginRight: 4,
   },
   name: {
     fontSize: 22,

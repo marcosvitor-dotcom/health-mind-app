@@ -1,7 +1,8 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CompleteRegistrationScreen from '../screens/auth/CompleteRegistrationScreen';
@@ -9,7 +10,27 @@ import ClinicNavigator from './ClinicNavigator';
 import PsychologistNavigator from './PsychologistNavigator';
 import ClientNavigator from './ClientNavigator';
 
-const Stack = createNativeStackNavigator();
+type RootStackParamList = {
+  Login: undefined;
+  CompleteRegistration: { token: string };
+  Main: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const linking: LinkingOptions<any> = {
+  prefixes: [
+    Linking.createURL('/'),
+    'healthmind://',
+    'https://health-mind-app.vercel.app',
+  ],
+  config: {
+    screens: {
+      CompleteRegistration: 'auth/complete-registration/:token',
+      Login: 'login',
+    },
+  },
+};
 
 export default function AppNavigator() {
   const { isAuthenticated, user, loading } = useAuth();
@@ -42,7 +63,7 @@ export default function AppNavigator() {
   };
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator>
         {!isAuthenticated ? (
           <>

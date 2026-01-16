@@ -6,6 +6,7 @@ import ChatScreen from '../screens/client/ChatScreen';
 import AppointmentsScreen from '../screens/client/AppointmentsScreen';
 import EmergencyScreen from '../screens/client/EmergencyScreen';
 import ProfileScreen from '../screens/client/ProfileScreen';
+import EditProfileScreen from '../screens/client/EditProfileScreen';
 import PsychologistChatScreen from '../screens/client/PsychologistChatScreen';
 
 const Tab = createBottomTabNavigator();
@@ -16,6 +17,15 @@ function EmergencyStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="EmergencyMain" component={EmergencyScreen} />
       <Stack.Screen name="PsychologistChat" component={PsychologistChatScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function ProfileStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 }
@@ -61,7 +71,7 @@ export default function ClientNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color, size }) => (

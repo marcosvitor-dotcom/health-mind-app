@@ -72,6 +72,12 @@ export default function ClientsScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Meus Pacientes</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
+            style={styles.invitationsButton}
+            onPress={() => navigation.navigate('Invitations')}
+          >
+            <Ionicons name="mail-open" size={18} color="#50C878" />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.inviteButton}
             onPress={() => navigation.navigate('InvitePatient')}
           >
@@ -192,6 +198,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  invitationsButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#E8FFF0',
   },
   inviteButton: {
     flexDirection: 'row',

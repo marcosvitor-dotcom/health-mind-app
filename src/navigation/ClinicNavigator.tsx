@@ -6,8 +6,11 @@ import OverviewScreen from '../screens/clinic/OverviewScreen';
 import PsychologistsScreen from '../screens/clinic/PsychologistsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
+import EditProfileScreen from '../screens/clinic/EditProfileScreen';
 import AddPsychologistScreen from '../screens/clinic/AddPsychologistScreen';
 import InvitePsychologistScreen from '../screens/clinic/InvitePsychologistScreen';
+import InvitationsScreen from '../screens/clinic/InvitationsScreen';
+import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -39,6 +42,34 @@ function PsychologistsStack() {
           },
         }}
       />
+      <Stack.Screen
+        name="Invitations"
+        component={InvitationsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InvitePatient"
+        component={InvitePatientScreen}
+        options={{
+          title: 'Convidar Paciente',
+          headerStyle: {
+            backgroundColor: '#50C878',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '600',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function ProfileStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 }
@@ -84,7 +115,7 @@ export default function ClinicNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color, size }) => (

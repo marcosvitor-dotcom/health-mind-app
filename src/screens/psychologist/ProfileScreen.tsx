@@ -11,7 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function ProfileScreen() {
+interface ProfileScreenProps {
+  navigation: any;
+}
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
@@ -42,7 +46,10 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Conta</Text>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('EditProfile')}
+          >
             <Ionicons name="person-outline" size={24} color="#333" />
             <Text style={styles.menuText}>Editar Perfil</Text>
             <Ionicons name="chevron-forward" size={24} color="#999" />
