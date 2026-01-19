@@ -20,7 +20,8 @@
       "Bash(git clean:*)",
       "Bash(git add .gitignore)",
       "Bash(git add:*)",
-      "Bash(npx expo install:*)"
+      "Bash(npx expo install:*)",
+      "Bash(dir:*)"
     ]
   }
 }
