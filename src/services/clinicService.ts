@@ -262,29 +262,96 @@ export const enrichAppointmentsWithPatients = async (appointments: ClinicAppoint
 
 /**
  * Atualizar um agendamento
+ * Tenta diferentes rotas e métodos (PATCH e PUT)
+ *
+ * IMPORTANTE: O backend espera:
+ * - Campo 'date' (não 'dateTime')
+ * - Tipo: 'online' ou 'in_person' (não 'presencial')
+ * - Status: 'scheduled', 'confirmed', 'completed', 'cancelled'
  */
 export const updateAppointment = async (
   appointmentId: string,
-  data: { date?: string; status?: string; notes?: string; type?: string }
+  data: { date?: string; status?: string; notes?: string; type?: string; psychologistId?: string; duration?: number }
 ): Promise<ClinicAppointment | null> => {
   try {
-    // Tenta diferentes rotas
+    // Tenta diferentes rotas e métodos
     const routes = [
-      `/appointments/${appointmentId}`,
+      { url: `/appointments/${appointmentId}`, method: 'put' },
+      { url: `/appointments/${appointmentId}`, method: 'patch' },
+      { url: `/clinic/appointments/${appointmentId}`, method: 'put' },
+      { url: `/clinic/appointments/${appointmentId}`, method: 'patch' },
     ];
 
     for (const route of routes) {
       try {
-        const response = await api.put(route, data);
+        console.log(`Tentando ${route.method.toUpperCase()} ${route.url} com dados:`, JSON.stringify(data, null, 2));
+        const response = route.method === 'put'
+          ? await api.put(route.url, data)
+          : await api.patch(route.url, data);
+        console.log('Resposta da API:', response.data);
         return response.data?.data || response.data;
       } catch (err: any) {
-        if (err.response?.status === 404) continue;
+        if (err.response?.status === 404) {
+          console.log(`Rota ${route.url} não encontrada, tentando próxima...`);
+          continue;
+        }
+        if (err.response?.status === 403) {
+          // Se for 403, não tenta outras rotas - é um problema de permissão
+          console.error('Erro 403 - Sem permissão:', err.response?.data);
+          throw err;
+        }
+        if (err.response?.status === 409) {
+          console.error('Erro 409 - Conflito:', {
+            message: err.response?.data?.message,
+            error: err.response?.data?.error,
+            data: err.response?.data,
+          });
+          throw err;
+        }
+        console.error(`Erro ao atualizar via ${route.url}:`, err.response?.data || err.message);
         throw err;
       }
     }
     return null;
   } catch (err) {
     console.error('Erro ao atualizar agendamento:', err);
+    throw err;
+  }
+};
+
+/**
+ * Solicitar alteração de agendamento (quando não há permissão para editar diretamente)
+ * Esta função pode enviar uma notificação ao psicólogo solicitando a mudança
+ */
+export const requestAppointmentChange = async (
+  appointmentId: string,
+  data: {
+    date?: string;
+    notes?: string;
+    type?: string;
+    psychologistId?: string;
+    reason: string;
+  }
+): Promise<boolean> => {
+  try {
+    // Tenta rota de solicitação de mudança
+    await api.post(`/appointments/${appointmentId}/request-change`, data);
+    return true;
+  } catch (err: any) {
+    // Se a rota não existir (404), tenta enviar notificação direta
+    if (err.response?.status === 404) {
+      try {
+        await api.post(`/notifications`, {
+          type: 'appointment_change_request',
+          appointmentId,
+          requestedChanges: data,
+        });
+        return true;
+      } catch (notifErr) {
+        console.error('Erro ao solicitar mudança:', notifErr);
+        throw new Error('Não foi possível solicitar a mudança. Entre em contato com o psicólogo diretamente.');
+      }
+    }
     throw err;
   }
 };

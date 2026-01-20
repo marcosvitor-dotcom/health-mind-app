@@ -27,10 +27,10 @@ interface AppointmentsByDate {
 // Horários do dia para visualização diária
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 07:00 às 20:00
 
-// Tipos de consulta
+// Tipos de consulta (devem corresponder aos valores do backend)
 const APPOINTMENT_TYPES = [
   { value: 'online', label: 'Online' },
-  { value: 'presencial', label: 'Presencial' },
+  { value: 'in_person', label: 'Presencial' },
 ];
 
 // Helper para extrair ID de objetos MongoDB
@@ -256,6 +256,12 @@ export default function ScheduleScreen({ navigation }: any) {
   const getAppointmentTypeLabel = (type?: string) => {
     if (!type) return 'Consulta';
     switch (type) {
+      case 'online':
+        return 'Online';
+      case 'in_person':
+        return 'Presencial';
+      case 'presencial': // Fallback para dados antigos
+        return 'Presencial';
       case 'regular':
         return 'Consulta Regular';
       case 'first':
@@ -266,10 +272,6 @@ export default function ScheduleScreen({ navigation }: any) {
         return 'Emergência';
       case 'return':
         return 'Retorno';
-      case 'online':
-        return 'Online';
-      case 'presencial':
-        return 'Presencial';
       default:
         return type;
     }
@@ -360,7 +362,7 @@ export default function ScheduleScreen({ navigation }: any) {
     // Preenche os campos de edição
     setEditDate(getAppointmentDate(appointment));
     setEditTime(getAppointmentTime(appointment));
-    setEditType(appointment.type || 'presencial');
+    setEditType(appointment.type || 'in_person'); // Padrão: in_person (presencial)
     setEditNotes(appointment.notes || '');
     setEditPsychologistId(getPsychologistId(appointment) || '');
 
@@ -393,16 +395,65 @@ export default function ScheduleScreen({ navigation }: any) {
       const [hours, minutes] = editTime.split(':');
       const dateTime = new Date(`${editDate}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`);
 
-      const updateData: any = {
-        date: dateTime.toISOString(),
-        type: editType,
-        notes: editNotes,
-      };
+      // Verifica se a data é válida
+      if (isNaN(dateTime.getTime())) {
+        Alert.alert('Erro', 'Data ou hora inválida. Por favor, verifique os valores.');
+        return;
+      }
+
+      // IMPORTANTE: O backend espera 'date' (não 'dateTime')
+      const updateData: any = {};
+
+      // Verifica se a data/hora mudou
+      const originalDate = getAppointmentDate(selectedAppointment);
+      const originalTime = getAppointmentTime(selectedAppointment);
+      const originalDateTime = new Date(`${originalDate}T${originalTime}:00`);
+
+      const dateChanged = Math.abs(dateTime.getTime() - originalDateTime.getTime()) > 60000; // Diferença maior que 1 minuto
+
+      if (dateChanged) {
+        // Valida que a data está no futuro (backend requer isso)
+        if (dateTime <= new Date()) {
+          Alert.alert(
+            'Data Inválida',
+            'A data do agendamento deve ser no futuro. Por favor, escolha uma data e hora posteriores ao momento atual.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+        updateData.date = dateTime.toISOString();
+      }
+
+      // Adiciona apenas os campos que foram modificados ou têm valor
+      if (editType && editType !== selectedAppointment.type) {
+        updateData.type = editType;
+      }
+
+      if (editNotes !== undefined && editNotes !== selectedAppointment.notes) {
+        updateData.notes = editNotes;
+      }
 
       // Se mudou o psicólogo
       if (editPsychologistId && editPsychologistId !== getPsychologistId(selectedAppointment)) {
         updateData.psychologistId = editPsychologistId;
       }
+
+      // Se nenhum campo foi alterado, não faz nada
+      if (Object.keys(updateData).length === 0) {
+        Alert.alert('Aviso', 'Nenhuma alteração foi detectada.');
+        return;
+      }
+
+      console.log('Dados de atualização:', JSON.stringify({
+        appointmentId,
+        updateData,
+        original: {
+          date: getAppointmentDate(selectedAppointment),
+          time: getAppointmentTime(selectedAppointment),
+          psychologist: getPsychologistId(selectedAppointment),
+          type: selectedAppointment.type,
+        },
+      }, null, 2));
 
       await clinicService.updateAppointment(appointmentId, updateData);
 
@@ -417,12 +468,46 @@ export default function ScheduleScreen({ navigation }: any) {
       console.error('Erro ao atualizar:', err);
       if (err.response?.status === 403) {
         Alert.alert(
-          'Sem Permissão',
-          'A clínica não tem permissão para editar este agendamento diretamente. Entre em contato com o psicólogo responsável.',
+          'Permissão Negada',
+          'A clínica não possui permissão para modificar agendamentos diretamente.\n\n' +
+          'Para fazer alterações neste agendamento, entre em contato com o psicólogo responsável:\n' +
+          `Dr(a). ${getPsychologistName(selectedAppointment)}\n\n` +
+          'Alterações em agendamentos devem ser realizadas pelo profissional que criou a consulta.',
+          [{ text: 'Entendi', style: 'cancel' }]
+        );
+      } else if (err.response?.status === 404) {
+        Alert.alert(
+          'Agendamento não encontrado',
+          'Este agendamento pode ter sido removido ou não está mais disponível.',
           [{ text: 'OK' }]
         );
+      } else if (err.response?.status === 409) {
+        const errorData = err.response?.data;
+        const errorMessage = errorData?.message || errorData?.error || '';
+
+        console.log('Detalhes do erro 409:', JSON.stringify(errorData, null, 2));
+
+        let displayMessage = errorMessage;
+
+        // Se não houver mensagem específica, monta uma genérica
+        if (!displayMessage) {
+          displayMessage =
+            'Não foi possível atualizar o agendamento devido a um conflito.\n\n' +
+            'Possíveis causas:\n' +
+            '• O horário já está ocupado por outro agendamento\n' +
+            '• Conflito com disponibilidade do psicólogo\n' +
+            '• O agendamento foi modificado recentemente\n\n' +
+            'Tente recarregar a agenda e verificar os horários disponíveis.';
+        }
+
+        Alert.alert('Conflito de Agendamento', displayMessage, [
+          { text: 'Recarregar Agenda', onPress: () => { setLoading(true); loadAppointments(); } },
+          { text: 'OK', style: 'cancel' }
+        ]);
       } else {
-        Alert.alert('Erro', err.message || 'Não foi possível atualizar o agendamento.');
+        const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message;
+        console.log('Erro completo:', JSON.stringify(err.response?.data, null, 2));
+        Alert.alert('Erro', errorMessage || 'Não foi possível atualizar o agendamento.');
       }
     } finally {
       setIsSaving(false);
@@ -441,7 +526,7 @@ export default function ScheduleScreen({ navigation }: any) {
 
     Alert.alert(
       'Cancelar Agendamento',
-      'Deseja realmente cancelar este agendamento?',
+      `Deseja realmente cancelar este agendamento?\n\nPaciente: ${getPatientName(selectedAppointment)}\nData: ${new Date(getAppointmentDate(selectedAppointment) + 'T00:00:00').toLocaleDateString('pt-BR')}\nHorário: ${getAppointmentTime(selectedAppointment)}`,
       [
         { text: 'Não', style: 'cancel' },
         {
@@ -460,8 +545,12 @@ export default function ScheduleScreen({ navigation }: any) {
             } catch (err: any) {
               if (err.response?.status === 403) {
                 Alert.alert(
-                  'Sem Permissão',
-                  'A clínica não tem permissão para cancelar este agendamento diretamente.'
+                  'Permissão Negada',
+                  'A clínica não possui permissão para cancelar agendamentos diretamente.\n\n' +
+                  'Para cancelar este agendamento, entre em contato com o psicólogo responsável:\n' +
+                  `Dr(a). ${getPsychologistName(selectedAppointment)}\n\n` +
+                  'Cancelamentos devem ser realizados pelo profissional que criou a consulta.',
+                  [{ text: 'Entendi', style: 'cancel' }]
                 );
               } else {
                 Alert.alert('Erro', err.message || 'Não foi possível cancelar o agendamento.');
@@ -501,8 +590,12 @@ export default function ScheduleScreen({ navigation }: any) {
     } catch (err: any) {
       if (err.response?.status === 403) {
         Alert.alert(
-          'Sem Permissão',
-          'A clínica não tem permissão para confirmar este agendamento diretamente.'
+          'Permissão Negada',
+          'A clínica não possui permissão para confirmar agendamentos diretamente.\n\n' +
+          'Para confirmar este agendamento, entre em contato com o psicólogo responsável:\n' +
+          `Dr(a). ${getPsychologistName(selectedAppointment)}\n\n` +
+          'Confirmações devem ser realizadas pelo profissional responsável pela consulta.',
+          [{ text: 'Entendi', style: 'cancel' }]
         );
       } else {
         Alert.alert('Erro', err.message || 'Não foi possível confirmar o agendamento.');
