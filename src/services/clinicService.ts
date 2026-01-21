@@ -29,6 +29,7 @@ export interface ClinicStats {
   totalPatients: number;
   appointmentsToday: number;
   occupancyRate: number;
+  newPatientsThisMonth?: number;
 }
 
 export interface ClinicPsychologist {
@@ -391,4 +392,156 @@ export const getClinicAppointments = async (clinicId: string, date?: string): Pr
   const flatAppointments = allAppointments.flat();
 
   return flatAppointments;
+};
+
+/**
+ * Vincular psicólogo à clínica
+ */
+export const linkPsychologistToClinic = async (clinicId: string, psychologistId: string): Promise<boolean> => {
+  try {
+    await api.post(`/clinics/${clinicId}/psychologists/${psychologistId}/link`);
+    return true;
+  } catch (err) {
+    console.error('Erro ao vincular psicólogo:', err);
+    throw err;
+  }
+};
+
+/**
+ * Desvincular psicólogo da clínica
+ */
+export const unlinkPsychologistFromClinic = async (clinicId: string, psychologistId: string): Promise<boolean> => {
+  try {
+    await api.post(`/clinics/${clinicId}/psychologists/${psychologistId}/unlink`);
+    return true;
+  } catch (err) {
+    console.error('Erro ao desvincular psicólogo:', err);
+    throw err;
+  }
+};
+
+/**
+ * Listar pacientes da clínica
+ */
+export const getClinicPatients = async (
+  clinicId: string,
+  options?: {
+    psychologistId?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }
+): Promise<{ patients: PatientBasic[]; total: number; pages: number }> => {
+  try {
+    const params: any = {};
+    if (options?.psychologistId) params.psychologistId = options.psychologistId;
+    if (options?.search) params.search = options.search;
+    if (options?.page) params.page = options.page;
+    if (options?.limit) params.limit = options.limit;
+
+    const response = await api.get(`/clinics/${clinicId}/patients`, { params });
+    const data = response.data;
+
+    if (data?.data) {
+      return {
+        patients: data.data.patients || [],
+        total: data.data.pagination?.total || 0,
+        pages: data.data.pagination?.pages || 0,
+      };
+    }
+
+    return { patients: [], total: 0, pages: 0 };
+  } catch (err) {
+    console.error('Erro ao buscar pacientes da clínica:', err);
+    throw err;
+  }
+};
+
+/**
+ * Vincular paciente à clínica
+ */
+export const linkPatientToClinic = async (clinicId: string, patientId: string): Promise<boolean> => {
+  try {
+    await api.post(`/clinics/${clinicId}/patients/${patientId}/link`);
+    return true;
+  } catch (err) {
+    console.error('Erro ao vincular paciente:', err);
+    throw err;
+  }
+};
+
+/**
+ * Desvincular paciente da clínica
+ */
+export const unlinkPatientFromClinic = async (clinicId: string, patientId: string): Promise<boolean> => {
+  try {
+    await api.post(`/clinics/${clinicId}/patients/${patientId}/unlink`);
+    return true;
+  } catch (err) {
+    console.error('Erro ao desvincular paciente:', err);
+    throw err;
+  }
+};
+
+/**
+ * Atribuir/reatribuir paciente a psicólogo da clínica
+ */
+export const assignPatientToPsychologist = async (
+  clinicId: string,
+  patientId: string,
+  psychologistId: string
+): Promise<boolean> => {
+  try {
+    await api.put(`/clinics/${clinicId}/patients/${patientId}/assign-psychologist`, {
+      psychologistId,
+    });
+    return true;
+  } catch (err) {
+    console.error('Erro ao atribuir paciente a psicólogo:', err);
+    throw err;
+  }
+};
+
+/**
+ * Obter novos pacientes do mês atual
+ * Tenta primeiro um endpoint específico, se não existir calcula localmente
+ */
+export const getNewPatientsThisMonth = async (clinicId: string): Promise<number> => {
+  try {
+    // Primeiro tenta um endpoint específico para stats do mês
+    const response = await api.get(`/clinics/${clinicId}/stats/monthly`);
+    if (response.data?.data?.newPatientsThisMonth !== undefined) {
+      return response.data.data.newPatientsThisMonth;
+    }
+    if (response.data?.newPatientsThisMonth !== undefined) {
+      return response.data.newPatientsThisMonth;
+    }
+  } catch (err: any) {
+    // Se o endpoint não existir, tenta calcular baseado nos pacientes
+    if (err.response?.status === 404) {
+      try {
+        // Busca pacientes com filtro de data (se a API suportar)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startDateStr = startOfMonth.toISOString().split('T')[0];
+
+        const response = await api.get(`/clinics/${clinicId}/patients`, {
+          params: { createdAfter: startDateStr },
+        });
+
+        const data = response.data;
+        if (data?.data?.pagination?.total !== undefined) {
+          return data.data.pagination.total;
+        }
+        if (data?.data?.patients) {
+          return data.data.patients.length;
+        }
+      } catch (innerErr) {
+        console.log('Não foi possível calcular novos pacientes do mês:', innerErr);
+      }
+    }
+  }
+
+  // Se não conseguir de nenhuma forma, retorna 0
+  return 0;
 };

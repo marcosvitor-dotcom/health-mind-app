@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import OverviewScreen from '../screens/clinic/OverviewScreen';
 import PsychologistsScreen from '../screens/clinic/PsychologistsScreen';
+import PatientsScreen from '../screens/clinic/PatientsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
 import EditProfileScreen from '../screens/clinic/EditProfileScreen';
@@ -100,6 +101,16 @@ export default function ClinicNavigator() {
           title: 'Psicólogos',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Patients"
+        component={PatientsScreen}
+        options={{
+          title: 'Pacientes',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
