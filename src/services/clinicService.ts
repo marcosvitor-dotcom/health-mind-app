@@ -573,13 +573,16 @@ export const getPatientStats = async (patientId: string): Promise<{
 }> => {
   try {
     // Buscar consultas do paciente
-    const appointmentsResponse = await api.get(`/patients/${patientId}/appointments`);
+    const appointmentsResponse = await api.get(`/appointments/patient/${patientId}`);
+    console.log('Appointments response:', appointmentsResponse.data); // Debug
     const appointments = appointmentsResponse.data?.data || [];
 
     // Contar sessões realizadas
     const sessionsCount = Array.isArray(appointments)
       ? appointments.filter((apt: any) => apt.status === 'completed').length
       : 0;
+
+    console.log('Sessões realizadas:', sessionsCount); // Debug
 
     // Buscar próxima consulta
     const now = new Date();
@@ -598,26 +601,24 @@ export const getPatientStats = async (patientId: string): Promise<{
 
     const nextAppointment = futureAppointments.length > 0 ? futureAppointments[0].dateTime || futureAppointments[0].date : null;
 
-    // Buscar informações de pagamento (se disponível)
+    console.log('Próxima consulta:', nextAppointment); // Debug
+    console.log('Total de consultas futuras:', futureAppointments.length); // Debug
+
+    // Buscar informações de pagamento (summary do paciente)
     let totalPaid = 0;
     let totalPending = 0;
 
     try {
-      const paymentsResponse = await api.get(`/patients/${patientId}/payments`);
-      const payments = paymentsResponse.data?.data || [];
+      const summaryResponse = await api.get(`/payments/summary/patient/${patientId}`);
+      const summary = summaryResponse.data?.data;
 
-      if (Array.isArray(payments)) {
-        totalPaid = payments
-          .filter((p: any) => p.status === 'paid')
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-
-        totalPending = payments
-          .filter((p: any) => p.status === 'pending')
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+      if (summary) {
+        totalPaid = summary.totalReceived || summary.totalPaid || 0;
+        totalPending = summary.totalPending || 0;
       }
     } catch (paymentErr) {
-      // Pagamentos podem não estar implementados ainda
-      console.log('Pagamentos não disponíveis ainda');
+      // Pagamentos podem não estar disponíveis ainda
+      console.log('Pagamentos não disponíveis ainda:', paymentErr);
     }
 
     return {

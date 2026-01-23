@@ -26,6 +26,7 @@ export default function PsychologistsScreen({ navigation }: any) {
     try {
       setError(null);
       const data = await clinicService.getClinicPsychologists(user.id);
+      console.log('Psicólogos carregados:', data); // Debug
       setPsychologists(data);
     } catch (err: any) {
       console.error('Erro ao carregar psicólogos:', err);
