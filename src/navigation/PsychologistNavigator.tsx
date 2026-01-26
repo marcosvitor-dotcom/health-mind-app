@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import OverviewScreen from '../screens/psychologist/OverviewScreen';
 import ClientsScreen from '../screens/psychologist/ClientsScreen';
 import PsychScheduleScreen from '../screens/psychologist/PsychScheduleScreen';
 import DocumentsScreen from '../screens/psychologist/DocumentsScreen';
@@ -76,6 +77,16 @@ export default function PsychologistNavigator() {
       }}
     >
       <Tab.Screen
+        name="Overview"
+        component={OverviewScreen}
+        options={{
+          title: 'Visão Geral',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Clients"
         component={ClientsStack}
         options={{
@@ -92,16 +103,6 @@ export default function PsychologistNavigator() {
           title: 'Agenda',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Documents"
-        component={DocumentsScreen}
-        options={{
-          title: 'Documentos',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text" size={size} color={color} />
           ),
         }}
       />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,89 +6,124 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  TextInput,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
 } from 'react-native';
-import { Calendar, Agenda } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '../../components/Card';
-import Header from '../../components/Header';
-
-interface Appointment {
-  id: string;
-  time: string;
-  patientName: string;
-  type: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  notes?: string;
-}
+import { useAuth } from '../../contexts/AuthContext';
+import * as psychologistService from '../../services/psychologistService';
 
 interface AppointmentsByDate {
-  [date: string]: Appointment[];
+  [date: string]: psychologistService.Appointment[];
 }
 
-export default function PsychScheduleScreen() {
+export default function PsychScheduleScreen({ navigation }: any) {
+  const { user } = useAuth();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newAppointment, setNewAppointment] = useState({
-    time: '',
-    patientName: '',
-    type: 'Consulta Regular',
-  });
+  const [appointments, setAppointments] = useState<AppointmentsByDate>({});
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<psychologistService.Appointment | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // Mock de compromissos
-  const [appointments, setAppointments] = useState<AppointmentsByDate>({
-    '2026-01-05': [
-      {
-        id: '1',
-        time: '09:00',
-        patientName: 'Maria Santos',
-        type: 'Consulta Regular',
-        status: 'confirmed',
-      },
-      {
-        id: '2',
-        time: '10:30',
-        patientName: 'João Silva',
-        type: 'Primeira Consulta',
-        status: 'confirmed',
-      },
-      {
-        id: '3',
-        time: '14:00',
-        patientName: 'Ana Costa',
-        type: 'Retorno',
-        status: 'pending',
-      },
-    ],
-    '2026-01-06': [
-      {
-        id: '4',
-        time: '11:00',
-        patientName: 'Pedro Oliveira',
-        type: 'Consulta Regular',
-        status: 'confirmed',
-      },
-    ],
-    '2026-01-08': [
-      {
-        id: '5',
-        time: '15:00',
-        patientName: 'Carlos Mendes',
-        type: 'Avaliação',
-        status: 'confirmed',
-      },
-      {
-        id: '6',
-        time: '16:30',
-        patientName: 'Julia Rocha',
-        type: 'Consulta Regular',
-        status: 'pending',
-      },
-    ],
-  });
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      const psychologistId = user?._id || user?.id;
+      if (!psychologistId) {
+        setLoading(false);
+        return;
+      }
+
+      const data = await psychologistService.getMyAppointments(psychologistId);
+
+      // Organizar por data
+      const byDate: AppointmentsByDate = {};
+      data.forEach((apt) => {
+        const aptDateTime = apt.dateTime || apt.date;
+        if (!aptDateTime) return;
+        const date = aptDateTime.split('T')[0];
+        if (!byDate[date]) {
+          byDate[date] = [];
+        }
+        byDate[date].push(apt);
+      });
+
+      // Ordenar por horário
+      Object.keys(byDate).forEach((date) => {
+        byDate[date].sort((a, b) => {
+          const timeA = new Date(a.dateTime || a.date).getTime();
+          const timeB = new Date(b.dateTime || b.date).getTime();
+          return timeA - timeB;
+        });
+      });
+
+      setAppointments(byDate);
+    } catch (error) {
+      console.error('Erro ao carregar agendamentos:', error);
+      Alert.alert('Erro', 'Não foi possível carregar os agendamentos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAppointments();
+    setRefreshing(false);
+  };
+
+  const handleOpenDetail = (appointment: psychologistService.Appointment) => {
+    setSelectedAppointment(appointment);
+    setShowDetailModal(true);
+  };
+
+  const handleConfirmAppointment = async (appointmentId: string) => {
+    try {
+      // TODO: Chamar API para confirmar agendamento
+      Alert.alert('Sucesso', 'Consulta confirmada!');
+      setShowDetailModal(false);
+      loadAppointments();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível confirmar a consulta');
+    }
+  };
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      Alert.alert(
+        'Cancelar Consulta',
+        'Tem certeza que deseja cancelar esta consulta?',
+        [
+          { text: 'Não', style: 'cancel' },
+          {
+            text: 'Sim, Cancelar',
+            style: 'destructive',
+            onPress: async () => {
+              // TODO: Chamar API para cancelar agendamento
+              Alert.alert('Sucesso', 'Consulta cancelada!');
+              setShowDetailModal(false);
+              loadAppointments();
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível cancelar a consulta');
+    }
+  };
 
   // Marcar datas com compromissos
   const markedDates = Object.keys(appointments).reduce((acc, date) => {
@@ -109,34 +144,14 @@ export default function PsychScheduleScreen() {
     };
   }
 
-  const handleAddAppointment = () => {
-    if (newAppointment.time && newAppointment.patientName) {
-      const newAppt: Appointment = {
-        id: Date.now().toString(),
-        time: newAppointment.time,
-        patientName: newAppointment.patientName,
-        type: newAppointment.type,
-        status: 'pending',
-      };
-
-      setAppointments({
-        ...appointments,
-        [selectedDate]: [...(appointments[selectedDate] || []), newAppt].sort(
-          (a, b) => a.time.localeCompare(b.time)
-        ),
-      });
-
-      setNewAppointment({ time: '', patientName: '', type: 'Consulta Regular' });
-      setShowAddModal(false);
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
         return '#50C878';
-      case 'pending':
+      case 'scheduled':
         return '#FFB347';
+      case 'completed':
+        return '#4A90E2';
       case 'cancelled':
         return '#FF6B6B';
       default:
@@ -148,13 +163,31 @@ export default function PsychScheduleScreen() {
     switch (status) {
       case 'confirmed':
         return 'Confirmado';
-      case 'pending':
-        return 'Pendente';
+      case 'scheduled':
+        return 'Agendado';
+      case 'completed':
+        return 'Concluído';
       case 'cancelled':
         return 'Cancelado';
       default:
         return status;
     }
+  };
+
+  const formatTime = (dateTime: string | undefined) => {
+    if (!dateTime) return '--:--';
+    const date = new Date(dateTime);
+    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (dateTime: string | undefined) => {
+    if (!dateTime) return '--/--/----';
+    const date = new Date(dateTime);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const getDateTime = (apt: psychologistService.Appointment) => {
+    return apt.dateTime || apt.date;
   };
 
   const renderDayAppointments = () => {
@@ -165,21 +198,28 @@ export default function PsychScheduleScreen() {
         <View style={styles.emptyState}>
           <Ionicons name="calendar-outline" size={48} color="#ccc" />
           <Text style={styles.emptyText}>Nenhum compromisso agendado</Text>
-          <Text style={styles.emptySubtext}>
-            Toque no botão + para adicionar
-          </Text>
+          <TouchableOpacity
+            style={styles.addAppointmentButton}
+            onPress={() => navigation.navigate('Clients')}
+          >
+            <Ionicons name="add-circle" size={20} color="#fff" />
+            <Text style={styles.addAppointmentText}>Agendar Consulta</Text>
+          </TouchableOpacity>
         </View>
       );
     }
 
     return (
-      <ScrollView style={styles.appointmentsList}>
+      <ScrollView
+        style={styles.appointmentsList}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {dayAppointments.map((appt) => (
-          <Card key={appt.id} style={styles.appointmentCard}>
+          <Card key={appt._id || appt.id} style={styles.appointmentCard}>
             <View style={styles.appointmentHeader}>
               <View style={styles.timeContainer}>
                 <Ionicons name="time-outline" size={20} color="#4A90E2" />
-                <Text style={styles.appointmentTime}>{appt.time}</Text>
+                <Text style={styles.appointmentTime}>{formatTime(getDateTime(appt))}</Text>
               </View>
               <View
                 style={[
@@ -187,98 +227,51 @@ export default function PsychScheduleScreen() {
                   { backgroundColor: getStatusColor(appt.status) + '20' },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: getStatusColor(appt.status) },
-                  ]}
-                >
+                <Text style={[styles.statusText, { color: getStatusColor(appt.status) }]}>
                   {getStatusText(appt.status)}
                 </Text>
               </View>
             </View>
 
-            <Text style={styles.patientName}>{appt.patientName}</Text>
-            <Text style={styles.appointmentType}>{appt.type}</Text>
+            <Text style={styles.patientName}>
+              {appt.patient?.name || 'Paciente não informado'}
+            </Text>
+            <Text style={styles.appointmentType}>{appt.type || 'Consulta'}</Text>
 
-            <View style={styles.appointmentActions}>
-              <TouchableOpacity style={styles.actionButton}>
-                <Ionicons name="pencil" size={18} color="#4A90E2" />
-                <Text style={styles.actionButtonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Ionicons name="checkmark-circle" size={18} color="#50C878" />
-                <Text style={styles.actionButtonText}>Confirmar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Ionicons name="close-circle" size={18} color="#FF6B6B" />
-                <Text style={styles.actionButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={() => handleOpenDetail(appt)}
+            >
+              <Ionicons name="information-circle-outline" size={18} color="#4A90E2" />
+              <Text style={styles.detailsButtonText}>Ver Detalhes</Text>
+            </TouchableOpacity>
           </Card>
         ))}
       </ScrollView>
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <Header
-        title="Agenda"
-        subtitle="Gerencie seus compromissos"
-        rightIcon="add-circle"
-        rightAction={() => setShowAddModal(true)}
-      />
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={styles.loadingText}>Carregando agenda...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-      {/* Seletor de Visualização */}
-      <View style={styles.viewSelector}>
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Agenda</Text>
         <TouchableOpacity
-          style={[
-            styles.viewButton,
-            viewMode === 'day' && styles.viewButtonActive,
-          ]}
-          onPress={() => setViewMode('day')}
+          style={styles.addButton}
+          onPress={() => navigation.navigate('Clients')}
         >
-          <Text
-            style={[
-              styles.viewButtonText,
-              viewMode === 'day' && styles.viewButtonTextActive,
-            ]}
-          >
-            Dia
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.viewButton,
-            viewMode === 'week' && styles.viewButtonActive,
-          ]}
-          onPress={() => setViewMode('week')}
-        >
-          <Text
-            style={[
-              styles.viewButtonText,
-              viewMode === 'week' && styles.viewButtonTextActive,
-            ]}
-          >
-            Semana
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.viewButton,
-            viewMode === 'month' && styles.viewButtonActive,
-          ]}
-          onPress={() => setViewMode('month')}
-        >
-          <Text
-            style={[
-              styles.viewButtonText,
-              viewMode === 'month' && styles.viewButtonTextActive,
-            ]}
-          >
-            Mês
-          </Text>
+          <Ionicons name="add-circle" size={28} color="#4A90E2" />
         </TouchableOpacity>
       </View>
 
@@ -327,81 +320,138 @@ export default function PsychScheduleScreen() {
       {/* Lista de Compromissos do Dia */}
       {renderDayAppointments()}
 
-      {/* Modal de Adicionar Compromisso */}
+      {/* Modal de Detalhes */}
       <Modal
-        visible={showAddModal}
+        visible={showDetailModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowAddModal(false)}
+        onRequestClose={() => setShowDetailModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Novo Compromisso</Text>
-              <TouchableOpacity onPress={() => setShowAddModal(false)}>
+              <Text style={styles.modalTitle}>Detalhes da Consulta</Text>
+              <TouchableOpacity onPress={() => setShowDetailModal(false)}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalLabel}>Horário</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Ex: 09:00"
-              value={newAppointment.time}
-              onChangeText={(text) =>
-                setNewAppointment({ ...newAppointment, time: text })
-              }
-            />
+            <ScrollView style={styles.modalBody}>
+              {selectedAppointment && (
+                <>
+                  <View style={styles.modalSection}>
+                    <View style={styles.modalInfoRow}>
+                      <Ionicons name="person-outline" size={24} color="#4A90E2" />
+                      <View style={styles.modalInfoContent}>
+                        <Text style={styles.modalInfoLabel}>Paciente</Text>
+                        <Text style={styles.modalInfoValue}>
+                          {selectedAppointment.patient?.name || 'Não informado'}
+                        </Text>
+                      </View>
+                    </View>
 
-            <Text style={styles.modalLabel}>Paciente</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Nome do paciente"
-              value={newAppointment.patientName}
-              onChangeText={(text) =>
-                setNewAppointment({ ...newAppointment, patientName: text })
-              }
-            />
+                    <View style={styles.modalInfoRow}>
+                      <Ionicons name="calendar-outline" size={24} color="#4A90E2" />
+                      <View style={styles.modalInfoContent}>
+                        <Text style={styles.modalInfoLabel}>Data</Text>
+                        <Text style={styles.modalInfoValue}>
+                          {formatDate(getDateTime(selectedAppointment))}
+                        </Text>
+                      </View>
+                    </View>
 
-            <Text style={styles.modalLabel}>Tipo de Consulta</Text>
-            <View style={styles.typeSelector}>
-              {['Consulta Regular', 'Primeira Consulta', 'Retorno', 'Avaliação'].map(
-                (type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={[
-                      styles.typeButton,
-                      newAppointment.type === type && styles.typeButtonActive,
-                    ]}
-                    onPress={() =>
-                      setNewAppointment({ ...newAppointment, type })
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.typeButtonText,
-                        newAppointment.type === type &&
-                          styles.typeButtonTextActive,
-                      ]}
-                    >
-                      {type}
-                    </Text>
-                  </TouchableOpacity>
-                )
+                    <View style={styles.modalInfoRow}>
+                      <Ionicons name="time-outline" size={24} color="#4A90E2" />
+                      <View style={styles.modalInfoContent}>
+                        <Text style={styles.modalInfoLabel}>Horário</Text>
+                        <Text style={styles.modalInfoValue}>
+                          {formatTime(getDateTime(selectedAppointment))}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.modalInfoRow}>
+                      <Ionicons name="medical-outline" size={24} color="#4A90E2" />
+                      <View style={styles.modalInfoContent}>
+                        <Text style={styles.modalInfoLabel}>Tipo</Text>
+                        <Text style={styles.modalInfoValue}>
+                          {selectedAppointment.type || 'Consulta'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.modalInfoRow}>
+                      <Ionicons name="information-circle-outline" size={24} color="#4A90E2" />
+                      <View style={styles.modalInfoContent}>
+                        <Text style={styles.modalInfoLabel}>Status</Text>
+                        <View
+                          style={[
+                            styles.statusBadge,
+                            {
+                              backgroundColor:
+                                getStatusColor(selectedAppointment.status) + '20',
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusText,
+                              { color: getStatusColor(selectedAppointment.status) },
+                            ]}
+                          >
+                            {getStatusText(selectedAppointment.status)}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {selectedAppointment.notes && (
+                      <View style={styles.modalInfoRow}>
+                        <Ionicons name="document-text-outline" size={24} color="#4A90E2" />
+                        <View style={styles.modalInfoContent}>
+                          <Text style={styles.modalInfoLabel}>Observações</Text>
+                          <Text style={styles.modalInfoValue}>
+                            {selectedAppointment.notes}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Ações */}
+                  {selectedAppointment.status === 'scheduled' && (
+                    <View style={styles.modalActions}>
+                      <TouchableOpacity
+                        style={[styles.modalActionButton, styles.confirmButton]}
+                        onPress={() =>
+                          handleConfirmAppointment(
+                            selectedAppointment._id || selectedAppointment.id || ''
+                          )
+                        }
+                      >
+                        <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                        <Text style={styles.modalActionText}>Confirmar Consulta</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.modalActionButton, styles.cancelButton]}
+                        onPress={() =>
+                          handleCancelAppointment(
+                            selectedAppointment._id || selectedAppointment.id || ''
+                          )
+                        }
+                      >
+                        <Ionicons name="close-circle" size={20} color="#fff" />
+                        <Text style={styles.modalActionText}>Cancelar Consulta</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
               )}
-            </View>
-
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddAppointment}
-            >
-              <Ionicons name="add-circle" size={24} color="#fff" />
-              <Text style={styles.addButtonText}>Adicionar Compromisso</Text>
-            </TouchableOpacity>
+            </ScrollView>
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -410,29 +460,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  viewSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 10,
-    justifyContent: 'space-around',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  viewButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  viewButtonActive: {
-    backgroundColor: '#4A90E2',
-  },
-  viewButtonText: {
-    fontSize: 14,
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
     color: '#666',
-    fontWeight: '500',
   },
-  viewButtonTextActive: {
-    color: '#fff',
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  addButton: {
+    padding: 4,
   },
   calendar: {
     borderBottomWidth: 1,
@@ -497,21 +550,19 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 12,
   },
-  appointmentActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 12,
-  },
-  actionButton: {
+  detailsButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#E8F4FD',
   },
-  actionButtonText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 4,
+  detailsButtonText: {
+    fontSize: 14,
+    color: '#4A90E2',
+    fontWeight: '600',
+    marginLeft: 6,
   },
   emptyState: {
     flex: 1,
@@ -524,11 +575,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
     marginTop: 16,
+    marginBottom: 20,
   },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
+  addAppointmentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4A90E2',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  addAppointmentText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -539,71 +600,67 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 24,
-    minHeight: 400,
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
-  modalLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-    marginTop: 12,
+  modalBody: {
+    padding: 20,
   },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  typeSelector: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  modalSection: {
     marginBottom: 20,
   },
-  typeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-    marginRight: 8,
-    marginBottom: 8,
+  modalInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  typeButtonActive: {
-    backgroundColor: '#4A90E2',
+  modalInfoContent: {
+    marginLeft: 12,
+    flex: 1,
   },
-  typeButtonText: {
-    fontSize: 14,
-    color: '#4A90E2',
+  modalInfoLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
   },
-  typeButtonTextActive: {
-    color: '#fff',
+  modalInfoValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
   },
-  addButton: {
-    backgroundColor: '#4A90E2',
+  modalActions: {
+    marginTop: 20,
+  },
+  modalActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
     borderRadius: 8,
-    marginTop: 20,
+    marginBottom: 12,
   },
-  addButtonText: {
+  confirmButton: {
+    backgroundColor: '#50C878',
+  },
+  cancelButton: {
+    backgroundColor: '#FF6B6B',
+  },
+  modalActionText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginLeft: 8,
   },
 });
