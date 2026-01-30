@@ -8,7 +8,6 @@ import PatientsScreen from '../screens/clinic/PatientsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
 import EditProfileScreen from '../screens/clinic/EditProfileScreen';
-import AddPsychologistScreen from '../screens/clinic/AddPsychologistScreen';
 import InvitePsychologistScreen from '../screens/clinic/InvitePsychologistScreen';
 import InvitationsScreen from '../screens/clinic/InvitationsScreen';
 import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
@@ -22,11 +21,6 @@ function PsychologistsStack() {
       <Stack.Screen
         name="PsychologistsList"
         component={PsychologistsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AddPsychologist"
-        component={AddPsychologistScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

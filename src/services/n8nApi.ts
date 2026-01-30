@@ -2,7 +2,7 @@
  * Serviço de integração com n8n para o chat com IA
  */
 
-const N8N_API_URL = 'https://marcosvitor1994.app.n8n.cloud/webhook/chat/message';
+const N8N_API_URL = 'https://losningtech.app.n8n.cloud/webhook/chat/message';
 
 export interface ChatRequest {
   userId: string;

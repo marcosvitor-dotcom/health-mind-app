@@ -16,6 +16,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
 import { InvitationData } from '../../types';
+import PsychologistRegistrationWizard from './PsychologistRegistrationWizard';
 
 interface CompleteRegistrationScreenProps {
   route: {
@@ -178,6 +179,16 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 
   if (!invitationData) {
     return null;
+  }
+
+  // Psicólogo usa wizard dedicado
+  if (invitationData.role === 'psychologist') {
+    return (
+      <PsychologistRegistrationWizard
+        invitationData={invitationData}
+        token={token}
+      />
+    );
   }
 
   const getRoleLabel = () => {
@@ -370,35 +381,6 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
                   />
                 </View>
               </View>
-            </>
-          )}
-
-          {/* Campos específicos de Psicólogo */}
-          {invitationData.role === 'psychologist' && (
-            <>
-              <Text style={styles.label}>Telefone</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="(11) 98765-4321"
-                placeholderTextColor="#999"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                editable={!submitting}
-              />
-
-              <Text style={styles.label}>Biografia</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Conte um pouco sobre você e sua experiência..."
-                placeholderTextColor="#999"
-                value={bio}
-                onChangeText={setBio}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                editable={!submitting}
-              />
             </>
           )}
 

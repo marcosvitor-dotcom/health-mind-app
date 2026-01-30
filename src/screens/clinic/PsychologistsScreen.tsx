@@ -177,13 +177,6 @@ export default function PsychologistsScreen({ navigation }: any) {
           <Text style={styles.actionBarButtonText}>Convidar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionBarButton}
-          onPress={() => navigation.navigate('AddPsychologist')}
-        >
-          <Ionicons name="person-add" size={18} color="#4A90E2" />
-          <Text style={styles.actionBarButtonText}>Adicionar</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView

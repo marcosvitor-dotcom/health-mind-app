@@ -208,6 +208,37 @@ export interface CompleteRegistrationPsychologistRequest {
   password: string;
   phone?: string;
   bio?: string;
+  // Campos do wizard terapêutico
+  formacaoAcademica?: string;
+  abordagemPrincipal?: string;
+  descricaoTrabalho?: string;
+  publicosEspecificos?: string[];
+  temasEspecializados?: string[];
+  tonsComunicacao?: string[];
+  tecnicasFavoritas?: string[];
+  restricoesTematicas?: string;
+  diferenciais?: string;
+  systemPrompt?: string;
+}
+
+export interface PsychologistWizardData {
+  // Step 1 - Dados Básicos
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  // Step 2 - Abordagem Terapêutica
+  formacaoAcademica: string;
+  abordagemPrincipal: string;
+  descricaoTrabalho: string;
+  // Step 3 - Especializações
+  publicosEspecificos: string[];
+  temasEspecializados: string[];
+  // Step 4 - Estilo de Comunicação
+  tonsComunicacao: string[];
+  // Step 5 - Técnicas e Diferenciais
+  tecnicasFavoritas: string;
+  restricoesTematicas: string;
+  diferenciais: string;
 }
 
 export interface CompleteRegistrationPatientRequest {

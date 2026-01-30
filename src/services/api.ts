@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 import { getToken, getRefreshToken, setToken, setRefreshToken, clearTokens } from '../utils/storage';
 
 // Base URL da API
-const BASE_URL = 'https://health-mind-api.vercel.app/api';
+const BASE_URL = 'https://health-mind-app.vercel.app/api';
 
 // Criar instância do axios
 const api = axios.create({
