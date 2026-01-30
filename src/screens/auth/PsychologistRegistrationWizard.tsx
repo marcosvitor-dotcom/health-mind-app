@@ -169,19 +169,16 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
       // Fase 2: Completar cadastro
       await completeRegistration(truncatedPrompt);
     } catch (error: any) {
-      if (error.message?.includes('Gemini') || error.message?.includes('modelos')) {
-        Alert.alert(
-          'Erro ao gerar IA',
-          'Não foi possível gerar o perfil de IA. Deseja continuar sem ele? O prompt poderá ser gerado depois.',
-          [
-            { text: 'Tentar Novamente', onPress: () => handleSubmit() },
-            { text: 'Continuar Sem IA', onPress: () => completeRegistration(undefined) },
-            { text: 'Cancelar', style: 'cancel' },
-          ]
-        );
-      } else {
-        Alert.alert('Erro', error.message || 'Erro ao completar cadastro.');
-      }
+      const msg = error?.message || String(error) || 'Erro desconhecido';
+      Alert.alert(
+        'Erro ao gerar IA',
+        `Não foi possível gerar o perfil de IA. Deseja continuar sem ele?\n\n${msg}`,
+        [
+          { text: 'Tentar Novamente', onPress: () => handleSubmit() },
+          { text: 'Continuar Sem IA', onPress: () => completeRegistration(undefined) },
+          { text: 'Cancelar', style: 'cancel' },
+        ]
+      );
     } finally {
       setSubmitting(false);
       setLoadingMessage('');

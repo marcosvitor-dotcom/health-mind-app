@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { PsychologistFormData } from '../utils/systemPromptGenerator';
 
-const GEMINI_API_KEY = 'AIzaSyCI6VpYjJNez_TfHp_q1pzE0Zs3xzkEUHc';
+const GEMINI_API_KEY = 'teste';
 
 const MODELS = [
   'gemini-2.5-flash',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
 ];
 
 const SECOES_OBRIGATORIAS = `
@@ -120,9 +119,10 @@ ${SECOES_OBRIGATORIAS}
 - Substitua todas as ocorrencias de [NOME_PSICOLOGO] pelo nome real: ${dados.nomeCompleto}`;
 };
 
-const callGemini = async (prompt: string, modelIndex: number = 0): Promise<string> => {
+const callGemini = async (prompt: string, modelIndex: number = 0, errors: string[] = []): Promise<string> => {
   if (modelIndex >= MODELS.length) {
-    throw new Error('Todos os modelos Gemini falharam. Tente novamente mais tarde.');
+    const details = errors.join(' | ');
+    throw new Error(`Todos os modelos Gemini falharam: ${details}`);
   }
 
   const model = MODELS[modelIndex];
@@ -151,14 +151,15 @@ const callGemini = async (prompt: string, modelIndex: number = 0): Promise<strin
     const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!text) {
-      console.warn(`Modelo ${model} retornou resposta vazia, tentando proximo...`);
-      return callGemini(prompt, modelIndex + 1);
+      errors.push(`${model}: resposta vazia`);
+      return callGemini(prompt, modelIndex + 1, errors);
     }
 
     return text;
   } catch (error: any) {
-    console.warn(`Modelo ${model} falhou: ${error.message}. Tentando proximo...`);
-    return callGemini(prompt, modelIndex + 1);
+    const errorMsg = error.response?.data?.error?.message || error.message || 'erro desconhecido';
+    errors.push(`${model}: ${errorMsg}`);
+    return callGemini(prompt, modelIndex + 1, errors);
   }
 };
 

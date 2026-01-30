@@ -13,9 +13,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -116,6 +118,15 @@ export default function LoginScreen() {
             <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.firstAccessButton}
+          onPress={() => navigation.navigate('FirstAccess')}
+          disabled={loading}
+        >
+          <Ionicons name="key-outline" size={18} color="#4A90E2" />
+          <Text style={styles.firstAccessText}>Primeiro acesso? Completar cadastro</Text>
+        </TouchableOpacity>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Health Mind App - Versão 1.0.0</Text>
@@ -218,6 +229,22 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: '#4A90E2',
     fontSize: 14,
+  },
+  firstAccessButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    gap: 6,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(74, 144, 226, 0.3)',
+    borderRadius: 10,
+  },
+  firstAccessText: {
+    color: '#4A90E2',
+    fontSize: 14,
+    fontWeight: '500',
   },
   footer: {
     alignItems: 'center',

@@ -5,6 +5,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
 import LoginScreen from '../screens/auth/LoginScreen';
+import FirstAccessScreen from '../screens/auth/FirstAccessScreen';
 import CompleteRegistrationScreen from '../screens/auth/CompleteRegistrationScreen';
 import ClinicNavigator from './ClinicNavigator';
 import PsychologistNavigator from './PsychologistNavigator';
@@ -12,6 +13,7 @@ import ClientNavigator from './ClientNavigator';
 
 type RootStackParamList = {
   Login: undefined;
+  FirstAccess: undefined;
   CompleteRegistration: { token: string };
   Main: undefined;
 };
@@ -70,6 +72,11 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Login"
               component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="FirstAccess"
+              component={FirstAccessScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen

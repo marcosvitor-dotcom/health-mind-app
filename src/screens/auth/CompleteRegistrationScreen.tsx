@@ -139,15 +139,15 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
         });
       }
 
-      if (response?.success && response.data) {
+      if (response) {
         // Salvar tokens
-        await storage.setToken(response.data.token);
-        await storage.setRefreshToken(response.data.refreshToken);
+        await storage.setToken(response.token);
+        await storage.setRefreshToken(response.refreshToken);
 
         // Normalizar user data
         const normalizedUser = {
-          ...response.data.user,
-          id: response.data.user._id || response.data.user.id,
+          ...response.user,
+          id: (response.user as any)._id || response.user.id,
         };
 
         await storage.setUser(normalizedUser);
@@ -157,9 +157,6 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
           'Seu cadastro foi concluído. Bem-vindo!',
           [{ text: 'OK' }]
         );
-
-        // Recarregar a tela para o AuthContext pegar o novo usuário
-        // (O AppNavigator vai detectar automaticamente)
       }
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao completar cadastro');
