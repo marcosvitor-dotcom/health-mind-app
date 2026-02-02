@@ -36,6 +36,50 @@ export interface UpdatePatientRequest {
   };
 }
 
+export interface PatientWithPsychologist {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  psychologistId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    crp?: string;
+    specialties?: string[];
+  };
+  clinicId?: string;
+  birthDate?: string;
+  cpf?: string;
+  avatar?: string;
+  emergencyContact?: {
+    name?: string;
+    phone?: string;
+    relationship?: string;
+  };
+}
+
+// ========================================
+// CONSULTA DE PERFIL
+// ========================================
+
+/**
+ * Obter dados do paciente com dados do psicologo populados
+ */
+export const getPatient = async (patientId: string): Promise<PatientWithPsychologist> => {
+  try {
+    const response = await api.get<ApiResponse<PatientWithPsychologist>>(`/patients/${patientId}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Erro ao buscar dados do paciente');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
 // ========================================
 // ATUALIZAÇÃO DE PERFIL
 // ========================================

@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
-import { InvitationData } from '../../types';
+import { InvitationData, User } from '../../types';
 import PsychologistRegistrationWizard from './PsychologistRegistrationWizard';
 
 interface CompleteRegistrationScreenProps {
@@ -28,6 +28,7 @@ interface CompleteRegistrationScreenProps {
 
 export default function CompleteRegistrationScreen({ route }: CompleteRegistrationScreenProps) {
   const { token } = route.params;
+  const { setAuthUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
@@ -145,18 +146,15 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
         await storage.setRefreshToken(response.refreshToken);
 
         // Normalizar user data
-        const normalizedUser = {
+        const normalizedUser: User = {
           ...response.user,
           id: (response.user as any)._id || response.user.id,
         };
 
         await storage.setUser(normalizedUser);
 
-        Alert.alert(
-          'Sucesso!',
-          'Seu cadastro foi concluído. Bem-vindo!',
-          [{ text: 'OK' }]
-        );
+        // Atualizar estado de autenticação para navegar automaticamente
+        setAuthUser(normalizedUser);
       }
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao completar cadastro');

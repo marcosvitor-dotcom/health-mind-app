@@ -1,9 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import * as profileService from '../../services/profileService';
+import { PatientWithPsychologist } from '../../services/profileService';
 
 interface ProfileScreenProps {
   navigation: any;
@@ -11,6 +13,31 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
+  const [patientData, setPatientData] = useState<PatientWithPsychologist | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const patientId = user?._id || user?.id || '';
+
+  useEffect(() => {
+    loadPatientData();
+  }, []);
+
+  const loadPatientData = async () => {
+    if (!patientId) {
+      setLoadingData(false);
+      return;
+    }
+    try {
+      const data = await profileService.getPatient(patientId);
+      setPatientData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados do paciente:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const psychologist = patientData?.psychologistId;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -47,7 +74,18 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <View style={[styles.menuIcon, { backgroundColor: '#E8F4FD' }]}>
                 <Ionicons name="person" size={20} color="#4A90E2" />
               </View>
-              <Text style={styles.menuText}>Meu Psicólogo</Text>
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuText}>Meu Psicologo</Text>
+                {loadingData ? (
+                  <ActivityIndicator size="small" color="#4A90E2" style={{ marginTop: 4 }} />
+                ) : psychologist ? (
+                  <Text style={styles.menuSubtext}>
+                    {psychologist.name}{psychologist.crp ? ` - CRP ${psychologist.crp}` : ''}
+                  </Text>
+                ) : (
+                  <Text style={styles.menuSubtext}>Nao atribuido</Text>
+                )}
+              </View>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -57,7 +95,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <View style={[styles.menuIcon, { backgroundColor: '#FFF5E6' }]}>
                 <Ionicons name="document-text" size={20} color="#FFB347" />
               </View>
-              <Text style={styles.menuText}>Solicitar Relatório</Text>
+              <Text style={styles.menuText}>Solicitar Relatorio</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -75,13 +113,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Configurações</Text>
+        <Text style={styles.sectionTitle}>Configuracoes</Text>
 
         <Card>
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLeft}>
               <Ionicons name="notifications" size={20} color="#666" />
-              <Text style={styles.menuText}>Notificações</Text>
+              <Text style={styles.menuText}>Notificacoes</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -100,7 +138,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <Text style={styles.menuText}>Idioma</Text>
             </View>
             <View style={styles.menuRight}>
-              <Text style={styles.menuValue}>Português</Text>
+              <Text style={styles.menuValue}>Portugues</Text>
               <Ionicons name="chevron-forward" size={24} color="#ccc" />
             </View>
           </TouchableOpacity>
@@ -130,7 +168,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLeft}>
               <Ionicons name="shield-checkmark" size={20} color="#666" />
-              <Text style={styles.menuText}>Política de Privacidade</Text>
+              <Text style={styles.menuText}>Politica de Privacidade</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -142,7 +180,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Text style={styles.logoutText}>Sair</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Versão 1.0.0</Text>
+      <Text style={styles.version}>Versao 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -227,9 +265,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
+  menuTextContainer: {
+    flex: 1,
+  },
   menuText: {
     fontSize: 16,
     color: '#333',
+  },
+  menuSubtext: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
   },
   menuRight: {
     flexDirection: 'row',
@@ -250,7 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#FF6B6B',
-    
+    gap: 8,
   },
   logoutText: {
     fontSize: 16,

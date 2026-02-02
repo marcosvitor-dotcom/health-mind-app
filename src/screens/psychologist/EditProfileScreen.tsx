@@ -102,11 +102,14 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
       await loadPsychologistData();
       Alert.alert('Sucesso', 'Avatar atualizado com sucesso!');
     } catch (error: any) {
+      console.error('Upload error:', error);
       Alert.alert('Erro', error.message || 'Erro ao fazer upload da imagem');
     } finally {
       setUploadingImage(false);
     }
   };
+
+  const [imageError, setImageError] = useState(false);
 
   const handleSave = async () => {
     if (!user) return;
@@ -164,8 +167,17 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
       >
         <View style={styles.avatarSection}>
           <TouchableOpacity onPress={pickImage} disabled={uploadingImage}>
-            {user?.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.avatar} />
+            {user?.avatar && !imageError ? (
+              <Image
+                source={{ uri: user.avatar }}
+                style={styles.avatar}
+                onError={(e) => {
+                  console.error('Image load error:', e.nativeEvent.error);
+                  console.error('Avatar URL:', user.avatar);
+                  setImageError(true);
+                }}
+                onLoad={() => setImageError(false)}
+              />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={50} color="#fff" />

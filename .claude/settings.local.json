@@ -28,7 +28,10 @@
       "Bash(git push)",
       "Bash(curl:*)",
       "Bash(npx expo list)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(node -e:*)",
+      "Bash(node:*)",
+      "Bash(ping:*)"
     ]
   }
 }

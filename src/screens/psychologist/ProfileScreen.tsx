@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
+  const [imageError, setImageError] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -27,8 +28,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            {user?.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.avatar} />
+            {user?.avatar && !imageError ? (
+              <Image
+                source={{ uri: user.avatar }}
+                style={styles.avatar}
+                onError={() => setImageError(true)}
+                onLoad={() => setImageError(false)}
+              />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={50} color="#fff" />

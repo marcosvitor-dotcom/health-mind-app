@@ -13,30 +13,90 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { sendMessageToN8N } from '../../services/n8nApi';
+import * as chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
+
+interface LocalMessage {
+  id: string;
+  text: string;
+  isAI: boolean;
+  timestamp: Date;
+}
 
 export default function ChatScreen() {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      text: 'Olá! Como você está se sentindo hoje?',
-      isAI: true,
-      timestamp: new Date(),
-    },
-  ]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [messages, setMessages] = useState<LocalMessage[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const patientId = user?._id || user?.id || '';
+
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
+  const loadChatHistory = async () => {
+    if (!patientId) {
+      setIsLoadingHistory(false);
+      setMessages([
+        {
+          id: '1',
+          text: 'Ola! Como voce esta se sentindo hoje?',
+          isAI: true,
+          timestamp: new Date(),
+        },
+      ]);
+      return;
+    }
+
+    try {
+      setIsLoadingHistory(true);
+      const history = await chatService.getChatHistory(patientId, 1, 50);
+
+      if (history.messages.length > 0) {
+        const loadedMessages: LocalMessage[] = history.messages.map((msg) => ({
+          id: msg._id,
+          text: msg.isAI ? (msg.response || msg.message) : msg.message,
+          isAI: msg.isAI,
+          timestamp: new Date(msg.createdAt),
+        }));
+        setMessages(loadedMessages);
+      } else {
+        // Sem historico - mensagem de boas-vindas
+        setMessages([
+          {
+            id: '1',
+            text: 'Ola! Como voce esta se sentindo hoje?',
+            isAI: true,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar historico:', error);
+      // Mesmo com erro, mostrar mensagem de boas-vindas
+      setMessages([
+        {
+          id: '1',
+          text: 'Ola! Como voce esta se sentindo hoje?',
+          isAI: true,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
   const handleSend = async () => {
     if (message.trim() && !isLoading) {
-      const userMessage = {
+      const userMessage: LocalMessage = {
         id: Date.now().toString(),
         text: message,
         isAI: false,
@@ -49,22 +109,30 @@ export default function ChatScreen() {
       setIsLoading(true);
 
       try {
-        const aiResponseText = await sendMessageToN8N(
-          messageToSend,
-          user?.id || 'user-123',
-          'psych-456'
-        );
+        const response = await chatService.sendMessage(patientId, messageToSend);
 
-        const aiResponse = {
-          id: (Date.now() + 1).toString(),
-          text: aiResponseText,
+        const aiResponse: LocalMessage = {
+          id: response.aiMessage._id || (Date.now() + 1).toString(),
+          text: response.aiMessage.response || response.aiMessage.message,
           isAI: true,
-          timestamp: new Date(),
+          timestamp: new Date(response.aiMessage.createdAt || new Date()),
         };
-        setMessages((prev) => [...prev, aiResponse]);
+
+        // Atualizar ID da mensagem do usuario com o real da API
+        setMessages((prev) => {
+          const updated = [...prev];
+          const userMsgIndex = updated.findIndex((m) => m.id === userMessage.id);
+          if (userMsgIndex >= 0) {
+            updated[userMsgIndex] = {
+              ...updated[userMsgIndex],
+              id: response.userMessage._id || updated[userMsgIndex].id,
+            };
+          }
+          return [...updated, aiResponse];
+        });
       } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
-        const errorResponse = {
+        const errorResponse: LocalMessage = {
           id: (Date.now() + 1).toString(),
           text: 'Desculpe, ocorreu um erro. Tente novamente.',
           isAI: true,
@@ -76,6 +144,31 @@ export default function ChatScreen() {
       }
     }
   };
+
+  if (isLoadingHistory) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Image
+            source={require('../../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <View style={styles.headerTextContainer}>
+            <View style={styles.aiIndicator}>
+              <View style={styles.aiDot} />
+              <Text style={styles.aiText}>Assistente</Text>
+            </View>
+            <Text style={styles.subtitle}>Seu diario pessoal</Text>
+          </View>
+        </View>
+        <View style={styles.loadingHistoryContainer}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={styles.loadingHistoryText}>Carregando conversas...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -95,7 +188,7 @@ export default function ChatScreen() {
               <View style={styles.aiDot} />
               <Text style={styles.aiText}>Assistente</Text>
             </View>
-            <Text style={styles.subtitle}>Seu diário pessoal</Text>
+            <Text style={styles.subtitle}>Seu diario pessoal</Text>
           </View>
         </View>
 
@@ -152,11 +245,11 @@ export default function ChatScreen() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Escreva como você está se sentindo..."
+            placeholder="Escreva como voce esta se sentindo..."
             value={message}
             onChangeText={setMessage}
             multiline
-            maxLength={500}
+            maxLength={2000}
             editable={!isLoading}
           />
           <TouchableOpacity
@@ -314,5 +407,15 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
     fontStyle: 'italic',
+  },
+  loadingHistoryContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingHistoryText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
   },
 });

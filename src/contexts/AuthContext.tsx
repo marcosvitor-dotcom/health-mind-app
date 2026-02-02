@@ -10,6 +10,7 @@ interface AuthContextData {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUserData: () => Promise<void>;
+  setAuthUser: (userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -117,6 +118,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
+   * Definir usuário autenticado (usado após completar cadastro)
+   */
+  const setAuthUser = (userData: User) => {
+    const normalizedUser: User = {
+      ...userData,
+      id: userData._id || userData.id,
+    };
+    setUser(normalizedUser);
+  };
+
+  /**
    * Atualizar dados do usuário
    */
   const refreshUserData = async () => {
@@ -146,6 +158,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         logout,
         refreshUserData,
+        setAuthUser,
       }}
     >
       {children}

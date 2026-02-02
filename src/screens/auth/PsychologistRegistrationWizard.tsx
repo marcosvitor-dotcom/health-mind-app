@@ -38,7 +38,7 @@ interface Props {
 }
 
 export default function PsychologistRegistrationWizard({ invitationData, token }: Props) {
-  const { refreshUserData } = useAuth();
+  const { setAuthUser } = useAuth();
   const scrollViewRef = useRef<ScrollView>(null);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -164,7 +164,7 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
       };
 
       const systemPrompt = await gerarSystemPromptComGemini(formData);
-      const truncatedPrompt = systemPrompt.substring(0, 10000);
+      const truncatedPrompt = systemPrompt.substring(0, 20000);
 
       // Fase 2: Completar cadastro
       await completeRegistration(truncatedPrompt);
@@ -215,9 +215,8 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
       };
       await storage.setUser(normalizedUser);
 
-      Alert.alert('Sucesso!', 'Seu cadastro foi concluído. Bem-vindo!', [
-        { text: 'OK', onPress: () => refreshUserData() },
-      ]);
+      // Atualizar estado de autenticação para navegar automaticamente
+      setAuthUser(normalizedUser);
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao completar cadastro.');
     } finally {
