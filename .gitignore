@@ -54,7 +54,7 @@ yarn-error.*
 *.tmp
 *.jpeg
 *.jpg
-*.png
+
 estrutura.txt
 com.facebook.*
 nul

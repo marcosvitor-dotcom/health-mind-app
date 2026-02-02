@@ -36,12 +36,20 @@
               "pathPrefix": "/auth/complete-registration"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dd0347bf-bd0f-4563-a860-35362f0c5ec0"
+      }
     }
   }
 }
