@@ -53,6 +53,7 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "owner": "marcos-vitor"
   }
 }
