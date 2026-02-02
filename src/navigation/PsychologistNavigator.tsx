@@ -13,6 +13,7 @@ import ProfileScreen from '../screens/psychologist/ProfileScreen';
 import EditProfileScreen from '../screens/psychologist/EditProfileScreen';
 import InvitePatientScreen from '../screens/psychologist/InvitePatientScreen';
 import InvitationsScreen from '../screens/psychologist/InvitationsScreen';
+import AppointmentBookingScreen from '../screens/psychologist/AppointmentBookingScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -54,6 +55,20 @@ function ClientsStack() {
         component={InvitationsScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="AppointmentBooking"
+        component={AppointmentBookingScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function ScheduleStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ScheduleMain" component={PsychScheduleScreen} />
+      <Stack.Screen name="AppointmentBooking" component={AppointmentBookingScreen} />
     </Stack.Navigator>
   );
 }
@@ -98,7 +113,7 @@ export default function PsychologistNavigator() {
       />
       <Tab.Screen
         name="Schedule"
-        component={PsychScheduleScreen}
+        component={ScheduleStack}
         options={{
           title: 'Agenda',
           tabBarIcon: ({ color, size }) => (

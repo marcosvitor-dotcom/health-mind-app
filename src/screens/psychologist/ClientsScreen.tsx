@@ -371,7 +371,15 @@ export default function ClientsScreen({ navigation }: any) {
                       <Ionicons name="document-text" size={20} color="#4A90E2" />
                       <Text style={styles.modalActionText}>Ver Prontuário</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.modalActionButton}>
+                    <TouchableOpacity
+                      style={styles.modalActionButton}
+                      onPress={() => {
+                        setShowModal(false);
+                        navigation.navigate('AppointmentBooking', {
+                          patient: selectedPatient,
+                        });
+                      }}
+                    >
                       <Ionicons name="calendar" size={20} color="#50C878" />
                       <Text style={[styles.modalActionText, { color: '#50C878' }]}>
                         Agendar Consulta

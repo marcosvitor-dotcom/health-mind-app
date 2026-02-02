@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import * as appointmentService from '../../services/appointmentService';
 import { AppointmentData } from '../../services/appointmentService';
 
-export default function AppointmentsScreen() {
+export default function AppointmentsScreen({ navigation }: any) {
   const { user } = useAuth();
   const [upcomingAppointments, setUpcomingAppointments] = useState<AppointmentData[]>([]);
   const [pastAppointments, setPastAppointments] = useState<AppointmentData[]>([]);
@@ -170,7 +170,10 @@ export default function AppointmentsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TouchableOpacity style={styles.newAppointmentButton}>
+      <TouchableOpacity
+        style={styles.newAppointmentButton}
+        onPress={() => navigation.navigate('BookAppointment')}
+      >
         <Ionicons name="add-circle" size={24} color="#fff" />
         <Text style={styles.newAppointmentText}>Agendar Nova Consulta</Text>
       </TouchableOpacity>

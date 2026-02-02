@@ -200,7 +200,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
           <Text style={styles.emptyText}>Nenhum compromisso agendado</Text>
           <TouchableOpacity
             style={styles.addAppointmentButton}
-            onPress={() => navigation.navigate('Clients')}
+            onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
           >
             <Ionicons name="add-circle" size={20} color="#fff" />
             <Text style={styles.addAppointmentText}>Agendar Consulta</Text>
@@ -269,7 +269,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Agenda</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => navigation.navigate('Clients')}
+          onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
         >
           <Ionicons name="add-circle" size={28} color="#4A90E2" />
         </TouchableOpacity>

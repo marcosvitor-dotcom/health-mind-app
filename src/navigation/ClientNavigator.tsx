@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import ChatScreen from '../screens/client/ChatScreen';
 import AppointmentsScreen from '../screens/client/AppointmentsScreen';
+import BookAppointmentScreen from '../screens/client/BookAppointmentScreen';
 import EmergencyScreen from '../screens/client/EmergencyScreen';
 import ProfileScreen from '../screens/client/ProfileScreen';
 import EditProfileScreen from '../screens/client/EditProfileScreen';
@@ -11,6 +12,15 @@ import PsychologistChatScreen from '../screens/client/PsychologistChatScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+function AppointmentsStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="AppointmentsMain" component={AppointmentsScreen} />
+      <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+    </Stack.Navigator>
+  );
+}
 
 function EmergencyStack() {
   return (
@@ -51,7 +61,7 @@ export default function ClientNavigator() {
       />
       <Tab.Screen
         name="Appointments"
-        component={AppointmentsScreen}
+        component={AppointmentsStack}
         options={{
           title: 'Consultas',
           tabBarIcon: ({ color, size }) => (
