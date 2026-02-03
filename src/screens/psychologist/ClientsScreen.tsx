@@ -8,6 +8,7 @@ import {
   TextInput,
   Modal,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -225,16 +226,20 @@ export default function ClientsScreen({ navigation }: any) {
         {filteredPatients.map((patient) => (
           <Card key={patient._id || patient.id}>
             <View style={styles.clientHeader}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {patient.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </Text>
-              </View>
+              {patient.avatar ? (
+                <Image source={{ uri: patient.avatar }} style={styles.avatarImage} />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {patient.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </Text>
+                </View>
+              )}
               <View style={styles.clientInfo}>
                 <View style={styles.nameRow}>
                   <Text style={styles.name}>{patient.name}</Text>
@@ -301,16 +306,20 @@ export default function ClientsScreen({ navigation }: any) {
                 <>
                   {/* Info do Paciente */}
                   <View style={styles.modalSection}>
-                    <View style={styles.modalAvatar}>
-                      <Text style={styles.modalAvatarText}>
-                        {selectedPatient.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </Text>
-                    </View>
+                    {selectedPatient.avatar ? (
+                      <Image source={{ uri: selectedPatient.avatar }} style={styles.modalAvatarImage} />
+                    ) : (
+                      <View style={styles.modalAvatar}>
+                        <Text style={styles.modalAvatarText}>
+                          {selectedPatient.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </Text>
+                      </View>
+                    )}
                     <Text style={styles.modalName}>{selectedPatient.name}</Text>
                     <Text style={styles.modalEmail}>{selectedPatient.email}</Text>
                     {selectedPatient.phone && (
@@ -370,6 +379,22 @@ export default function ClientsScreen({ navigation }: any) {
                     <TouchableOpacity style={styles.modalActionButton}>
                       <Ionicons name="document-text" size={20} color="#4A90E2" />
                       <Text style={styles.modalActionText}>Ver Prontuário</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.modalActionButton}
+                      onPress={() => {
+                        setShowModal(false);
+                        const patientId = selectedPatient?._id || selectedPatient?.id;
+                        navigation.navigate('TherapeuticReportList', {
+                          patientId,
+                          patientName: selectedPatient?.name,
+                        });
+                      }}
+                    >
+                      <Ionicons name="sparkles" size={20} color="#9C27B0" />
+                      <Text style={[styles.modalActionText, { color: '#9C27B0' }]}>
+                        Relatório Terapêutico (IA)
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.modalActionButton}
@@ -486,6 +511,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
   avatarText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -582,6 +612,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#4A90E2',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
+  },
+  modalAvatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     marginBottom: 12,
   },
   modalAvatarText: {

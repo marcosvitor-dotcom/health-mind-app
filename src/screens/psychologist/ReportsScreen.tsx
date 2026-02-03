@@ -29,16 +29,29 @@ interface FinancialData {
   }>;
 }
 
-export default function ReportsScreen() {
+export default function ReportsScreen({ navigation }: any) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'year'>('month');
+  const [patients, setPatients] = useState<psychologistService.Patient[]>([]);
 
   useEffect(() => {
     loadFinancialData();
+    loadPatients();
   }, []);
+
+  const loadPatients = async () => {
+    try {
+      const psychologistId = user?._id || user?.id;
+      if (!psychologistId) return;
+      const data = await psychologistService.getMyPatients(psychologistId);
+      setPatients(data);
+    } catch (error) {
+      console.log('Erro ao carregar pacientes para relatórios:', error);
+    }
+  };
 
   const loadFinancialData = async () => {
     try {
@@ -279,6 +292,48 @@ export default function ReportsScreen() {
           </Text>
         </Card>
 
+        {/* Relatórios Terapêuticos */}
+        <Card style={styles.therapeuticCard}>
+          <View style={styles.therapeuticHeader}>
+            <View style={styles.therapeuticTitleRow}>
+              <Ionicons name="sparkles" size={22} color="#9C27B0" />
+              <Text style={styles.cardTitle}>Relatórios Terapêuticos</Text>
+            </View>
+            <Text style={styles.therapeuticSubtitle}>
+              Gere relatórios com IA a partir das conversas dos pacientes
+            </Text>
+          </View>
+          {patients.length > 0 ? (
+            patients.map((patient) => (
+              <TouchableOpacity
+                key={patient._id || patient.id}
+                style={styles.therapeuticPatientItem}
+                onPress={() =>
+                  navigation.navigate('TherapeuticReportList', {
+                    patientId: patient._id || patient.id,
+                    patientName: patient.name,
+                  })
+                }
+              >
+                <View style={styles.therapeuticPatientAvatar}>
+                  <Text style={styles.therapeuticPatientInitials}>
+                    {patient.name
+                      .split(' ')
+                      .map((n: string) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </Text>
+                </View>
+                <Text style={styles.therapeuticPatientName}>{patient.name}</Text>
+                <Ionicons name="chevron-forward" size={20} color="#9C27B0" />
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.therapeuticEmpty}>Nenhum paciente cadastrado</Text>
+          )}
+        </Card>
+
         {/* Export Options */}
         <Card style={styles.exportCard}>
           <Text style={styles.cardTitle}>Exportar Relatório</Text>
@@ -508,6 +563,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  therapeuticCard: {
+    marginBottom: 16,
+  },
+  therapeuticHeader: {
+    marginBottom: 12,
+  },
+  therapeuticTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  therapeuticSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+  },
+  therapeuticPatientItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  therapeuticPatientAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3E5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  therapeuticPatientInitials: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#9C27B0',
+  },
+  therapeuticPatientName: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#333',
+  },
+  therapeuticEmpty: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    paddingVertical: 16,
   },
   exportCard: {
     marginBottom: 16,

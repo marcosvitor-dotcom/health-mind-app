@@ -1,142 +1,204 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
+import { useAuth } from '../../contexts/AuthContext';
+import { getPatient, PatientWithPsychologist } from '../../services/profileService';
 
 export default function EmergencyScreen({ navigation }: any) {
+  const { user } = useAuth();
+  const [psychologist, setPsychologist] = useState<PatientWithPsychologist['psychologistId'] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const patientId = user?._id || user?.id || '';
+
+  useEffect(() => {
+    loadPsychologistData();
+  }, []);
+
+  const loadPsychologistData = async () => {
+    try {
+      const patientData = await getPatient(patientId);
+      if (patientData.psychologistId && typeof patientData.psychologistId === 'object') {
+        setPsychologist(patientData.psychologistId);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do psicólogo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number}`);
   };
 
   const handleWhatsApp = (number: string) => {
-    Linking.openURL(`https://wa.me/${number}`);
+    const cleanPhone = number.replace(/\D/g, '');
+    Linking.openURL(`whatsapp://send?phone=55${cleanPhone}`).catch(() => {
+      Linking.openURL(`https://wa.me/55${cleanPhone}`);
+    });
   };
+
+  const psychologistData = psychologist && typeof psychologist === 'object' ? psychologist : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView>
-      <Card style={styles.alertCard}>
-        <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
-        <Text style={styles.alertTitle}>Em caso de emergência</Text>
-        <Text style={styles.alertText}>
-          Se você está passando por uma crise ou pensando em se machucar,
-          procure ajuda imediata pelos canais abaixo.
-        </Text>
-      </Card>
+        <Card style={styles.alertCard}>
+          <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
+          <Text style={styles.alertTitle}>Em caso de emergência</Text>
+          <Text style={styles.alertText}>
+            Se você está passando por uma crise ou pensando em se machucar,
+            procure ajuda imediata pelos canais abaixo.
+          </Text>
+        </Card>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Seu Psicólogo</Text>
-        <Card>
-          <View style={styles.contactHeader}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={32} color="#fff" />
-            </View>
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactName}>Dr. João Silva</Text>
-              <Text style={styles.contactRole}>Psicólogo - CRP 06/123456</Text>
-            </View>
-          </View>
+        {/* Recursos de Emergência - Agora no topo */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recursos de Emergência</Text>
 
-          <View style={styles.contactButtons}>
+          <Card>
             <TouchableOpacity
-              style={styles.emergencyButton}
-              onPress={() => handleCall('11987654321')}
+              style={styles.resourceItem}
+              onPress={() => handleCall('188')}
             >
-              <Ionicons name="call" size={24} color="#fff" />
-              <Text style={styles.emergencyButtonText}>Ligar</Text>
+              <View style={styles.resourceIcon}>
+                <Ionicons name="call" size={24} color="#4A90E2" />
+              </View>
+              <View style={styles.resourceInfo}>
+                <Text style={styles.resourceName}>CVV - 188</Text>
+                <Text style={styles.resourceDescription}>
+                  Centro de Valorização da Vida - 24h
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#ccc" />
             </TouchableOpacity>
+          </Card>
+
+          <Card>
             <TouchableOpacity
-              style={[styles.emergencyButton, styles.whatsappButton]}
-              onPress={() => handleWhatsApp('5511987654321')}
+              style={styles.resourceItem}
+              onPress={() => handleCall('192')}
             >
-              <Ionicons name="logo-whatsapp" size={24} color="#fff" />
-              <Text style={styles.emergencyButtonText}>WhatsApp</Text>
+              <View style={styles.resourceIcon}>
+                <Ionicons name="medkit" size={24} color="#FF6B6B" />
+              </View>
+              <View style={styles.resourceInfo}>
+                <Text style={styles.resourceName}>SAMU - 192</Text>
+                <Text style={styles.resourceDescription}>
+                  Atendimento médico de urgência - 24h
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#ccc" />
             </TouchableOpacity>
-          </View>
+          </Card>
 
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={() => navigation.navigate('PsychologistChat')}
-          >
-            <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
-            <Text style={styles.chatButtonText}>Enviar Mensagem no App</Text>
-            <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
-          </TouchableOpacity>
+          <Card>
+            <TouchableOpacity
+              style={styles.resourceItem}
+              onPress={() => handleCall('190')}
+            >
+              <View style={styles.resourceIcon}>
+                <Ionicons name="shield" size={24} color="#FFB347" />
+              </View>
+              <View style={styles.resourceInfo}>
+                <Text style={styles.resourceName}>Polícia - 190</Text>
+                <Text style={styles.resourceDescription}>
+                  Em caso de risco imediato
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            </TouchableOpacity>
+          </Card>
+        </View>
 
-          <View style={styles.availability}>
-            <Ionicons name="time" size={16} color="#666" />
-            <Text style={styles.availabilityText}>
-              Disponível: Seg-Sex, 9h às 18h
-            </Text>
-          </View>
+        {/* Seu Psicólogo - Agora abaixo */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Seu Psicólogo</Text>
+          <Card>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#4A90E2" />
+                <Text style={styles.loadingText}>Carregando...</Text>
+              </View>
+            ) : psychologistData ? (
+              <>
+                <View style={styles.contactHeader}>
+                  {psychologistData.avatar ? (
+                    <Image
+                      source={{ uri: psychologistData.avatar }}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {psychologistData.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={styles.contactInfo}>
+                    <Text style={styles.contactName}>{psychologistData.name}</Text>
+                    {psychologistData.crp && (
+                      <Text style={styles.contactRole}>Psicólogo - CRP {psychologistData.crp}</Text>
+                    )}
+                    {psychologistData.email && (
+                      <Text style={styles.contactEmail}>{psychologistData.email}</Text>
+                    )}
+                  </View>
+                </View>
+
+                {psychologistData.phone && (
+                  <View style={styles.contactButtons}>
+                    <TouchableOpacity
+                      style={styles.emergencyButton}
+                      onPress={() => handleCall(psychologistData.phone!)}
+                    >
+                      <Ionicons name="call" size={24} color="#fff" />
+                      <Text style={styles.emergencyButtonText}>Ligar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.emergencyButton, styles.whatsappButton]}
+                      onPress={() => handleWhatsApp(psychologistData.phone!)}
+                    >
+                      <Ionicons name="logo-whatsapp" size={24} color="#fff" />
+                      <Text style={styles.emergencyButtonText}>WhatsApp</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  style={styles.chatButton}
+                  onPress={() => navigation.navigate('PsychologistChat')}
+                >
+                  <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
+                  <Text style={styles.chatButtonText}>Enviar Mensagem no App</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View style={styles.noPsychologist}>
+                <Ionicons name="person-outline" size={40} color="#ccc" />
+                <Text style={styles.noPsychologistText}>
+                  Nenhum psicólogo vinculado
+                </Text>
+              </View>
+            )}
+          </Card>
+        </View>
+
+        <Card style={styles.infoCard}>
+          <Ionicons name="information-circle" size={24} color="#4A90E2" />
+          <Text style={styles.infoText}>
+            Lembre-se: buscar ajuda é um ato de coragem. Você não está sozinho(a).
+          </Text>
         </Card>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recursos de Emergência</Text>
-
-        <Card>
-          <TouchableOpacity
-            style={styles.resourceItem}
-            onPress={() => handleCall('188')}
-          >
-            <View style={styles.resourceIcon}>
-              <Ionicons name="call" size={24} color="#4A90E2" />
-            </View>
-            <View style={styles.resourceInfo}>
-              <Text style={styles.resourceName}>CVV - 188</Text>
-              <Text style={styles.resourceDescription}>
-                Centro de Valorização da Vida - 24h
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
-          </TouchableOpacity>
-        </Card>
-
-        <Card>
-          <TouchableOpacity
-            style={styles.resourceItem}
-            onPress={() => handleCall('192')}
-          >
-            <View style={styles.resourceIcon}>
-              <Ionicons name="medkit" size={24} color="#FF6B6B" />
-            </View>
-            <View style={styles.resourceInfo}>
-              <Text style={styles.resourceName}>SAMU - 192</Text>
-              <Text style={styles.resourceDescription}>
-                Atendimento médico de urgência - 24h
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
-          </TouchableOpacity>
-        </Card>
-
-        <Card>
-          <TouchableOpacity
-            style={styles.resourceItem}
-            onPress={() => handleCall('190')}
-          >
-            <View style={styles.resourceIcon}>
-              <Ionicons name="shield" size={24} color="#FFB347" />
-            </View>
-            <View style={styles.resourceInfo}>
-              <Text style={styles.resourceName}>Polícia - 190</Text>
-              <Text style={styles.resourceDescription}>
-                Em caso de risco imediato
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
-          </TouchableOpacity>
-        </Card>
-      </View>
-
-      <Card style={styles.infoCard}>
-        <Ionicons name="information-circle" size={24} color="#4A90E2" />
-        <Text style={styles.infoText}>
-          Lembre-se: buscar ajuda é um ato de coragem. Você não está sozinho(a).
-        </Text>
-      </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -177,6 +239,15 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 12,
   },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#666',
+  },
   contactHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -189,6 +260,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#4A90E2',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
   contactInfo: {
     marginLeft: 12,
@@ -204,6 +285,11 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
+  contactEmail: {
+    fontSize: 13,
+    color: '#999',
+    marginTop: 2,
+  },
   contactButtons: {
     flexDirection: 'row',
     marginBottom: 12,
@@ -217,6 +303,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     marginHorizontal: 4,
+    gap: 8,
   },
   whatsappButton: {
     backgroundColor: '#25D366',
@@ -241,18 +328,14 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     flex: 1,
   },
-  availability: {
-    flexDirection: 'row',
+  noPsychologist: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    paddingVertical: 20,
   },
-  availabilityText: {
-    fontSize: 13,
-    color: '#666',
-    marginLeft: 6,
+  noPsychologistText: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
   },
   resourceItem: {
     flexDirection: 'row',

@@ -11,6 +11,7 @@ import {
   Modal,
   TextInput,
   Linking,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -351,9 +352,13 @@ export default function PatientsScreen({ navigation }: any) {
               >
                 <Card style={styles.patientCard}>
                   <View style={styles.patientHeader}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>{getInitial(patient.name)}</Text>
-                    </View>
+                    {patient.avatar ? (
+                      <Image source={{ uri: patient.avatar }} style={styles.avatarImage} />
+                    ) : (
+                      <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>{getInitial(patient.name)}</Text>
+                      </View>
+                    )}
                     <View style={styles.patientInfo}>
                       <Text style={styles.name}>{patient.name}</Text>
                       {patient.email && <Text style={styles.email}>{patient.email}</Text>}
@@ -501,7 +506,11 @@ export default function PatientsScreen({ navigation }: any) {
             {contactPatient && (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.contactAvatar}>
-                  <Ionicons name="person-circle" size={80} color="#50C878" />
+                  {contactPatient.avatar ? (
+                    <Image source={{ uri: contactPatient.avatar }} style={styles.contactAvatarImage} />
+                  ) : (
+                    <Ionicons name="person-circle" size={80} color="#50C878" />
+                  )}
                 </View>
 
                 <Text style={styles.contactName}>{contactPatient.name}</Text>
@@ -657,9 +666,13 @@ export default function PatientsScreen({ navigation }: any) {
             {selectedPatient && (
               <>
                 <View style={styles.patientInfoSection}>
-                  <View style={styles.avatarLarge}>
-                    <Text style={styles.avatarTextLarge}>{getInitial(selectedPatient.name)}</Text>
-                  </View>
+                  {selectedPatient.avatar ? (
+                    <Image source={{ uri: selectedPatient.avatar }} style={styles.avatarLargeImage} />
+                  ) : (
+                    <View style={styles.avatarLarge}>
+                      <Text style={styles.avatarTextLarge}>{getInitial(selectedPatient.name)}</Text>
+                    </View>
+                  )}
                   <Text style={styles.patientNameLarge}>{selectedPatient.name}</Text>
                   {selectedPatient.email && (
                     <Text style={styles.patientEmailLarge}>{selectedPatient.email}</Text>
@@ -852,6 +865,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
   avatarText: {
     color: '#fff',
     fontSize: 20,
@@ -1026,6 +1044,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  avatarLargeImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
+  },
   avatarTextLarge: {
     color: '#fff',
     fontSize: 32,
@@ -1108,6 +1132,11 @@ const styles = StyleSheet.create({
   contactAvatar: {
     alignItems: 'center',
     marginBottom: 16,
+  },
+  contactAvatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   contactName: {
     fontSize: 24,

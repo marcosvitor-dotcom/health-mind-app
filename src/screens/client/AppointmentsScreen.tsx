@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
@@ -99,6 +99,33 @@ export default function AppointmentsScreen({ navigation }: any) {
     return 'Psicologo';
   };
 
+  const handleCancelAppointment = (appointment: AppointmentData) => {
+    Alert.alert(
+      'Cancelar Consulta',
+      'Tem certeza que deseja cancelar esta consulta?',
+      [
+        { text: 'Não', style: 'cancel' },
+        {
+          text: 'Sim, Cancelar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await appointmentService.cancelAppointment(appointment._id);
+              Alert.alert('Sucesso', 'Consulta cancelada com sucesso.');
+              loadAppointments();
+            } catch (error: any) {
+              Alert.alert('Erro', error.message || 'Não foi possível cancelar a consulta.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReschedule = (appointment: AppointmentData) => {
+    navigation.navigate('BookAppointment', { rescheduleId: appointment._id });
+  };
+
   const AppointmentCard = ({ appointment, isPast = false }: { appointment: AppointmentData; isPast?: boolean }) => {
     const date = new Date(appointment.date);
     return (
@@ -141,11 +168,17 @@ export default function AppointmentsScreen({ navigation }: any) {
 
         {!isPast && (
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleReschedule(appointment)}
+            >
               <Ionicons name="calendar" size={18} color="#4A90E2" />
               <Text style={styles.actionText}>Reagendar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, styles.cancelButton]}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.cancelButton]}
+              onPress={() => handleCancelAppointment(appointment)}
+            >
               <Ionicons name="close-circle" size={18} color="#FF6B6B" />
               <Text style={[styles.actionText, { color: '#FF6B6B' }]}>
                 Cancelar

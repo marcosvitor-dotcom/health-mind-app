@@ -14,6 +14,8 @@ import EditProfileScreen from '../screens/psychologist/EditProfileScreen';
 import InvitePatientScreen from '../screens/psychologist/InvitePatientScreen';
 import InvitationsScreen from '../screens/psychologist/InvitationsScreen';
 import AppointmentBookingScreen from '../screens/psychologist/AppointmentBookingScreen';
+import TherapeuticReportListScreen from '../screens/psychologist/TherapeuticReportListScreen';
+import TherapeuticReportDetailScreen from '../screens/psychologist/TherapeuticReportDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -60,6 +62,16 @@ function ClientsStack() {
         component={AppointmentBookingScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="TherapeuticReportList"
+        component={TherapeuticReportListScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TherapeuticReportDetail"
+        component={TherapeuticReportDetailScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -69,6 +81,16 @@ function ScheduleStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ScheduleMain" component={PsychScheduleScreen} />
       <Stack.Screen name="AppointmentBooking" component={AppointmentBookingScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function ReportsStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ReportsMain" component={ReportsScreen} />
+      <Stack.Screen name="TherapeuticReportList" component={TherapeuticReportListScreen} />
+      <Stack.Screen name="TherapeuticReportDetail" component={TherapeuticReportDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -123,7 +145,7 @@ export default function PsychologistNavigator() {
       />
       <Tab.Screen
         name="Reports"
-        component={ReportsScreen}
+        component={ReportsStack}
         options={{
           title: 'Relatórios',
           tabBarIcon: ({ color, size }) => (

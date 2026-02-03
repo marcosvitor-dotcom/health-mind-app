@@ -85,7 +85,9 @@ export default function BookAppointmentScreen({ navigation }: any) {
 
     setCreating(true);
     try {
-      const dateTime = `${selectedDate}T${selectedSlot}:00.000Z`;
+      // Use local timezone offset to ensure the selected time matches what's displayed
+      const localDate = new Date(`${selectedDate}T${selectedSlot}:00`);
+      const dateTime = localDate.toISOString();
 
       await appointmentService.createAppointment({
         patientId,

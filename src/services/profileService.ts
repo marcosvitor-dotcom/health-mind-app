@@ -49,6 +49,7 @@ export interface PatientWithPsychologist {
     phone?: string;
     crp?: string;
     specialties?: string[];
+    avatar?: string;
   };
   clinicId?: string;
   birthDate?: string;

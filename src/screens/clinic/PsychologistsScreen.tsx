@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Linking, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
@@ -217,13 +217,13 @@ export default function PsychologistsScreen({ navigation }: any) {
             >
               <Card>
                 <View style={styles.psychologistHeader}>
-                  <View style={styles.avatar}>
-                    {psychologist.avatar ? (
+                  {psychologist.avatar ? (
+                    <Image source={{ uri: psychologist.avatar }} style={styles.avatarImage} />
+                  ) : (
+                    <View style={styles.avatar}>
                       <Text style={styles.avatarText}>{getInitial(psychologist.name)}</Text>
-                    ) : (
-                      <Text style={styles.avatarText}>{getInitial(psychologist.name)}</Text>
-                    )}
-                  </View>
+                    </View>
+                  )}
                   <View style={styles.psychologistInfo}>
                     <Text style={styles.name}>{psychologist.name}</Text>
                     <Text style={styles.crp}>{psychologist.crp}</Text>
@@ -291,7 +291,11 @@ export default function PsychologistsScreen({ navigation }: any) {
             {contactPsychologist && (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.contactAvatar}>
-                  <Ionicons name="person-circle" size={80} color="#4A90E2" />
+                  {contactPsychologist.avatar ? (
+                    <Image source={{ uri: contactPsychologist.avatar }} style={styles.contactAvatarImage} />
+                  ) : (
+                    <Ionicons name="person-circle" size={80} color="#4A90E2" />
+                  )}
                 </View>
 
                 <Text style={styles.contactName}>{contactPsychologist.name}</Text>
@@ -546,6 +550,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
   avatarText: {
     color: '#fff',
     fontSize: 24,
@@ -658,6 +667,11 @@ const styles = StyleSheet.create({
   contactAvatar: {
     alignItems: 'center',
     marginBottom: 16,
+  },
+  contactAvatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   contactName: {
     fontSize: 24,

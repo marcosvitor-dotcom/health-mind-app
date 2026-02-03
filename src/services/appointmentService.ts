@@ -111,6 +111,23 @@ export const createAppointment = async (
 };
 
 /**
+ * Cancelar uma consulta
+ */
+export const cancelAppointment = async (appointmentId: string): Promise<void> => {
+  try {
+    const { data } = await api.put<ApiResponse>(`/appointments/${appointmentId}`, {
+      status: 'cancelled',
+    });
+
+    if (!data.success) {
+      throw new Error(data.message || 'Erro ao cancelar consulta');
+    }
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
  * Obter horarios disponiveis para um psicologo em uma data
  */
 export const getAvailableSlots = async (

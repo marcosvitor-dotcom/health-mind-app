@@ -54,6 +54,12 @@
     "plugins": [
       "expo-font"
     ],
-    "owner": "marcos-vitor"
+    "owner": "marcos-vitor",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dd0347bf-bd0f-4563-a860-35362f0c5ec0"
+    }
   }
 }
