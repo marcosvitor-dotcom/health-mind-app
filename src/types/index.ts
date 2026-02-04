@@ -1,5 +1,5 @@
 // Tipos de usuário
-export type UserRole = 'clinic' | 'psychologist' | 'client' | 'patient';
+export type UserRole = 'clinic' | 'psychologist' | 'client' | 'patient' | 'admin';
 
 export interface User {
   _id: string;
@@ -115,6 +115,113 @@ export type ClientTabParamList = {
   Emergency: undefined;
   Profile: undefined;
 };
+
+export type AdminTabParamList = {
+  Overview: undefined;
+  Clinics: undefined;
+  Users: undefined;
+  Settings: undefined;
+};
+
+// Tipos para Admin
+export interface AdminPermissions {
+  manageUsers: boolean;
+  manageClinics: boolean;
+  viewMetrics: boolean;
+  promoteAdmin: boolean;
+}
+
+export interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  role: 'admin';
+  permissions: AdminPermissions;
+  createdBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  lastLoginAt?: string;
+  createdAt: string;
+  deletedAt?: string;
+}
+
+export interface AdminStats {
+  totals: {
+    clinics: number;
+    psychologists: number;
+    patients: number;
+    admins: number;
+  };
+  activeUsers: {
+    clinics: number;
+    psychologists: number;
+    patients: number;
+    total: number;
+  };
+  newThisMonth: {
+    clinics: number;
+    psychologists: number;
+    patients: number;
+    total: number;
+  };
+  appointmentsThisMonth: number;
+}
+
+export interface AdminClinic {
+  _id: string;
+  name: string;
+  email: string;
+  cnpj?: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    number?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
+  psychologistsCount: number;
+  patientsCount: number;
+  createdAt: string;
+  deletedAt?: string;
+}
+
+export interface AdminPsychologist {
+  _id: string;
+  name: string;
+  email: string;
+  crp?: string;
+  phone?: string;
+  specialties?: string[];
+  clinicId?: {
+    _id: string;
+    name: string;
+  };
+  patientsCount: number;
+  createdAt: string;
+  deletedAt?: string;
+}
+
+export interface AdminPatient {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  psychologistId?: {
+    _id: string;
+    name: string;
+  };
+  clinicId?: {
+    _id: string;
+    name: string;
+  };
+  createdAt: string;
+  deletedAt?: string;
+}
 
 // Tipos para API de Autenticação
 export interface LoginRequest {

@@ -10,6 +10,7 @@ import CompleteRegistrationScreen from '../screens/auth/CompleteRegistrationScre
 import ClinicNavigator from './ClinicNavigator';
 import PsychologistNavigator from './PsychologistNavigator';
 import ClientNavigator from './ClientNavigator';
+import AdminNavigator from './AdminNavigator';
 
 type RootStackParamList = {
   Login: undefined;
@@ -53,6 +54,8 @@ export default function AppNavigator() {
     const role = user.role === 'patient' ? 'client' : user.role;
 
     switch (role) {
+      case 'admin':
+        return <Stack.Screen name="Main" component={AdminNavigator} options={{ headerShown: false }} />;
       case 'clinic':
         return <Stack.Screen name="Main" component={ClinicNavigator} options={{ headerShown: false }} />;
       case 'psychologist':
