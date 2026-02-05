@@ -3,7 +3,7 @@ import { PsychologistFormData } from '../utils/systemPromptGenerator';
 
 /**
  * Gera um system prompt personalizado chamando a API do backend,
- * que por sua vez utiliza o Gemini com a chave protegida no servidor.
+ * que por sua vez utiliza o Claude com a chave protegida no servidor.
  */
 export const gerarSystemPromptComGemini = async (dados: PsychologistFormData): Promise<string> => {
   const response = await api.post('/ai/generate-system-prompt', dados);
