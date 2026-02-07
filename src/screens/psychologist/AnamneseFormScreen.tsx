@@ -51,6 +51,7 @@ export default function AnamneseFormScreen({ navigation, route }: any) {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <Header
         title="Ficha de Anamnese"
@@ -58,7 +59,7 @@ export default function AnamneseFormScreen({ navigation, route }: any) {
         onBack={() => navigation.goBack()}
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Card style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Ionicons name="information-circle" size={20} color="#4A90E2" />

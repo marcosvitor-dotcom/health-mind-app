@@ -280,6 +280,7 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
         <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setEditMode(false)} style={styles.backButton}>

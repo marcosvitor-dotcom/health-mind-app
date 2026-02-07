@@ -7,6 +7,9 @@ export const ABORDAGENS = [
   'Comportamental',
   'Junguiana',
   'Existencial',
+  'Fenomenológica',
+  'Psicodrama',
+  'Integrativa',
   'Outra',
 ];
 
@@ -19,6 +22,9 @@ export const PUBLICOS = [
   'Casais',
   'Famílias',
   'Gestantes',
+  'Mulheres em situação de violência',
+  'Pessoas com deficiência',
+  'Pessoas em luto',
 ];
 
 export const TEMAS = [
@@ -27,13 +33,21 @@ export const TEMAS = [
   'Trauma',
   'Luto',
   'Relacionamentos',
-  'Violência',
+  'Violência de Gênero',
+  'Violência Doméstica',
   'Autoestima',
   'Estresse',
   'Burnout',
   'Vícios',
   'Transtornos Alimentares',
   'TOC',
+  'Identidade de Gênero',
+  'Orientação Sexual',
+  'Abuso/Negligência',
+  'Sexualidade',
+  'Carreira e Propósito',
+  'Maternidade/Paternidade',
+  'Neurodivergência',
 ];
 
 export const TONS = [
@@ -43,4 +57,7 @@ export const TONS = [
   'Encorajador',
   'Formal',
   'Descontraído',
+  'Empático',
+  'Firme',
+  'Gentil',
 ];

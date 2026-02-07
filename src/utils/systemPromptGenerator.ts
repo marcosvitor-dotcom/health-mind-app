@@ -6,6 +6,7 @@ export interface PsychologistFormData {
   nomeCompleto: string;
   crp: string;
   formacaoAcademica: string;
+  posGraduacao?: string;
   abordagemPrincipal: string;
   descricaoTrabalho: string;
   publicosEspecificos: string[];
@@ -14,6 +15,11 @@ export interface PsychologistFormData {
   tecnicasFavoritas: string[];
   restricoesTematicas?: string;
   diferenciais?: string;
+  experienciaViolencia?: string;
+  situacoesLimite?: string;
+  linguagemPreferida?: string;
+  exemploAcolhimento?: string;
+  exemploLimiteEtico?: string;
 }
 
 /**

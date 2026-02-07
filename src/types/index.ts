@@ -317,6 +317,7 @@ export interface CompleteRegistrationPsychologistRequest {
   bio?: string;
   // Campos do wizard terapêutico
   formacaoAcademica?: string;
+  posGraduacao?: string;
   abordagemPrincipal?: string;
   descricaoTrabalho?: string;
   publicosEspecificos?: string[];
@@ -325,6 +326,12 @@ export interface CompleteRegistrationPsychologistRequest {
   tecnicasFavoritas?: string[];
   restricoesTematicas?: string;
   diferenciais?: string;
+  // Perguntas clínicas aprofundadas
+  experienciaViolencia?: string;
+  situacoesLimite?: string;
+  linguagemPreferida?: string;
+  exemploAcolhimento?: string;
+  exemploLimiteEtico?: string;
   systemPrompt?: string;
 }
 
@@ -335,6 +342,7 @@ export interface PsychologistWizardData {
   phone: string;
   // Step 2 - Abordagem Terapêutica
   formacaoAcademica: string;
+  posGraduacao: string;
   abordagemPrincipal: string;
   descricaoTrabalho: string;
   // Step 3 - Especializações
@@ -346,6 +354,12 @@ export interface PsychologistWizardData {
   tecnicasFavoritas: string;
   restricoesTematicas: string;
   diferenciais: string;
+  // Step 5b - Perguntas Clínicas Aprofundadas
+  experienciaViolencia: string;
+  situacoesLimite: string;
+  linguagemPreferida: string;
+  exemploAcolhimento: string;
+  exemploLimiteEtico: string;
 }
 
 export interface CompleteRegistrationPatientRequest {

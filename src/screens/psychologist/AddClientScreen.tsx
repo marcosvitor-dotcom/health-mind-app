@@ -103,6 +103,7 @@ export default function AddClientScreen({ navigation }: any) {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <Header
         title="Novo Paciente"
@@ -110,7 +111,7 @@ export default function AddClientScreen({ navigation }: any) {
         onBack={() => navigation.goBack()}
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>Dados Pessoais</Text>
 

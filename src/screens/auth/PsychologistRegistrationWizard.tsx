@@ -53,6 +53,7 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
     confirmPassword: '',
     phone: invitationData.preFilledData.phone || '',
     formacaoAcademica: '',
+    posGraduacao: '',
     abordagemPrincipal: '',
     descricaoTrabalho: '',
     publicosEspecificos: [],
@@ -61,6 +62,11 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
     tecnicasFavoritas: '',
     restricoesTematicas: '',
     diferenciais: '',
+    experienciaViolencia: '',
+    situacoesLimite: '',
+    linguagemPreferida: '',
+    exemploAcolhimento: '',
+    exemploLimiteEtico: '',
   });
 
   const updateField = <K extends keyof PsychologistWizardData>(
@@ -153,6 +159,7 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         nomeCompleto: invitationData.preFilledData.name || '',
         crp: invitationData.preFilledData.crp || '',
         formacaoAcademica: wizardData.formacaoAcademica,
+        posGraduacao: wizardData.posGraduacao,
         abordagemPrincipal: wizardData.abordagemPrincipal,
         descricaoTrabalho: wizardData.descricaoTrabalho,
         publicosEspecificos: wizardData.publicosEspecificos,
@@ -161,6 +168,11 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         tecnicasFavoritas: wizardData.tecnicasFavoritas.split('\n').filter(t => t.trim()),
         restricoesTematicas: wizardData.restricoesTematicas,
         diferenciais: wizardData.diferenciais,
+        experienciaViolencia: wizardData.experienciaViolencia,
+        situacoesLimite: wizardData.situacoesLimite,
+        linguagemPreferida: wizardData.linguagemPreferida,
+        exemploAcolhimento: wizardData.exemploAcolhimento,
+        exemploLimiteEtico: wizardData.exemploLimiteEtico,
       };
 
       const systemPrompt = await gerarSystemPromptComGemini(formData);
@@ -195,6 +207,7 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         password: wizardData.password,
         phone: wizardData.phone || undefined,
         formacaoAcademica: wizardData.formacaoAcademica,
+        posGraduacao: wizardData.posGraduacao,
         abordagemPrincipal: wizardData.abordagemPrincipal,
         descricaoTrabalho: wizardData.descricaoTrabalho,
         publicosEspecificos: wizardData.publicosEspecificos,
@@ -203,6 +216,11 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         tecnicasFavoritas: wizardData.tecnicasFavoritas.split('\n').filter(t => t.trim()),
         restricoesTematicas: wizardData.restricoesTematicas,
         diferenciais: wizardData.diferenciais,
+        experienciaViolencia: wizardData.experienciaViolencia,
+        situacoesLimite: wizardData.situacoesLimite,
+        linguagemPreferida: wizardData.linguagemPreferida,
+        exemploAcolhimento: wizardData.exemploAcolhimento,
+        exemploLimiteEtico: wizardData.exemploLimiteEtico,
         systemPrompt,
       });
 
@@ -351,6 +369,15 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         placeholderTextColor="#999"
         value={wizardData.formacaoAcademica}
         onChangeText={v => updateField('formacaoAcademica', v)}
+      />
+
+      <Text style={styles.label}>Pós-graduação / Especialização</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: Pós-graduada em Gestalt-terapia pelo Instituto X"
+        placeholderTextColor="#999"
+        value={wizardData.posGraduacao}
+        onChangeText={v => updateField('posGraduacao', v)}
       />
 
       <Text style={styles.label}>Abordagem Principal *</Text>
@@ -517,6 +544,64 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         maxLength={100}
       />
       <Text style={styles.charCounter}>{wizardData.diferenciais.length}/100</Text>
+
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionSubtitle}>Perguntas Clínicas Aprofundadas</Text>
+      <Text style={styles.hint}>Estas perguntas ajudam a gerar um assistente mais personalizado e preciso</Text>
+
+      <Text style={[styles.label, { marginTop: 12 }]}>Experiência com violência de gênero/doméstica</Text>
+      <Text style={styles.hint}>Você tem experiência atendendo vítimas de violência? Descreva brevemente.</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Ex: Atuo há 5 anos com mulheres em situação de violência doméstica..."
+        placeholderTextColor="#999"
+        value={wizardData.experienciaViolencia}
+        onChangeText={v => updateField('experienciaViolencia', v)}
+        multiline
+      />
+
+      <Text style={[styles.label, { marginTop: 12 }]}>Como você lida com situações-limite?</Text>
+      <Text style={styles.hint}>Quando um paciente está em crise ou risco, como você age?</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Ex: Priorizo a segurança, aciono o protocolo de emergência..."
+        placeholderTextColor="#999"
+        value={wizardData.situacoesLimite}
+        onChangeText={v => updateField('situacoesLimite', v)}
+        multiline
+      />
+
+      <Text style={[styles.label, { marginTop: 12 }]}>Linguagem/pronomes preferidos</Text>
+      <Text style={styles.hint}>Como sua assistente deve se comunicar? Linguagem neutra, inclusiva?</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: Linguagem neutra e inclusiva, evitar pressuposições"
+        placeholderTextColor="#999"
+        value={wizardData.linguagemPreferida}
+        onChangeText={v => updateField('linguagemPreferida', v)}
+      />
+
+      <Text style={[styles.label, { marginTop: 12 }]}>Exemplo: como você acolhe um paciente?</Text>
+      <Text style={styles.hint}>Escreva como você responderia a um paciente que diz "hoje foi um dia horrível"</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Ex: Sinto que foi um dia pesado. Estou aqui para te ouvir..."
+        placeholderTextColor="#999"
+        value={wizardData.exemploAcolhimento}
+        onChangeText={v => updateField('exemploAcolhimento', v)}
+        multiline
+      />
+
+      <Text style={[styles.label, { marginTop: 12 }]}>Exemplo: como você responde a pedido de diagnóstico?</Text>
+      <Text style={styles.hint}>Quando um paciente pergunta "você acha que eu tenho depressão?", como responde?</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Ex: Essa é uma avaliação que apenas eu posso fazer nas sessões..."
+        placeholderTextColor="#999"
+        value={wizardData.exemploLimiteEtico}
+        onChangeText={v => updateField('exemploLimiteEtico', v)}
+        multiline
+      />
     </View>
   );
 
@@ -562,6 +647,12 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
           <Text style={styles.reviewLabel}>Formação: </Text>
           {wizardData.formacaoAcademica}
         </Text>
+        {wizardData.posGraduacao ? (
+          <Text style={styles.reviewItem}>
+            <Text style={styles.reviewLabel}>Pós-graduação: </Text>
+            {wizardData.posGraduacao}
+          </Text>
+        ) : null}
         <Text style={styles.reviewItem}>
           <Text style={styles.reviewLabel}>Abordagem: </Text>
           {wizardData.abordagemPrincipal}
@@ -657,6 +748,48 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         )}
       </View>
 
+      {/* Perguntas Clínicas */}
+      {(wizardData.experienciaViolencia || wizardData.situacoesLimite || wizardData.linguagemPreferida || wizardData.exemploAcolhimento || wizardData.exemploLimiteEtico) ? (
+        <View style={styles.reviewSection}>
+          <View style={styles.reviewSectionHeader}>
+            <Text style={styles.reviewSectionTitle}>Perguntas Clínicas</Text>
+            <TouchableOpacity onPress={() => goToStep(4)}>
+              <Text style={styles.reviewEditLink}>Editar</Text>
+            </TouchableOpacity>
+          </View>
+          {wizardData.experienciaViolencia ? (
+            <>
+              <Text style={styles.reviewLabel}>Experiência com violência:</Text>
+              <Text style={styles.reviewItem}>{wizardData.experienciaViolencia}</Text>
+            </>
+          ) : null}
+          {wizardData.situacoesLimite ? (
+            <>
+              <Text style={[styles.reviewLabel, { marginTop: 6 }]}>Situações-limite:</Text>
+              <Text style={styles.reviewItem}>{wizardData.situacoesLimite}</Text>
+            </>
+          ) : null}
+          {wizardData.linguagemPreferida ? (
+            <>
+              <Text style={[styles.reviewLabel, { marginTop: 6 }]}>Linguagem preferida:</Text>
+              <Text style={styles.reviewItem}>{wizardData.linguagemPreferida}</Text>
+            </>
+          ) : null}
+          {wizardData.exemploAcolhimento ? (
+            <>
+              <Text style={[styles.reviewLabel, { marginTop: 6 }]}>Exemplo de acolhimento:</Text>
+              <Text style={styles.reviewItem}>{wizardData.exemploAcolhimento}</Text>
+            </>
+          ) : null}
+          {wizardData.exemploLimiteEtico ? (
+            <>
+              <Text style={[styles.reviewLabel, { marginTop: 6 }]}>Exemplo de limite ético:</Text>
+              <Text style={styles.reviewItem}>{wizardData.exemploLimiteEtico}</Text>
+            </>
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={styles.aiNote}>
         <Ionicons name="sparkles" size={18} color="#4A90E2" />
         <Text style={styles.aiNoteText}>
@@ -682,7 +815,8 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
     <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -707,9 +841,11 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
           style={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          contentContainerStyle={{ paddingBottom: 40 }}
         >
           {renderCurrentStep()}
-          <View style={{ height: 100 }} />
+          <View style={{ height: 120 }} />
         </ScrollView>
 
         {/* Navigation Footer */}
@@ -884,6 +1020,17 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 100,
     textAlignVertical: 'top',
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 20,
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4A90E2',
+    marginBottom: 4,
   },
   charCounter: {
     fontSize: 12,
