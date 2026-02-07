@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import * as authService from '../services/authService';
 import * as storage from '../utils/storage';
+import { setupPushNotifications } from '../services/notificationService';
 
 interface AuthContextData {
   user: User | null;
@@ -39,6 +40,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const updatedUser = await authService.getMe();
           setUser(updatedUser);
           await storage.setUser(updatedUser);
+
+          // Registrar push notifications ao restaurar sessão
+          setupPushNotifications().catch((err) =>
+            console.log('Push notification setup (não crítico):', err)
+          );
         } catch (error) {
           // Token inválido ou expirado - limpar storage
           console.log('Token expirado, fazendo logout...');
@@ -86,6 +92,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Salvar usuário
       await storage.setUser(normalizedUser);
       setUser(normalizedUser);
+
+      // Registrar push notifications após login
+      setupPushNotifications().catch((err) =>
+        console.log('Push notification setup (não crítico):', err)
+      );
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;

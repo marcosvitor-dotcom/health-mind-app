@@ -17,8 +17,18 @@ export interface AppointmentData {
   date: string;
   duration: number;
   type: string;
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'pending';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'pending' | 'awaiting_patient' | 'awaiting_psychologist';
   notes?: string;
+  paymentId?: {
+    _id: string;
+    status: string;
+    paymentMethod?: string;
+    healthInsurance?: string;
+    finalValue?: number;
+    paidAt?: string;
+    confirmedAt?: string;
+    dueDate?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -143,6 +153,60 @@ export const getAvailableSlots = async (
       return data.data;
     }
     throw new Error(data.message || 'Erro ao buscar horários disponíveis');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Confirmar presença em uma consulta
+ */
+export const confirmAppointment = async (appointmentId: string): Promise<AppointmentData> => {
+  try {
+    const { data } = await api.post<ApiResponse<AppointmentData>>(
+      `/appointments/${appointmentId}/confirm`
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao confirmar consulta');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Solicitar reagendamento de consulta
+ */
+export const requestReschedule = async (appointmentId: string): Promise<AppointmentData> => {
+  try {
+    const { data } = await api.post<ApiResponse<AppointmentData>>(
+      `/appointments/${appointmentId}/request-reschedule`
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao solicitar reagendamento');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Obter detalhes completos de uma consulta (com dados de pagamento)
+ */
+export const getAppointmentDetails = async (appointmentId: string): Promise<AppointmentData> => {
+  try {
+    const { data } = await api.get<ApiResponse<AppointmentData>>(
+      `/appointments/${appointmentId}`
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao buscar detalhes da consulta');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

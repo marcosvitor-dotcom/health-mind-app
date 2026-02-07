@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import * as psychologistService from '../../services/psychologistService';
+import * as appointmentService from '../../services/appointmentService';
 
 interface AppointmentsByDate {
   [date: string]: psychologistService.Appointment[];
@@ -85,44 +86,55 @@ export default function PsychScheduleScreen({ navigation }: any) {
     setRefreshing(false);
   };
 
-  const handleOpenDetail = (appointment: psychologistService.Appointment) => {
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  const handleOpenDetail = async (appointment: psychologistService.Appointment) => {
     setSelectedAppointment(appointment);
     setShowDetailModal(true);
+    setLoadingDetails(true);
+    try {
+      const details = await appointmentService.getAppointmentDetails(appointment._id || appointment.id || '');
+      setSelectedAppointment({ ...appointment, ...details });
+    } catch (error) {
+      // Mantém os dados originais se falhar
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const handleConfirmAppointment = async (appointmentId: string) => {
     try {
-      // TODO: Chamar API para confirmar agendamento
+      await appointmentService.confirmAppointment(appointmentId);
       Alert.alert('Sucesso', 'Consulta confirmada!');
       setShowDetailModal(false);
       loadAppointments();
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível confirmar a consulta');
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Não foi possível confirmar a consulta');
     }
   };
 
   const handleCancelAppointment = async (appointmentId: string) => {
-    try {
-      Alert.alert(
-        'Cancelar Consulta',
-        'Tem certeza que deseja cancelar esta consulta?',
-        [
-          { text: 'Não', style: 'cancel' },
-          {
-            text: 'Sim, Cancelar',
-            style: 'destructive',
-            onPress: async () => {
-              // TODO: Chamar API para cancelar agendamento
+    Alert.alert(
+      'Cancelar Consulta',
+      'Tem certeza que deseja cancelar esta consulta?',
+      [
+        { text: 'Não', style: 'cancel' },
+        {
+          text: 'Sim, Cancelar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await appointmentService.cancelAppointment(appointmentId);
               Alert.alert('Sucesso', 'Consulta cancelada!');
               setShowDetailModal(false);
               loadAppointments();
-            },
+            } catch (error: any) {
+              Alert.alert('Erro', error.message || 'Não foi possível cancelar a consulta');
+            }
           },
-        ]
-      );
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível cancelar a consulta');
-    }
+        },
+      ]
+    );
   };
 
   // Marcar datas com compromissos
@@ -148,6 +160,11 @@ export default function PsychScheduleScreen({ navigation }: any) {
     switch (status) {
       case 'confirmed':
         return '#50C878';
+      case 'awaiting_patient':
+        return '#FFB347';
+      case 'awaiting_psychologist':
+        return '#9B59B6';
+      case 'pending':
       case 'scheduled':
         return '#FFB347';
       case 'completed':
@@ -162,15 +179,50 @@ export default function PsychScheduleScreen({ navigation }: any) {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return 'Confirmado';
+        return 'Confirmada';
+      case 'awaiting_patient':
+        return 'Aguardando Paciente';
+      case 'awaiting_psychologist':
+        return 'Aguardando Confirmação';
+      case 'pending':
       case 'scheduled':
-        return 'Agendado';
+        return 'Aguardando';
       case 'completed':
-        return 'Concluído';
+        return 'Realizada';
       case 'cancelled':
-        return 'Cancelado';
+        return 'Cancelada';
       default:
         return status;
+    }
+  };
+
+  const getPaymentStatusLabel = (status?: string) => {
+    switch (status) {
+      case 'confirmed': return 'Pago';
+      case 'pending': return 'Aguardando Pagamento';
+      case 'awaiting_confirmation': return 'Aguardando Assinatura';
+      case 'cancelled': return 'Cancelado';
+      case 'refunded': return 'Reembolsado';
+      default: return 'Não informado';
+    }
+  };
+
+  const getPaymentStatusColor = (status?: string) => {
+    switch (status) {
+      case 'confirmed': return '#50C878';
+      case 'pending': return '#FFB347';
+      case 'awaiting_confirmation': return '#9B59B6';
+      case 'cancelled': return '#FF6B6B';
+      case 'refunded': return '#4A90E2';
+      default: return '#999';
+    }
+  };
+
+  const getTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'online': return 'Online';
+      case 'in_person': return 'Presencial';
+      default: return 'Consulta';
     }
   };
 
@@ -236,7 +288,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
             <Text style={styles.patientName}>
               {appt.patient?.name || 'Paciente não informado'}
             </Text>
-            <Text style={styles.appointmentType}>{appt.type || 'Consulta'}</Text>
+            <Text style={styles.appointmentType}>{getTypeLabel(appt.type)}</Text>
 
             <TouchableOpacity
               style={styles.detailsButton}
@@ -375,7 +427,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
                       <View style={styles.modalInfoContent}>
                         <Text style={styles.modalInfoLabel}>Tipo</Text>
                         <Text style={styles.modalInfoValue}>
-                          {selectedAppointment.type || 'Consulta'}
+                          {getTypeLabel(selectedAppointment.type)}
                         </Text>
                       </View>
                     </View>
@@ -418,20 +470,45 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     )}
                   </View>
 
+                  {/* Seção de Pagamento */}
+                  {(selectedAppointment as any).paymentId && (
+                    <View style={styles.paymentSection}>
+                      <Text style={styles.paymentTitle}>Pagamento</Text>
+                      <View style={styles.paymentRow}>
+                        <Text style={styles.paymentLabel}>Status:</Text>
+                        <View style={[styles.paymentBadge, { backgroundColor: getPaymentStatusColor((selectedAppointment as any).paymentId.status) + '20' }]}>
+                          <Text style={[styles.paymentBadgeText, { color: getPaymentStatusColor((selectedAppointment as any).paymentId.status) }]}>
+                            {getPaymentStatusLabel((selectedAppointment as any).paymentId.status)}
+                          </Text>
+                        </View>
+                      </View>
+                      {(selectedAppointment as any).paymentId.finalValue > 0 && (
+                        <View style={styles.paymentRow}>
+                          <Text style={styles.paymentLabel}>Valor:</Text>
+                          <Text style={styles.paymentValue}>
+                            R$ {(selectedAppointment as any).paymentId.finalValue.toFixed(2).replace('.', ',')}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
                   {/* Ações */}
-                  {selectedAppointment.status === 'scheduled' && (
+                  {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled' && (
                     <View style={styles.modalActions}>
-                      <TouchableOpacity
-                        style={[styles.modalActionButton, styles.confirmButton]}
-                        onPress={() =>
-                          handleConfirmAppointment(
-                            selectedAppointment._id || selectedAppointment.id || ''
-                          )
-                        }
-                      >
-                        <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                        <Text style={styles.modalActionText}>Confirmar Consulta</Text>
-                      </TouchableOpacity>
+                      {(selectedAppointment.status === 'awaiting_psychologist' || selectedAppointment.status === 'scheduled' || selectedAppointment.status === 'awaiting_patient') && (
+                        <TouchableOpacity
+                          style={[styles.modalActionButton, styles.confirmButton]}
+                          onPress={() =>
+                            handleConfirmAppointment(
+                              selectedAppointment._id || selectedAppointment.id || ''
+                            )
+                          }
+                        >
+                          <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                          <Text style={styles.modalActionText}>Confirmar Consulta</Text>
+                        </TouchableOpacity>
+                      )}
                       <TouchableOpacity
                         style={[styles.modalActionButton, styles.cancelButton]}
                         onPress={() =>
@@ -662,5 +739,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  paymentSection: {
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  paymentTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  paymentLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  paymentValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  paymentBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  paymentBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

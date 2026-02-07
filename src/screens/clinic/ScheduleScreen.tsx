@@ -219,8 +219,12 @@ export default function ScheduleScreen({ navigation }: any) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
-      case 'scheduled':
         return '#50C878';
+      case 'awaiting_patient':
+        return '#FFB347';
+      case 'awaiting_psychologist':
+        return '#9B59B6';
+      case 'scheduled':
       case 'pending':
         return '#FFB347';
       case 'cancelled':
@@ -238,6 +242,10 @@ export default function ScheduleScreen({ navigation }: any) {
     switch (status) {
       case 'confirmed':
         return 'Confirmada';
+      case 'awaiting_patient':
+        return 'Aguardando Paciente';
+      case 'awaiting_psychologist':
+        return 'Aguardando Psicólogo';
       case 'scheduled':
         return 'Agendada';
       case 'pending':
@@ -659,8 +667,8 @@ export default function ScheduleScreen({ navigation }: any) {
     dates.forEach((date) => {
       const dayAppts = appointments[date] || [];
       total += dayAppts.length;
-      confirmed += dayAppts.filter((a) => a.status === 'confirmed' || a.status === 'scheduled').length;
-      pending += dayAppts.filter((a) => a.status === 'pending').length;
+      confirmed += dayAppts.filter((a) => a.status === 'confirmed').length;
+      pending += dayAppts.filter((a) => ['pending', 'scheduled', 'awaiting_patient', 'awaiting_psychologist'].includes(a.status)).length;
     });
 
     return { total, confirmed, pending, label };
@@ -693,8 +701,8 @@ export default function ScheduleScreen({ navigation }: any) {
 
     Object.keys(appointments).forEach((date) => {
       const dayAppts = appointments[date] || [];
-      const hasConfirmed = dayAppts.some((a) => a.status === 'confirmed' || a.status === 'scheduled');
-      const hasPending = dayAppts.some((a) => a.status === 'pending');
+      const hasConfirmed = dayAppts.some((a) => a.status === 'confirmed');
+      const hasPending = dayAppts.some((a) => ['pending', 'scheduled', 'awaiting_patient', 'awaiting_psychologist'].includes(a.status));
 
       marked[date] = {
         marked: true,
@@ -1151,7 +1159,7 @@ export default function ScheduleScreen({ navigation }: any) {
                     <Text style={styles.editActionText}>Ver Paciente</Text>
                   </TouchableOpacity>
 
-                  {selectedAppointment.status === 'pending' && (
+                  {['pending', 'scheduled', 'awaiting_patient', 'awaiting_psychologist'].includes(selectedAppointment.status) && (
                     <TouchableOpacity
                       style={[styles.editActionButton, { backgroundColor: '#50C878' }]}
                       onPress={handleConfirmAppointment}

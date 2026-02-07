@@ -51,7 +51,7 @@ export interface ClinicAppointment {
   dateTime?: string;
   date?: string;
   duration: number;
-  status: 'scheduled' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'no_show';
+  status: 'scheduled' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'no_show' | 'awaiting_patient' | 'awaiting_psychologist';
   type?: string;
   notes?: string;
   psychologist?: {
