@@ -10,12 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
 import { InvitationData, User } from '../../types';
+import { TERMS_OF_USE, PRIVACY_POLICY } from '../../constants/legalDocuments';
 import PsychologistRegistrationWizard from './PsychologistRegistrationWizard';
 
 interface CompleteRegistrationScreenProps {
@@ -58,6 +60,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
   const [emergencyPhone, setEmergencyPhone] = useState('');
   const [emergencyRelationship, setEmergencyRelationship] = useState('');
 
+  // Termos de uso
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [legalModalVisible, setLegalModalVisible] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<'terms' | 'privacy'>('terms');
+
   useEffect(() => {
     validateToken();
   }, []);
@@ -94,6 +101,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
       return;
     }
 
+    if (!termsAccepted) {
+      Alert.alert('Erro', 'Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -119,6 +131,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
             state,
             zipCode,
           },
+          termsAcceptedAt: new Date().toISOString(),
         });
       } else if (invitationData?.role === 'psychologist') {
         response = await authService.completePsychologistRegistration({
@@ -126,6 +139,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
           password,
           phone,
           bio,
+          termsAcceptedAt: new Date().toISOString(),
         });
       } else if (invitationData?.role === 'patient') {
         response = await authService.completePatientRegistration({
@@ -137,6 +151,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
             phone: emergencyPhone,
             relationship: emergencyRelationship,
           } : undefined,
+          termsAcceptedAt: new Date().toISOString(),
         });
       }
 
@@ -429,10 +444,47 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
             </>
           )}
 
+          {/* Termos de Uso */}
+          <View style={styles.termsContainer}>
+            <TouchableOpacity
+              style={styles.checkbox}
+              onPress={() => setTermsAccepted(!termsAccepted)}
+              disabled={submitting}
+            >
+              <Ionicons
+                name={termsAccepted ? 'checkbox' : 'square-outline'}
+                size={24}
+                color={termsAccepted ? '#4A90E2' : '#999'}
+              />
+            </TouchableOpacity>
+            <Text style={styles.termsText}>
+              Li e aceito os{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={() => {
+                  setLegalModalType('terms');
+                  setLegalModalVisible(true);
+                }}
+              >
+                Termos de Uso
+              </Text>
+              {' '}e a{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={() => {
+                  setLegalModalType('privacy');
+                  setLegalModalVisible(true);
+                }}
+              >
+                Politica de Privacidade
+              </Text>
+            </Text>
+          </View>
+
           <TouchableOpacity
-            style={[styles.button, submitting && styles.buttonDisabled]}
+            style={[styles.button, (submitting || !termsAccepted) && styles.buttonDisabled]}
             onPress={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !termsAccepted}
           >
             {submitting ? (
               <ActivityIndicator color="#fff" />
@@ -442,6 +494,33 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal de documento legal */}
+      <Modal
+        visible={legalModalVisible}
+        animationType="slide"
+        onRequestClose={() => setLegalModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setLegalModalVisible(false)}>
+              <Ionicons name="close" size={28} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>
+              {legalModalType === 'terms' ? 'Termos de Uso' : 'Politica de Privacidade'}
+            </Text>
+            <View style={{ width: 28 }} />
+          </View>
+          <ScrollView
+            style={styles.modalContent}
+            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          >
+            <Text style={styles.modalText}>
+              {legalModalType === 'terms' ? TERMS_OF_USE : PRIVACY_POLICY}
+            </Text>
+          </ScrollView>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -587,5 +666,52 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 20,
+    gap: 10,
+  },
+  checkbox: {
+    marginTop: 2,
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+  },
+  termsLink: {
+    color: '#4A90E2',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingTop: Platform.OS === 'ios' ? 54 : 14,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalContent: {
+    flex: 1,
+  },
+  modalText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 22,
   },
 });

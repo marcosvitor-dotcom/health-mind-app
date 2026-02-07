@@ -77,6 +77,18 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Suporte</Text>
 
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'terms' })}>
+            <Ionicons name="document-text-outline" size={24} color="#333" />
+            <Text style={styles.menuText}>Termos de Uso</Text>
+            <Ionicons name="chevron-forward" size={24} color="#999" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'privacy' })}>
+            <Ionicons name="shield-checkmark-outline" size={24} color="#333" />
+            <Text style={styles.menuText}>Politica de Privacidade</Text>
+            <Ionicons name="chevron-forward" size={24} color="#999" />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem}>
             <Ionicons name="help-circle-outline" size={24} color="#333" />
             <Text style={styles.menuText}>Central de Ajuda</Text>

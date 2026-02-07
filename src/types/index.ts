@@ -308,6 +308,7 @@ export interface CompleteRegistrationClinicRequest {
     state: string;
     zipCode: string;
   };
+  termsAcceptedAt?: string;
 }
 
 export interface CompleteRegistrationPsychologistRequest {
@@ -333,6 +334,7 @@ export interface CompleteRegistrationPsychologistRequest {
   exemploAcolhimento?: string;
   exemploLimiteEtico?: string;
   systemPrompt?: string;
+  termsAcceptedAt?: string;
 }
 
 export interface PsychologistWizardData {
@@ -371,4 +373,5 @@ export interface CompleteRegistrationPatientRequest {
     phone: string;
     relationship: string;
   };
+  termsAcceptedAt?: string;
 }

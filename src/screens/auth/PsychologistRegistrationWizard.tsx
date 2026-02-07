@@ -21,6 +21,7 @@ import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
 import { useAuth } from '../../contexts/AuthContext';
 import { ABORDAGENS, PUBLICOS, TEMAS, TONS } from '../../constants/psychologistOptions';
+import { TERMS_OF_USE, PRIVACY_POLICY } from '../../constants/legalDocuments';
 
 const TOTAL_STEPS = 6;
 const STEP_TITLES = [
@@ -47,6 +48,9 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAbordagemDropdown, setShowAbordagemDropdown] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [legalModalVisible, setLegalModalVisible] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<'terms' | 'privacy'>('terms');
 
   const [wizardData, setWizardData] = useState<PsychologistWizardData>({
     password: '',
@@ -150,6 +154,11 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
 
   // --- Submit ---
   const handleSubmit = async () => {
+    if (!termsAccepted) {
+      Alert.alert('Erro', 'Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar');
+      return;
+    }
+
     setSubmitting(true);
     setLoadingMessage('Gerando perfil de IA personalizado...');
 
@@ -222,6 +231,7 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         exemploAcolhimento: wizardData.exemploAcolhimento,
         exemploLimiteEtico: wizardData.exemploLimiteEtico,
         systemPrompt,
+        termsAcceptedAt: new Date().toISOString(),
       });
 
       // Auto-login
@@ -790,6 +800,42 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         </View>
       ) : null}
 
+      {/* Termos de Uso */}
+      <View style={styles.termsContainer}>
+        <TouchableOpacity
+          style={styles.termsCheckbox}
+          onPress={() => setTermsAccepted(!termsAccepted)}
+        >
+          <Ionicons
+            name={termsAccepted ? 'checkbox' : 'square-outline'}
+            size={24}
+            color={termsAccepted ? '#4A90E2' : '#999'}
+          />
+        </TouchableOpacity>
+        <Text style={styles.termsText}>
+          Li e aceito os{' '}
+          <Text
+            style={styles.termsLink}
+            onPress={() => {
+              setLegalModalType('terms');
+              setLegalModalVisible(true);
+            }}
+          >
+            Termos de Uso
+          </Text>
+          {' '}e a{' '}
+          <Text
+            style={styles.termsLink}
+            onPress={() => {
+              setLegalModalType('privacy');
+              setLegalModalVisible(true);
+            }}
+          >
+            Politica de Privacidade
+          </Text>
+        </Text>
+      </View>
+
       <View style={styles.aiNote}>
         <Ionicons name="sparkles" size={18} color="#4A90E2" />
         <Text style={styles.aiNoteText}>
@@ -866,9 +912,9 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+              style={[styles.submitButton, (submitting || !termsAccepted) && styles.submitButtonDisabled]}
               onPress={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || !termsAccepted}
             >
               <Text style={styles.submitButtonText}>Finalizar Cadastro</Text>
             </TouchableOpacity>
@@ -884,6 +930,33 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
             <Text style={styles.loadingTitle}>{loadingMessage}</Text>
             <Text style={styles.loadingHint}>Isso pode levar alguns segundos...</Text>
           </View>
+        </View>
+      </Modal>
+
+      {/* Modal de documento legal */}
+      <Modal
+        visible={legalModalVisible}
+        animationType="slide"
+        onRequestClose={() => setLegalModalVisible(false)}
+      >
+        <View style={styles.legalModalContainer}>
+          <View style={styles.legalModalHeader}>
+            <TouchableOpacity onPress={() => setLegalModalVisible(false)}>
+              <Ionicons name="close" size={28} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.legalModalTitle}>
+              {legalModalType === 'terms' ? 'Termos de Uso' : 'Politica de Privacidade'}
+            </Text>
+            <View style={{ width: 28 }} />
+          </View>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          >
+            <Text style={styles.legalModalText}>
+              {legalModalType === 'terms' ? TERMS_OF_USE : PRIVACY_POLICY}
+            </Text>
+          </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>
@@ -1270,5 +1343,50 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#888',
     textAlign: 'center',
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 20,
+    gap: 10,
+    paddingHorizontal: 4,
+  },
+  termsCheckbox: {
+    marginTop: 2,
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+  },
+  termsLink: {
+    color: '#4A90E2',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  legalModalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  legalModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingTop: Platform.OS === 'ios' ? 54 : 14,
+  },
+  legalModalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#333',
+  },
+  legalModalText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 22,
   },
 });

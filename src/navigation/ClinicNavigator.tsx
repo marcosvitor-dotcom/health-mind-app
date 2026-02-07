@@ -11,6 +11,7 @@ import EditProfileScreen from '../screens/clinic/EditProfileScreen';
 import InvitePsychologistScreen from '../screens/clinic/InvitePsychologistScreen';
 import InvitationsScreen from '../screens/clinic/InvitationsScreen';
 import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
+import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -65,6 +66,7 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
     </Stack.Navigator>
   );
 }
