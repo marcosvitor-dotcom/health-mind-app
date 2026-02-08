@@ -157,13 +157,6 @@ export default function EmergencyScreen({ navigation }: any) {
                 {psychologistData.phone && (
                   <View style={styles.contactButtons}>
                     <TouchableOpacity
-                      style={styles.emergencyButton}
-                      onPress={() => handleCall(psychologistData.phone!)}
-                    >
-                      <Ionicons name="call" size={24} color="#fff" />
-                      <Text style={styles.emergencyButtonText}>Ligar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
                       style={[styles.emergencyButton, styles.whatsappButton]}
                       onPress={() => handleWhatsApp(psychologistData.phone!)}
                     >
@@ -175,7 +168,11 @@ export default function EmergencyScreen({ navigation }: any) {
 
                 <TouchableOpacity
                   style={styles.chatButton}
-                  onPress={() => navigation.navigate('PsychologistChat')}
+                  onPress={() => navigation.navigate('DirectChat', {
+                    recipientId: psychologistData._id,
+                    recipientName: psychologistData.name,
+                    recipientRole: 'psychologist',
+                  })}
                 >
                   <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
                   <Text style={styles.chatButtonText}>Enviar Mensagem no App</Text>

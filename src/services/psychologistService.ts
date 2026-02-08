@@ -11,6 +11,7 @@ export interface Patient {
   phone?: string;
   status?: string;
   avatar?: string;
+  clinicId?: string | null;
 }
 
 export interface Appointment {

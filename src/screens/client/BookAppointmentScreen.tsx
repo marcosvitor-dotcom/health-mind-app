@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import * as appointmentService from '../../services/appointmentService';
 import { getPatient } from '../../services/profileService';
+import * as roomService from '../../services/roomService';
+import { Room } from '../../services/roomService';
 
 export default function BookAppointmentScreen({ navigation }: any) {
   const { user } = useAuth();
@@ -36,6 +38,12 @@ export default function BookAppointmentScreen({ navigation }: any) {
   const [notes, setNotes] = useState('');
   const [creating, setCreating] = useState(false);
 
+  // Room selection
+  const [clinicId, setClinicId] = useState<string>('');
+  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+
   useEffect(() => {
     loadPsychologistInfo();
   }, []);
@@ -54,10 +62,36 @@ export default function BookAppointmentScreen({ navigation }: any) {
         setPsychologistId(patientData.psychologistId._id);
         setPsychologistName(patientData.psychologistId.name);
       }
+      if (patientData.clinicId) {
+        const cId = typeof patientData.clinicId === 'object' ? patientData.clinicId._id : patientData.clinicId;
+        setClinicId(cId);
+      }
     } catch (error) {
       console.error('Erro ao carregar psicólogo:', error);
     } finally {
       setLoadingPsychologist(false);
+    }
+  };
+
+  useEffect(() => {
+    if (step === 'confirm' && appointmentType === 'in_person' && clinicId) {
+      loadAvailableRooms();
+    }
+    if (appointmentType === 'online') {
+      setSelectedRoomId(null);
+    }
+  }, [step, appointmentType]);
+
+  const loadAvailableRooms = async () => {
+    if (!clinicId) return;
+    setLoadingRooms(true);
+    try {
+      const rooms = await roomService.getRooms(clinicId);
+      setAvailableRooms(rooms);
+    } catch (error) {
+      console.error('Erro ao carregar salas:', error);
+    } finally {
+      setLoadingRooms(false);
     }
   };
 
@@ -95,6 +129,7 @@ export default function BookAppointmentScreen({ navigation }: any) {
         date: dateTime,
         type: appointmentType,
         notes: notes.trim() || undefined,
+        roomId: selectedRoomId || undefined,
       });
 
       Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
@@ -307,6 +342,54 @@ export default function BookAppointmentScreen({ navigation }: any) {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Room selection for in_person + clinic */}
+      {appointmentType === 'in_person' && clinicId && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.fieldLabel}>Sala (opcional)</Text>
+          {loadingRooms ? (
+            <ActivityIndicator size="small" color="#4A90E2" style={{ marginVertical: 12 }} />
+          ) : availableRooms.length > 0 ? (
+            <>
+              <View style={styles.slotsGrid}>
+                {availableRooms.map((room) => (
+                  <TouchableOpacity
+                    key={room._id}
+                    style={[
+                      styles.slotButton,
+                      selectedRoomId === room._id && styles.slotButtonSelected,
+                    ]}
+                    onPress={() => setSelectedRoomId(
+                      selectedRoomId === room._id ? null : room._id
+                    )}
+                  >
+                    <Text
+                      style={[
+                        styles.slotText,
+                        selectedRoomId === room._id && styles.slotTextSelected,
+                      ]}
+                    >
+                      {room.name}{room.number ? ` #${room.number}` : ''}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {selectedRoomId && (
+                <View style={styles.roomWarning}>
+                  <Ionicons name="information-circle-outline" size={16} color="#E6A000" />
+                  <Text style={styles.roomWarningText}>
+                    A sala sera enviada como solicitacao. A clinica precisara aprovar.
+                  </Text>
+                </View>
+              )}
+            </>
+          ) : (
+            <Text style={{ fontSize: 13, color: '#999', marginTop: 4 }}>
+              Nenhuma sala disponivel na clinica
+            </Text>
+          )}
+        </View>
+      )}
 
       <Text style={styles.fieldLabel}>Observações (opcional)</Text>
       <TextInput
@@ -598,5 +681,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  roomWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFF8E8',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  roomWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#E6A000',
+    lineHeight: 18,
   },
 });

@@ -6,6 +6,8 @@ const STORAGE_KEYS = {
   TOKEN: '@HealthMind:token',
   REFRESH_TOKEN: '@HealthMind:refreshToken',
   USER: '@HealthMind:user',
+  THEME: '@HealthMind:theme',
+  NOTIFICATIONS_ENABLED: '@HealthMind:notificationsEnabled',
 };
 
 // Token
@@ -60,6 +62,43 @@ export const setUser = async (user: User): Promise<void> => {
     await EncryptedStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   } catch (error) {
     console.error('Erro ao salvar usuário:', error);
+  }
+};
+
+// Theme
+export const getTheme = async (): Promise<string | null> => {
+  try {
+    return await EncryptedStorage.getItem(STORAGE_KEYS.THEME) ?? null;
+  } catch (error) {
+    console.error('Erro ao buscar tema:', error);
+    return null;
+  }
+};
+
+export const setTheme = async (theme: string): Promise<void> => {
+  try {
+    await EncryptedStorage.setItem(STORAGE_KEYS.THEME, theme);
+  } catch (error) {
+    console.error('Erro ao salvar tema:', error);
+  }
+};
+
+// Notifications
+export const getNotificationsEnabled = async (): Promise<boolean | null> => {
+  try {
+    const value = await EncryptedStorage.getItem(STORAGE_KEYS.NOTIFICATIONS_ENABLED);
+    return value !== null ? value === 'true' : null;
+  } catch (error) {
+    console.error('Erro ao buscar preferencia de notificacoes:', error);
+    return null;
+  }
+};
+
+export const setNotificationsEnabled = async (enabled: boolean): Promise<void> => {
+  try {
+    await EncryptedStorage.setItem(STORAGE_KEYS.NOTIFICATIONS_ENABLED, String(enabled));
+  } catch (error) {
+    console.error('Erro ao salvar preferencia de notificacoes:', error);
   }
 };
 

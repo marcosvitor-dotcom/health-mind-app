@@ -17,6 +17,8 @@ import AppointmentBookingScreen from '../screens/psychologist/AppointmentBooking
 import TherapeuticReportListScreen from '../screens/psychologist/TherapeuticReportListScreen';
 import TherapeuticReportDetailScreen from '../screens/psychologist/TherapeuticReportDetailScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
+import SettingsScreen from '../screens/shared/SettingsScreen';
+import DirectChatScreen from '../screens/shared/DirectChatScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -73,6 +75,11 @@ function ClientsStack() {
         component={TherapeuticReportDetailScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="DirectChat"
+        component={DirectChatScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -102,6 +109,7 @@ function ProfileStack() {
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

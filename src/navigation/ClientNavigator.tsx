@@ -8,8 +8,11 @@ import BookAppointmentScreen from '../screens/client/BookAppointmentScreen';
 import EmergencyScreen from '../screens/client/EmergencyScreen';
 import ProfileScreen from '../screens/client/ProfileScreen';
 import EditProfileScreen from '../screens/client/EditProfileScreen';
-import PsychologistChatScreen from '../screens/client/PsychologistChatScreen';
+import PsychologistProfileScreen from '../screens/client/PsychologistProfileScreen';
+import DirectChatScreen from '../screens/shared/DirectChatScreen';
+import ClinicInfoScreen from '../screens/client/ClinicInfoScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
+import SettingsScreen from '../screens/shared/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,7 +30,7 @@ function EmergencyStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="EmergencyMain" component={EmergencyScreen} />
-      <Stack.Screen name="PsychologistChat" component={PsychologistChatScreen} />
+      <Stack.Screen name="DirectChat" component={DirectChatScreen} />
     </Stack.Navigator>
   );
 }
@@ -37,7 +40,11 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="PsychologistProfile" component={PsychologistProfileScreen} />
+      <Stack.Screen name="ClinicInfo" component={ClinicInfoScreen} />
+      <Stack.Screen name="DirectChat" component={DirectChatScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

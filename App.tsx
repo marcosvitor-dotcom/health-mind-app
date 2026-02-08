@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Updates from 'expo-updates';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 async function checkForUpdates() {
@@ -46,7 +47,9 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <AppNavigator />
+      <ThemeProvider>
+        <AppNavigator />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

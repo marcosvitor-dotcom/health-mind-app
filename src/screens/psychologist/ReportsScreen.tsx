@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import * as psychologistService from '../../services/psychologistService';
+import * as subleaseService from '../../services/subleaseService';
+import { SubleaseSummary, RoomSublease } from '../../services/subleaseService';
 
 interface FinancialData {
   monthRevenue: number;
@@ -36,10 +38,13 @@ export default function ReportsScreen({ navigation }: any) {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'year'>('month');
   const [patients, setPatients] = useState<psychologistService.Patient[]>([]);
+  const [subleaseSummary, setSubleaseSummary] = useState<SubleaseSummary | null>(null);
+  const [recentSubleases, setRecentSubleases] = useState<RoomSublease[]>([]);
 
   useEffect(() => {
     loadFinancialData();
     loadPatients();
+    loadSubleaseData();
   }, []);
 
   const loadPatients = async () => {
@@ -50,6 +55,29 @@ export default function ReportsScreen({ navigation }: any) {
       setPatients(data);
     } catch (error) {
       console.log('Erro ao carregar pacientes para relatórios:', error);
+    }
+  };
+
+  const loadSubleaseData = async () => {
+    try {
+      const psychologistId = user?._id || user?.id;
+      if (!psychologistId || !user?.clinicId) return;
+
+      try {
+        const summary = await subleaseService.getPsychologistSubleaseSummary(psychologistId);
+        setSubleaseSummary(summary);
+      } catch (summaryErr) {
+        console.log('Erro ao carregar resumo de sublocações:', summaryErr);
+      }
+
+      try {
+        const subleasesResponse = await subleaseService.getSubleases(1, 5);
+        setRecentSubleases(subleasesResponse.subleases || []);
+      } catch (subleasesErr) {
+        console.log('Erro ao carregar sublocações recentes:', subleasesErr);
+      }
+    } catch (error) {
+      console.log('Erro ao carregar dados de sublocações:', error);
     }
   };
 
@@ -119,7 +147,7 @@ export default function ReportsScreen({ navigation }: any) {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadFinancialData();
+    await Promise.all([loadFinancialData(), loadSubleaseData()]);
     setRefreshing(false);
   };
 
@@ -291,6 +319,70 @@ export default function ReportsScreen({ navigation }: any) {
               : 'Estes são seus relatórios financeiros individuais. Os valores mostram suas receitas de sessões com pacientes.'}
           </Text>
         </Card>
+
+        {/* Sublease Section */}
+        {user?.clinicId && (
+          <Card style={styles.subleaseCard}>
+            <View style={styles.subleaseTitleRow}>
+              <Ionicons name="key-outline" size={22} color="#4A90E2" />
+              <Text style={styles.cardTitle}>Sublocacoes do Mes</Text>
+            </View>
+
+            <View style={styles.subleaseSummaryRow}>
+              <View style={styles.subleaseSummaryItem}>
+                <Text style={styles.subleaseSummaryLabel}>Pendente</Text>
+                <Text style={[styles.subleaseSummaryValue, { color: '#E8A317' }]}>
+                  {formatCurrency(subleaseSummary?.pendingValue || 0)}
+                </Text>
+              </View>
+              <View style={styles.subleaseSummaryItem}>
+                <Text style={styles.subleaseSummaryLabel}>Pago</Text>
+                <Text style={[styles.subleaseSummaryValue, { color: '#50C878' }]}>
+                  {formatCurrency(subleaseSummary?.paidValue || 0)}
+                </Text>
+              </View>
+            </View>
+
+            {recentSubleases.length > 0 ? (
+              recentSubleases.map((sublease) => (
+                <View key={sublease._id} style={styles.subleaseItem}>
+                  <View style={styles.subleaseItemInfo}>
+                    <Text style={styles.subleaseRoomName}>
+                      {typeof sublease.roomId === 'object' ? sublease.roomId.name : 'Sala'}
+                    </Text>
+                    <Text style={styles.subleaseDate}>
+                      {new Date(sublease.appointmentDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </Text>
+                  </View>
+                  <Text style={styles.subleaseValue}>
+                    {formatCurrency(sublease.value)}
+                  </Text>
+                  <View
+                    style={[
+                      styles.subleaseStatusBadge,
+                      {
+                        backgroundColor: sublease.status === 'paid' ? '#E8FFF0' : '#FFF8E1',
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.subleaseStatusText,
+                        {
+                          color: sublease.status === 'paid' ? '#50C878' : '#E8A317',
+                        },
+                      ]}
+                    >
+                      {sublease.status === 'paid' ? 'Pago' : 'Pendente'}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.subleaseEmpty}>Nenhuma sublocacao este mes</Text>
+            )}
+          </Card>
+        )}
 
         {/* Relatórios Terapêuticos */}
         <Card style={styles.therapeuticCard}>
@@ -632,5 +724,73 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
     marginLeft: 12,
+  },
+  subleaseCard: {
+    marginBottom: 16,
+  },
+  subleaseTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  subleaseSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  subleaseSummaryItem: {
+    alignItems: 'center',
+  },
+  subleaseSummaryLabel: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 4,
+  },
+  subleaseSummaryValue: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  subleaseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  subleaseItemInfo: {
+    flex: 1,
+  },
+  subleaseRoomName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  subleaseDate: {
+    fontSize: 12,
+    color: '#666',
+  },
+  subleaseValue: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
+    marginRight: 10,
+  },
+  subleaseStatusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  subleaseStatusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  subleaseEmpty: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    paddingVertical: 16,
   },
 });

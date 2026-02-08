@@ -62,6 +62,63 @@ export interface PatientWithPsychologist {
   };
 }
 
+export interface PsychologistProfile {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  crp?: string;
+  avatar?: string;
+  specialties?: string[];
+  therapeuticProfile?: {
+    formacaoAcademica?: string;
+    posGraduacao?: string;
+    abordagemPrincipal?: string;
+    descricaoTrabalho?: string;
+    publicosEspecificos?: string[];
+    temasEspecializados?: string[];
+    tonsComunicacao?: string[];
+    diferenciais?: string;
+  };
+  settings?: {
+    defaultSessionDuration?: number;
+    acceptsOnline?: boolean;
+    acceptsInPerson?: boolean;
+  };
+  clinicId?: {
+    _id: string;
+    name: string;
+  };
+}
+
+export interface ClinicInfo {
+  _id: string;
+  name: string;
+  cnpj?: string;
+  phone?: string;
+  logo?: string;
+  address?: {
+    street?: string;
+    number?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
+}
+
+export interface ClinicPsychologistItem {
+  _id: string;
+  name: string;
+  crp?: string;
+  avatar?: string;
+  specialties?: string[];
+  therapeuticProfile?: {
+    abordagemPrincipal?: string;
+    descricaoTrabalho?: string;
+  };
+  isCurrentPsychologist?: boolean;
+}
+
 // ========================================
 // CONSULTA DE PERFIL
 // ========================================
@@ -222,6 +279,71 @@ export const uploadPatientAvatar = async (patientId: string, imageUri: string): 
       return response.data.data;
     }
     throw new Error('Erro ao fazer upload do avatar');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+// ========================================
+// PERFIL DO PSICÓLOGO (para pacientes)
+// ========================================
+
+/**
+ * Obter perfil completo do psicólogo do paciente
+ */
+export const getPsychologistProfile = async (patientId: string): Promise<PsychologistProfile> => {
+  try {
+    const response = await api.get<ApiResponse<PsychologistProfile>>(`/patients/${patientId}/psychologist-profile`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Erro ao buscar perfil do psicólogo');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Obter informações da clínica do paciente
+ */
+export const getClinicInfo = async (patientId: string): Promise<ClinicInfo> => {
+  try {
+    const response = await api.get<ApiResponse<ClinicInfo>>(`/patients/${patientId}/clinic-info`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Erro ao buscar informações da clínica');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Listar psicólogos da clínica do paciente
+ */
+export const getClinicPsychologists = async (patientId: string): Promise<ClinicPsychologistItem[]> => {
+  try {
+    const response = await api.get<ApiResponse<ClinicPsychologistItem[]>>(`/patients/${patientId}/clinic-psychologists`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Erro ao buscar psicólogos da clínica');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Solicitar transferência para outro psicólogo
+ */
+export const requestTransfer = async (patientId: string, targetPsychologistId: string): Promise<void> => {
+  try {
+    const response = await api.post<ApiResponse<void>>(`/patients/${patientId}/request-transfer`, {
+      targetPsychologistId,
+    });
+    if (!response.data.success) {
+      throw new Error('Erro ao solicitar transferência');
+    }
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

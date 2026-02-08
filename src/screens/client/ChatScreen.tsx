@@ -10,9 +10,15 @@ import {
   Platform,
   ActivityIndicator,
   Image,
+  Animated,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import * as chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -31,6 +37,12 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Voice-to-text state
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [speechAvailable, setSpeechAvailable] = useState(false);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
   const patientId = user?._id || user?.id || '';
 
   useEffect(() => {
@@ -40,6 +52,110 @@ export default function ChatScreen() {
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
+
+  useEffect(() => {
+    const checkSpeech = async () => {
+      try {
+        const available = await ExpoSpeechRecognitionModule.isRecognitionAvailable();
+        setSpeechAvailable(available);
+      } catch {
+        setSpeechAvailable(false);
+      }
+    };
+    checkSpeech();
+  }, []);
+
+  // Pulse animation helpers
+  const startPulseAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.3,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stopPulseAnimation = () => {
+    pulseAnim.stopAnimation();
+    pulseAnim.setValue(1);
+  };
+
+  // Speech recognition event handlers
+  useSpeechRecognitionEvent('result', (event) => {
+    if (event.results && event.results.length > 0) {
+      const transcript = event.results[0].transcript;
+      if (event.isFinal) {
+        setMessage((prev) => {
+          const separator = prev.trim() ? ' ' : '';
+          return prev + separator + transcript;
+        });
+        setIsTranscribing(false);
+      }
+    }
+  });
+
+  useSpeechRecognitionEvent('start', () => {
+    setIsRecording(true);
+    startPulseAnimation();
+  });
+
+  useSpeechRecognitionEvent('end', () => {
+    setIsRecording(false);
+    setIsTranscribing(false);
+    stopPulseAnimation();
+  });
+
+  useSpeechRecognitionEvent('error', (event) => {
+    console.error('Speech recognition error:', event.error, event.message);
+    setIsRecording(false);
+    setIsTranscribing(false);
+    stopPulseAnimation();
+
+    if (event.error !== 'no-speech') {
+      Alert.alert(
+        'Erro no reconhecimento de voz',
+        'Nao foi possivel transcrever o audio. Tente novamente.'
+      );
+    }
+  });
+
+  const handleMicPress = async () => {
+    if (isRecording) {
+      ExpoSpeechRecognitionModule.stop();
+      setIsTranscribing(true);
+      return;
+    }
+
+    const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+    if (!result.granted) {
+      Alert.alert(
+        'Permissao necessaria',
+        'Para usar a funcao de voz, permita o acesso ao microfone e ao reconhecimento de fala nas configuracoes do dispositivo.'
+      );
+      return;
+    }
+
+    try {
+      ExpoSpeechRecognitionModule.start({
+        lang: 'pt-BR',
+        interimResults: false,
+        continuous: false,
+        requiresOnDeviceRecognition: false,
+        addsPunctuation: true,
+      });
+    } catch (error) {
+      console.error('Failed to start speech recognition:', error);
+      Alert.alert('Erro', 'Nao foi possivel iniciar o reconhecimento de voz.');
+    }
+  };
 
   const loadChatHistory = async () => {
     if (!patientId) {
@@ -243,24 +359,56 @@ export default function ChatScreen() {
         </ScrollView>
 
         <View style={styles.inputContainer}>
+          {speechAvailable && (
+            <TouchableOpacity
+              style={styles.micButton}
+              onPress={handleMicPress}
+              disabled={isLoading}
+            >
+              <Animated.View
+                style={[
+                  styles.micIconContainer,
+                  isRecording && styles.micIconContainerActive,
+                  { transform: [{ scale: isRecording ? pulseAnim : 1 }] },
+                ]}
+              >
+                <Ionicons
+                  name={isRecording ? 'stop' : 'mic'}
+                  size={22}
+                  color={isRecording ? '#fff' : '#4A90E2'}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+          )}
+
           <TextInput
             style={styles.input}
-            placeholder="Escreva como voce esta se sentindo..."
+            placeholder={
+              isRecording
+                ? 'Ouvindo...'
+                : isTranscribing
+                ? 'Transcrevendo...'
+                : 'Escreva como voce esta se sentindo...'
+            }
             value={message}
             onChangeText={setMessage}
             multiline
             maxLength={2000}
-            editable={!isLoading}
+            editable={!isLoading && !isRecording}
           />
+
           <TouchableOpacity
-            style={[styles.sendButton, (!message.trim() || isLoading) && styles.sendButtonDisabled]}
+            style={[
+              styles.sendButton,
+              (!message.trim() || isLoading || isRecording) && styles.sendButtonDisabled,
+            ]}
             onPress={handleSend}
-            disabled={!message.trim() || isLoading}
+            disabled={!message.trim() || isLoading || isRecording}
           >
             <Ionicons
               name="send"
               size={24}
-              color={message.trim() && !isLoading ? '#fff' : '#ccc'}
+              color={message.trim() && !isLoading && !isRecording ? '#fff' : '#ccc'}
             />
           </TouchableOpacity>
         </View>
@@ -289,6 +437,8 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     marginRight: 12,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   headerTextContainer: {
     flex: 1,
@@ -391,6 +541,22 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#f0f0f0',
+  },
+  micButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  micIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  micIconContainerActive: {
+    backgroundColor: '#E53935',
   },
   loadingContainer: {
     flexDirection: 'row',

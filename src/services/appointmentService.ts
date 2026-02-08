@@ -18,6 +18,10 @@ export interface AppointmentData {
   duration: number;
   type: string;
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'pending' | 'awaiting_patient' | 'awaiting_psychologist';
+  roomId?: string | { _id: string; name: string; number?: string };
+  roomStatus?: 'pending' | 'approved' | 'rejected' | 'changed' | null;
+  roomRequestedId?: string | { _id: string; name: string; number?: string };
+  roomChangedTo?: string | { _id: string; name: string; number?: string };
   notes?: string;
   paymentId?: {
     _id: string;
@@ -57,6 +61,7 @@ export interface CreateAppointmentRequest {
   duration?: number;
   type?: 'online' | 'in_person';
   notes?: string;
+  roomId?: string;
 }
 
 export interface TimeSlot {

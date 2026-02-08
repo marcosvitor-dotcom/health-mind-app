@@ -69,7 +69,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Text style={styles.sectionTitle}>Meu Tratamento</Text>
 
         <Card>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('PsychologistProfile')}
+          >
             <View style={styles.menuLeft}>
               <View style={[styles.menuIcon, { backgroundColor: '#E8F4FD' }]}>
                 <Ionicons name="person" size={20} color="#4A90E2" />
@@ -85,6 +88,22 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 ) : (
                   <Text style={styles.menuSubtext}>Nao atribuido</Text>
                 )}
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('ClinicInfo')}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#E8F4FD' }]}>
+                <Ionicons name="business" size={20} color="#4A90E2" />
+              </View>
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuText}>Minha Clinica</Text>
+                <Text style={styles.menuSubtext}>Ver dados e psicologos</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#ccc" />
@@ -116,7 +135,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Text style={styles.sectionTitle}>Configuracoes</Text>
 
         <Card>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.menuLeft}>
               <Ionicons name="notifications" size={20} color="#666" />
               <Text style={styles.menuText}>Notificacoes</Text>

@@ -372,7 +372,18 @@ export default function ClientsScreen({ navigation }: any) {
                   {/* Ações */}
                   <View style={styles.modalSection}>
                     <Text style={styles.sectionTitle}>Ações</Text>
-                    <TouchableOpacity style={styles.modalActionButton}>
+                    <TouchableOpacity
+                      style={styles.modalActionButton}
+                      onPress={() => {
+                        setShowModal(false);
+                        const patientId = selectedPatient?._id || selectedPatient?.id;
+                        navigation.navigate('DirectChat', {
+                          recipientId: patientId,
+                          recipientName: selectedPatient?.name,
+                          recipientRole: 'patient',
+                        });
+                      }}
+                    >
                       <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
                       <Text style={styles.modalActionText}>Enviar Mensagem</Text>
                     </TouchableOpacity>

@@ -154,6 +154,8 @@ const styles = StyleSheet.create({
   logo: {
     width: 200,
     height: 200,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   subtitle: {
     color: '#fff',

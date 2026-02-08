@@ -3,14 +3,19 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import api from './api';
+import { getNotificationsEnabled } from '../utils/storage';
 
 // Configurar como as notificações são exibidas quando o app está em foreground
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
+  handleNotification: async () => {
+    const enabled = await getNotificationsEnabled();
+    const shouldShow = enabled !== false;
+    return {
+      shouldShowAlert: shouldShow,
+      shouldPlaySound: shouldShow,
+      shouldSetBadge: shouldShow,
+    };
+  },
 });
 
 /**

@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as appointmentService from '../../services/appointmentService';
+import * as roomService from '../../services/roomService';
+import { Room } from '../../services/roomService';
 
 export default function AppointmentBookingScreen({ navigation, route }: any) {
   const { user } = useAuth();
@@ -47,6 +49,12 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
   const [notes, setNotes] = useState('');
   const [creating, setCreating] = useState(false);
 
+  // Room selection
+  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+  const clinicId = user?.clinicId || '';
+
   useEffect(() => {
     if (!preSelectedPatient) {
       loadPatients();
@@ -58,6 +66,28 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
       loadSlots(selectedDate);
     }
   }, [step, selectedDate]);
+
+  useEffect(() => {
+    if (step === 3 && appointmentType === 'in_person' && clinicId) {
+      loadAvailableRooms();
+    }
+    if (appointmentType === 'online') {
+      setSelectedRoomId(null);
+    }
+  }, [step, appointmentType]);
+
+  const loadAvailableRooms = async () => {
+    if (!clinicId) return;
+    setLoadingRooms(true);
+    try {
+      const rooms = await roomService.getRooms(clinicId);
+      setAvailableRooms(rooms);
+    } catch (error) {
+      console.error('Erro ao carregar salas:', error);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
 
   const loadPatients = async () => {
     try {
@@ -117,6 +147,7 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
         date: dateTime,
         type: appointmentType,
         notes: notes.trim() || undefined,
+        roomId: selectedRoomId || undefined,
       });
 
       Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
@@ -377,6 +408,69 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Room selection for in_person + clinic */}
+      {appointmentType === 'in_person' && clinicId && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.fieldLabel}>Sala (opcional)</Text>
+          {loadingRooms ? (
+            <ActivityIndicator size="small" color="#4A90E2" style={{ marginVertical: 12 }} />
+          ) : availableRooms.length > 0 ? (
+            <>
+              <View style={styles.slotsGrid}>
+                {availableRooms.map((room) => (
+                  <TouchableOpacity
+                    key={room._id}
+                    style={[
+                      styles.slotButton,
+                      selectedRoomId === room._id && styles.slotButtonSelected,
+                    ]}
+                    onPress={() => setSelectedRoomId(
+                      selectedRoomId === room._id ? null : room._id
+                    )}
+                  >
+                    <Text
+                      style={[
+                        styles.slotText,
+                        selectedRoomId === room._id && styles.slotTextSelected,
+                      ]}
+                    >
+                      {room.name}{room.number ? ` #${room.number}` : ''}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {selectedRoomId && (
+                <View style={styles.roomWarning}>
+                  <Ionicons name="information-circle-outline" size={16} color="#E6A000" />
+                  <Text style={styles.roomWarningText}>
+                    A sala sera enviada como solicitacao. A clinica precisara aprovar.
+                  </Text>
+                </View>
+              )}
+              {selectedRoomId && selectedPatient && (() => {
+                const room = availableRooms.find(r => r._id === selectedRoomId);
+                const isExternal = !selectedPatient.clinicId || selectedPatient.clinicId !== clinicId;
+                if (room?.subleasePrice && room.subleasePrice > 0 && isExternal) {
+                  return (
+                    <View style={styles.subleaseWarning}>
+                      <Ionicons name="cash-outline" size={16} color="#E8A317" />
+                      <Text style={styles.subleaseWarningText}>
+                        Esta sala tem taxa de sublocacao de R$ {room.subleasePrice.toFixed(2).replace('.', ',')} para pacientes externos a clinica.
+                      </Text>
+                    </View>
+                  );
+                }
+                return null;
+              })()}
+            </>
+          ) : (
+            <Text style={{ fontSize: 13, color: '#999', marginTop: 4 }}>
+              Nenhuma sala disponivel na clinica
+            </Text>
+          )}
+        </View>
+      )}
 
       <Text style={styles.fieldLabel}>Observações (opcional)</Text>
       <TextInput
@@ -750,5 +844,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  roomWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFF8E8',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  roomWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#E6A000',
+    lineHeight: 18,
+  },
+  subleaseWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFF3E0',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#E8A317',
+  },
+  subleaseWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#E8A317',
+    fontWeight: '500',
+    lineHeight: 18,
   },
 });

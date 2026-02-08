@@ -31,7 +31,9 @@
       "Bash(python:*)",
       "Bash(node -e:*)",
       "Bash(node:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(del \"c:\\\\Users\\\\marco\\\\OneDrive\\\\Desktop\\\\health_mind_ai\\\\health-mind-app\\\\src\\\\screens\\\\client\\\\PsychologistChatScreen.tsx\")"
     ]
   }
 }
