@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as roomService from '../../services/roomService';
 import { Room, PendingRoomRequest, AMENITIES_MAP } from '../../services/roomService';
 import * as subleaseService from '../../services/subleaseService';
@@ -23,6 +24,7 @@ type Segment = 'rooms' | 'requests' | 'subleases';
 
 export default function RoomsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const clinicId = user?._id || user?.id || '';
 
   const [segment, setSegment] = useState<Segment>('rooms');
@@ -142,18 +144,18 @@ export default function RoomsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Carregando salas...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando salas...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Salas</Text>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Salas</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('RoomDetail')}
@@ -163,20 +165,20 @@ export default function RoomsScreen({ navigation }: any) {
       </View>
 
       {/* Segmented Control */}
-      <View style={styles.segmentContainer}>
+      <View style={[styles.segmentContainer, { backgroundColor: isDark ? colors.border : '#e8e8e8' }]}>
         <TouchableOpacity
-          style={[styles.segmentButton, segment === 'rooms' && styles.segmentActive]}
+          style={[styles.segmentButton, segment === 'rooms' && [styles.segmentActive, { backgroundColor: colors.surface }]]}
           onPress={() => setSegment('rooms')}
         >
-          <Text style={[styles.segmentText, segment === 'rooms' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: colors.textSecondary }, segment === 'rooms' && styles.segmentTextActive]}>
             Salas ({rooms.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.segmentButton, segment === 'requests' && styles.segmentActive]}
+          style={[styles.segmentButton, segment === 'requests' && [styles.segmentActive, { backgroundColor: colors.surface }]]}
           onPress={() => setSegment('requests')}
         >
-          <Text style={[styles.segmentText, segment === 'requests' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: colors.textSecondary }, segment === 'requests' && styles.segmentTextActive]}>
             Solicitacoes
           </Text>
           {pendingCount > 0 && (
@@ -186,10 +188,10 @@ export default function RoomsScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.segmentButton, segment === 'subleases' && styles.segmentActive]}
+          style={[styles.segmentButton, segment === 'subleases' && [styles.segmentActive, { backgroundColor: colors.surface }]]}
           onPress={() => setSegment('subleases')}
         >
-          <Text style={[styles.segmentText, segment === 'subleases' && styles.segmentTextActive]}>
+          <Text style={[styles.segmentText, { color: colors.textSecondary }, segment === 'subleases' && styles.segmentTextActive]}>
             Sublocacoes
           </Text>
           {subleasePendingCount > 0 && (
@@ -207,8 +209,8 @@ export default function RoomsScreen({ navigation }: any) {
         {segment === 'rooms' ? (
           rooms.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="business-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>Nenhuma sala cadastrada</Text>
+              <Ionicons name="business-outline" size={64} color={colors.textTertiary} />
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma sala cadastrada</Text>
               <TouchableOpacity
                 style={styles.emptyButton}
                 onPress={() => navigation.navigate('RoomDetail')}
@@ -220,35 +222,35 @@ export default function RoomsScreen({ navigation }: any) {
             rooms.map((room) => (
               <TouchableOpacity
                 key={room._id}
-                style={styles.roomCard}
+                style={[styles.roomCard, { backgroundColor: colors.surface }]}
                 onPress={() => navigation.navigate('RoomDetail', { room })}
               >
                 <View style={styles.roomCardHeader}>
                   <View style={styles.roomCardLeft}>
-                    <View style={[styles.roomIcon, !room.isActive && styles.roomIconInactive]}>
+                    <View style={[styles.roomIcon, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }, !room.isActive && { backgroundColor: colors.borderLight }]}>
                       <Ionicons
                         name="business"
                         size={20}
-                        color={room.isActive ? '#4A90E2' : '#999'}
+                        color={room.isActive ? '#4A90E2' : colors.textTertiary}
                       />
                     </View>
                     <View>
-                      <Text style={styles.roomName}>{room.name}</Text>
+                      <Text style={[styles.roomName, { color: colors.textPrimary }]}>{room.name}</Text>
                       {room.number && (
-                        <Text style={styles.roomNumber}>Sala {room.number}</Text>
+                        <Text style={[styles.roomNumber, { color: colors.textSecondary }]}>Sala {room.number}</Text>
                       )}
                     </View>
                   </View>
-                  <View style={[styles.statusBadge, room.isActive ? styles.activeBadge : styles.inactiveBadge]}>
-                    <Text style={[styles.statusBadgeText, room.isActive ? styles.activeText : styles.inactiveText]}>
+                  <View style={[styles.statusBadge, room.isActive ? [styles.activeBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFE8' }] : { backgroundColor: colors.borderLight }]}>
+                    <Text style={[styles.statusBadgeText, room.isActive ? styles.activeText : { color: colors.textTertiary }]}>
                       {room.isActive ? 'Ativa' : 'Inativa'}
                     </Text>
                   </View>
                 </View>
                 <View style={styles.roomCardDetails}>
                   <View style={styles.detailItem}>
-                    <Ionicons name="people-outline" size={14} color="#666" />
-                    <Text style={styles.detailText}>{room.capacity} pessoas</Text>
+                    <Ionicons name="people-outline" size={14} color={colors.textSecondary} />
+                    <Text style={[styles.detailText, { color: colors.textSecondary }]}>{room.capacity} pessoas</Text>
                   </View>
                   {room.subleasePrice != null && room.subleasePrice > 0 && (
                     <Text style={styles.roomSublease}>
@@ -258,7 +260,7 @@ export default function RoomsScreen({ navigation }: any) {
                   {room.amenities.length > 0 && (
                     <View style={styles.amenitiesRow}>
                       {room.amenities.slice(0, 4).map((a) => (
-                        <View key={a} style={styles.amenityChip}>
+                        <View key={a} style={[styles.amenityChip, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
                           <Ionicons
                             name={(AMENITIES_MAP[a]?.icon || 'ellipse') as any}
                             size={12}
@@ -267,12 +269,12 @@ export default function RoomsScreen({ navigation }: any) {
                         </View>
                       ))}
                       {room.amenities.length > 4 && (
-                        <Text style={styles.moreAmenities}>+{room.amenities.length - 4}</Text>
+                        <Text style={[styles.moreAmenities, { color: colors.textSecondary }]}>+{room.amenities.length - 4}</Text>
                       )}
                     </View>
                   )}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#ccc" style={styles.chevron} />
+                <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} style={styles.chevron} />
               </TouchableOpacity>
             ))
           )
@@ -280,31 +282,31 @@ export default function RoomsScreen({ navigation }: any) {
           // Segment: Requests
           requests.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="checkmark-circle-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>Nenhuma solicitacao pendente</Text>
+              <Ionicons name="checkmark-circle-outline" size={64} color={colors.textTertiary} />
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma solicitacao pendente</Text>
             </View>
           ) : (
             requests.map((req) => (
-              <View key={req._id} style={styles.requestCard}>
+              <View key={req._id} style={[styles.requestCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.requestHeader}>
                   <View style={styles.requestInfo}>
-                    <Text style={styles.requestPsychologist}>
+                    <Text style={[styles.requestPsychologist, { color: colors.textPrimary }]}>
                       {req.psychologistId?.name || 'Psicologo'}
                     </Text>
-                    <Text style={styles.requestPatient}>
+                    <Text style={[styles.requestPatient, { color: colors.textSecondary }]}>
                       Paciente: {req.patientId?.name || '-'}
                     </Text>
                     <Text style={styles.requestDateTime}>
                       {formatDateTime(req.date)} - {req.duration}min
                     </Text>
                   </View>
-                  <View style={styles.requestRoom}>
+                  <View style={[styles.requestRoom, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
                     <Ionicons name="business" size={16} color="#4A90E2" />
                     <Text style={styles.requestRoomName}>
                       {req.roomId?.name || 'Sala'}
                     </Text>
                     {req.roomId?.number && (
-                      <Text style={styles.requestRoomNumber}>#{req.roomId.number}</Text>
+                      <Text style={[styles.requestRoomNumber, { color: colors.textSecondary }]}>#{req.roomId.number}</Text>
                     )}
                   </View>
                 </View>
@@ -360,8 +362,8 @@ export default function RoomsScreen({ navigation }: any) {
             </View>
           ) : subleases.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="cash-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>Nenhuma sublocacao encontrada</Text>
+              <Ionicons name="cash-outline" size={64} color={colors.textTertiary} />
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma sublocacao encontrada</Text>
             </View>
           ) : (
             subleases.map((sublease) => {
@@ -372,32 +374,32 @@ export default function RoomsScreen({ navigation }: any) {
               const valueFormatted = sublease.value.toFixed(2).replace('.', ',');
 
               let statusLabel = 'Pendente';
-              let statusStyle = styles.subleaseStatusPending;
+              let statusStyle = isDark ? { backgroundColor: '#3D3020' } : styles.subleaseStatusPending;
               let statusTextStyle = styles.subleaseStatusPendingText;
               if (sublease.status === 'paid') {
                 statusLabel = 'Pago';
-                statusStyle = styles.subleaseStatusPaid;
+                statusStyle = isDark ? { backgroundColor: '#1F3D1F' } : styles.subleaseStatusPaid;
                 statusTextStyle = styles.subleaseStatusPaidText;
               } else if (sublease.status === 'cancelled') {
                 statusLabel = 'Cancelado';
-                statusStyle = styles.subleaseStatusCancelled;
-                statusTextStyle = styles.subleaseStatusCancelledText;
+                statusStyle = { backgroundColor: colors.borderLight };
+                statusTextStyle = { color: colors.textTertiary } as any;
               }
 
               return (
-                <View key={sublease._id} style={styles.subleaseCard}>
+                <View key={sublease._id} style={[styles.subleaseCard, { backgroundColor: colors.surface }]}>
                   <View style={styles.subleaseCardHeader}>
                     <View style={styles.subleaseCardInfo}>
-                      <Text style={styles.subleasePsychologist}>{psychName || 'Psicologo'}</Text>
+                      <Text style={[styles.subleasePsychologist, { color: colors.textPrimary }]}>{psychName || 'Psicologo'}</Text>
                       <Text style={styles.subleaseRoom}>Sala: {roomName || '-'}</Text>
-                      <Text style={styles.subleasePatient}>Paciente: {patientName || '-'}</Text>
-                      <Text style={styles.subleaseDate}>{dateFormatted}</Text>
+                      <Text style={[styles.subleasePatient, { color: colors.textSecondary }]}>Paciente: {patientName || '-'}</Text>
+                      <Text style={[styles.subleaseDate, { color: colors.textSecondary }]}>{dateFormatted}</Text>
                     </View>
                     <View style={styles.subleaseCardRight}>
                       <View style={[styles.subleaseStatusBadge, statusStyle]}>
                         <Text style={[styles.subleaseStatusText, statusTextStyle]}>{statusLabel}</Text>
                       </View>
-                      <Text style={styles.subleaseValue}>R$ {valueFormatted}</Text>
+                      <Text style={[styles.subleaseValue, { color: colors.textPrimary }]}>R$ {valueFormatted}</Text>
                     </View>
                   </View>
                   {sublease.status === 'pending' && (
@@ -442,18 +444,18 @@ export default function RoomsScreen({ navigation }: any) {
         onRequestClose={() => setChangeModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Selecionar Outra Sala</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Selecionar Outra Sala</Text>
               <TouchableOpacity onPress={() => setChangeModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
             {loadingRooms ? (
               <ActivityIndicator size="large" color="#4A90E2" style={{ marginVertical: 40 }} />
             ) : availableRooms.length === 0 ? (
               <View style={styles.emptyModal}>
-                <Text style={styles.emptyModalText}>Nenhuma sala disponivel</Text>
+                <Text style={[styles.emptyModalText, { color: colors.textTertiary }]}>Nenhuma sala disponivel</Text>
               </View>
             ) : (
               <FlatList
@@ -461,19 +463,19 @@ export default function RoomsScreen({ navigation }: any) {
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={styles.modalRoomItem}
+                    style={[styles.modalRoomItem, { borderBottomColor: colors.borderLight }]}
                     onPress={() => confirmChangeRoom(item._id)}
                   >
                     <View style={styles.modalRoomInfo}>
                       <Ionicons name="business" size={20} color="#4A90E2" />
                       <View style={{ marginLeft: 12 }}>
-                        <Text style={styles.modalRoomName}>{item.name}</Text>
+                        <Text style={[styles.modalRoomName, { color: colors.textPrimary }]}>{item.name}</Text>
                         {item.number && (
-                          <Text style={styles.modalRoomNumber}>Sala {item.number}</Text>
+                          <Text style={[styles.modalRoomNumber, { color: colors.textSecondary }]}>Sala {item.number}</Text>
                         )}
                       </View>
                     </View>
-                    <Text style={styles.modalRoomCapacity}>{item.capacity}p</Text>
+                    <Text style={[styles.modalRoomCapacity, { color: colors.textSecondary }]}>{item.capacity}p</Text>
                   </TouchableOpacity>
                 )}
               />
@@ -488,18 +490,15 @@ export default function RoomsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: '#666',
   },
   header: {
     flexDirection: 'row',
@@ -507,14 +506,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#333',
   },
   addButton: {
     backgroundColor: '#4A90E2',
@@ -528,7 +524,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: '#e8e8e8',
     borderRadius: 10,
     padding: 3,
   },
@@ -542,7 +537,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   segmentActive: {
-    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -552,7 +546,6 @@ const styles = StyleSheet.create({
   segmentText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
   },
   segmentTextActive: {
     color: '#4A90E2',
@@ -583,7 +576,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
   },
   emptyButton: {
     backgroundColor: '#4A90E2',
@@ -599,7 +591,6 @@ const styles = StyleSheet.create({
   },
   // Room card
   roomCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -620,21 +611,17 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
   roomIconInactive: {
-    backgroundColor: '#f0f0f0',
   },
   roomName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   roomNumber: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   statusBadge: {
@@ -643,10 +630,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   activeBadge: {
-    backgroundColor: '#E8FFE8',
   },
   inactiveBadge: {
-    backgroundColor: '#f0f0f0',
   },
   statusBadgeText: {
     fontSize: 12,
@@ -656,7 +641,6 @@ const styles = StyleSheet.create({
     color: '#50C878',
   },
   inactiveText: {
-    color: '#999',
   },
   roomCardDetails: {
     flexDirection: 'row',
@@ -670,7 +654,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: '#666',
   },
   amenitiesRow: {
     flexDirection: 'row',
@@ -681,13 +664,11 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
   moreAmenities: {
     fontSize: 12,
-    color: '#666',
   },
   chevron: {
     position: 'absolute',
@@ -696,7 +677,6 @@ const styles = StyleSheet.create({
   },
   // Request card
   requestCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -714,11 +694,9 @@ const styles = StyleSheet.create({
   requestPsychologist: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
   requestPatient: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   requestDateTime: {
@@ -731,7 +709,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#E8F4FD',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -744,7 +721,6 @@ const styles = StyleSheet.create({
   },
   requestRoomNumber: {
     fontSize: 12,
-    color: '#666',
   },
   requestActions: {
     flexDirection: 'row',
@@ -780,7 +756,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '60%',
@@ -792,12 +767,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   emptyModal: {
     alignItems: 'center',
@@ -805,7 +778,6 @@ const styles = StyleSheet.create({
   },
   emptyModalText: {
     fontSize: 15,
-    color: '#999',
   },
   modalRoomItem: {
     flexDirection: 'row',
@@ -813,7 +785,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   modalRoomInfo: {
     flexDirection: 'row',
@@ -822,16 +793,13 @@ const styles = StyleSheet.create({
   modalRoomName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
   modalRoomNumber: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   modalRoomCapacity: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
   },
   // Room sublease price
@@ -842,7 +810,6 @@ const styles = StyleSheet.create({
   },
   // Sublease card
   subleaseCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -863,7 +830,6 @@ const styles = StyleSheet.create({
   subleasePsychologist: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
   subleaseRoom: {
     fontSize: 13,
@@ -873,18 +839,15 @@ const styles = StyleSheet.create({
   },
   subleasePatient: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   subleaseDate: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
   },
   subleaseValue: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#333',
   },
   // Sublease status badges
   subleaseStatusBadge: {
@@ -909,10 +872,8 @@ const styles = StyleSheet.create({
     color: '#50C878',
   },
   subleaseStatusCancelled: {
-    backgroundColor: '#f0f0f0',
   },
   subleaseStatusCancelledText: {
-    color: '#999',
   },
   // Mark as paid button
   markPaidButton: {

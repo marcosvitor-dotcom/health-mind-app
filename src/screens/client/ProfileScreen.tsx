@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as profileService from '../../services/profileService';
 import { PatientWithPsychologist } from '../../services/profileService';
 
@@ -13,6 +14,7 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
+  const { colors, isDark } = useTheme();
   const [patientData, setPatientData] = useState<PatientWithPsychologist | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -40,9 +42,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const psychologist = patientData?.psychologistId;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView>
-      <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('EditProfile')}>
+      <TouchableOpacity style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]} onPress={() => navigation.navigate('EditProfile')}>
         {user?.avatar ? (
           <Image source={{ uri: user.avatar }} style={styles.avatar} />
         ) : (
@@ -57,149 +59,149 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             </Text>
           </View>
         )}
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
+        <Text style={[styles.name, { color: colors.textPrimary }]}>{user?.name}</Text>
+        <Text style={[styles.email, { color: colors.textSecondary }]}>{user?.email}</Text>
         <View style={styles.editProfileHint}>
-          <Text style={styles.editProfileText}>Toque para editar perfil</Text>
-          <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
+          <Text style={[styles.editProfileText, { color: colors.primary }]}>Toque para editar perfil</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.primary} />
         </View>
       </TouchableOpacity>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Meu Tratamento</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Meu Tratamento</Text>
 
         <Card>
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}
             onPress={() => navigation.navigate('PsychologistProfile')}
           >
             <View style={styles.menuLeft}>
-              <View style={[styles.menuIcon, { backgroundColor: '#E8F4FD' }]}>
-                <Ionicons name="person" size={20} color="#4A90E2" />
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+                <Ionicons name="person" size={20} color={colors.primary} />
               </View>
               <View style={styles.menuTextContainer}>
-                <Text style={styles.menuText}>Meu Psicologo</Text>
+                <Text style={[styles.menuText, { color: colors.textPrimary }]}>Meu Psicologo</Text>
                 {loadingData ? (
-                  <ActivityIndicator size="small" color="#4A90E2" style={{ marginTop: 4 }} />
+                  <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: 4 }} />
                 ) : psychologist ? (
-                  <Text style={styles.menuSubtext}>
+                  <Text style={[styles.menuSubtext, { color: colors.textSecondary }]}>
                     {psychologist.name}{psychologist.crp ? ` - CRP ${psychologist.crp}` : ''}
                   </Text>
                 ) : (
-                  <Text style={styles.menuSubtext}>Nao atribuido</Text>
+                  <Text style={[styles.menuSubtext, { color: colors.textSecondary }]}>Nao atribuido</Text>
                 )}
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}
             onPress={() => navigation.navigate('ClinicInfo')}
           >
             <View style={styles.menuLeft}>
-              <View style={[styles.menuIcon, { backgroundColor: '#E8F4FD' }]}>
-                <Ionicons name="business" size={20} color="#4A90E2" />
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+                <Ionicons name="business" size={20} color={colors.primary} />
               </View>
               <View style={styles.menuTextContainer}>
-                <Text style={styles.menuText}>Minha Clinica</Text>
-                <Text style={styles.menuSubtext}>Ver dados e psicologos</Text>
+                <Text style={[styles.menuText, { color: colors.textPrimary }]}>Minha Clinica</Text>
+                <Text style={[styles.menuSubtext, { color: colors.textSecondary }]}>Ver dados e psicologos</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
             <View style={styles.menuLeft}>
-              <View style={[styles.menuIcon, { backgroundColor: '#FFF5E6' }]}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? '#3D3020' : '#FFF5E6' }]}>
                 <Ionicons name="document-text" size={20} color="#FFB347" />
               </View>
-              <Text style={styles.menuText}>Solicitar Relatorio</Text>
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Solicitar Relatorio</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
             <View style={styles.menuLeft}>
-              <View style={[styles.menuIcon, { backgroundColor: '#E8FFE8' }]}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFE8' }]}>
                 <Ionicons name="stats-chart" size={20} color="#50C878" />
               </View>
-              <Text style={styles.menuText}>Meu Progresso</Text>
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Meu Progresso</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </Card>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Configuracoes</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Configuracoes</Text>
 
         <Card>
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.menuLeft}>
-              <Ionicons name="notifications" size={20} color="#666" />
-              <Text style={styles.menuText}>Notificacoes</Text>
+              <Ionicons name="notifications" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Notificacoes</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
             <View style={styles.menuLeft}>
-              <Ionicons name="lock-closed" size={20} color="#666" />
-              <Text style={styles.menuText}>Privacidade</Text>
+              <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Privacidade</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
             <View style={styles.menuLeft}>
-              <Ionicons name="language" size={20} color="#666" />
-              <Text style={styles.menuText}>Idioma</Text>
+              <Ionicons name="language" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Idioma</Text>
             </View>
             <View style={styles.menuRight}>
-              <Text style={styles.menuValue}>Portugues</Text>
-              <Ionicons name="chevron-forward" size={24} color="#ccc" />
+              <Text style={[styles.menuValue, { color: colors.textSecondary }]}>Portugues</Text>
+              <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
             </View>
           </TouchableOpacity>
         </Card>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Suporte</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Suporte</Text>
 
         <Card>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
             <View style={styles.menuLeft}>
-              <Ionicons name="help-circle" size={20} color="#666" />
-              <Text style={styles.menuText}>Central de Ajuda</Text>
+              <Ionicons name="help-circle" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Central de Ajuda</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'terms' })}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('LegalDocument', { type: 'terms' })}>
             <View style={styles.menuLeft}>
-              <Ionicons name="document" size={20} color="#666" />
-              <Text style={styles.menuText}>Termos de Uso</Text>
+              <Ionicons name="document" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Termos de Uso</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'privacy' })}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('LegalDocument', { type: 'privacy' })}>
             <View style={styles.menuLeft}>
-              <Ionicons name="shield-checkmark" size={20} color="#666" />
-              <Text style={styles.menuText}>Politica de Privacidade</Text>
+              <Ionicons name="shield-checkmark" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Politica de Privacidade</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </Card>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+      <TouchableOpacity style={[styles.logoutButton, { backgroundColor: colors.surface }]} onPress={logout}>
         <Ionicons name="log-out" size={20} color="#FF6B6B" />
         <Text style={styles.logoutText}>Sair</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Versao 1.0.0</Text>
+      <Text style={[styles.version, { color: colors.textTertiary }]}>Versao 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -208,14 +210,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     alignItems: 'center',
     padding: 32,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   avatar: {
     width: 80,
@@ -240,17 +239,14 @@ const styles = StyleSheet.create({
   },
   editProfileText: {
     fontSize: 14,
-    color: '#4A90E2',
     marginRight: 4,
   },
   name: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#333',
   },
   email: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   section: {
@@ -259,7 +255,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#999',
     marginBottom: 8,
     textTransform: 'uppercase',
   },
@@ -269,7 +264,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   menuLeft: {
     flexDirection: 'row',
@@ -289,11 +283,9 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 16,
-    color: '#333',
   },
   menuSubtext: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   menuRight: {
@@ -302,7 +294,6 @@ const styles = StyleSheet.create({
   },
   menuValue: {
     fontSize: 14,
-    color: '#666',
     marginRight: 8,
   },
   logoutButton: {
@@ -311,7 +302,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 16,
     padding: 16,
-    backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#FF6B6B',
@@ -324,7 +314,6 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 12,
-    color: '#999',
     textAlign: 'center',
     marginBottom: 32,
   },

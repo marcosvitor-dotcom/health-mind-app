@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as profileService from '../../services/profileService';
 import { PsychologistProfile } from '../../services/profileService';
 
@@ -23,6 +24,7 @@ interface Props {
 
 export default function PsychologistProfileScreen({ navigation, route }: Props) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [profile, setProfile] = useState<PsychologistProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,26 +64,26 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Carregando perfil...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando perfil...</Text>
       </View>
     );
   }
 
   if (!profile) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.headerBar}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.headerBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerBarTitle}>Meu Psicólogo</Text>
+          <Text style={[styles.headerBarTitle, { color: colors.textPrimary }]}>Meu Psicólogo</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="person-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum psicólogo vinculado</Text>
+          <Ionicons name="person-outline" size={64} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhum psicólogo vinculado</Text>
         </View>
       </SafeAreaView>
     );
@@ -90,51 +92,51 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
   const tp = profile.therapeuticProfile;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.headerBar}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.headerBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerBarTitle}>Meu Psicólogo</Text>
+        <Text style={[styles.headerBarTitle, { color: colors.textPrimary }]}>Meu Psicólogo</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
-        <View style={styles.profileHeader}>
+        <View style={[styles.profileHeader, { backgroundColor: colors.surface }]}>
           {profile.avatar ? (
             <Image source={{ uri: profile.avatar }} style={styles.avatar} />
           ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
               <Text style={styles.avatarText}>{getInitials(profile.name)}</Text>
             </View>
           )}
-          <Text style={styles.profileName}>{profile.name}</Text>
+          <Text style={[styles.profileName, { color: colors.textPrimary }]}>{profile.name}</Text>
           {profile.crp && (
-            <Text style={styles.profileCrp}>CRP {profile.crp}</Text>
+            <Text style={[styles.profileCrp, { color: colors.textSecondary }]}>CRP {profile.crp}</Text>
           )}
           {tp?.abordagemPrincipal && (
-            <View style={styles.approachBadge}>
-              <Text style={styles.approachBadgeText}>{tp.abordagemPrincipal}</Text>
+            <View style={[styles.approachBadge, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+              <Text style={[styles.approachBadgeText, { color: colors.primary }]}>{tp.abordagemPrincipal}</Text>
             </View>
           )}
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionRow}>
+        <View style={[styles.actionRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           {profile.phone && (
             <>
               <TouchableOpacity style={styles.actionBtn} onPress={handleCall}>
-                <View style={[styles.actionIcon, { backgroundColor: '#E8FFE8' }]}>
+                <View style={[styles.actionIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8FFE8' }]}>
                   <Ionicons name="call" size={20} color="#50C878" />
                 </View>
-                <Text style={styles.actionLabel}>Ligar</Text>
+                <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>Ligar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={handleWhatsApp}>
-                <View style={[styles.actionIcon, { backgroundColor: '#E8FFE8' }]}>
+                <View style={[styles.actionIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8FFE8' }]}>
                   <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
                 </View>
-                <Text style={styles.actionLabel}>WhatsApp</Text>
+                <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>WhatsApp</Text>
               </TouchableOpacity>
             </>
           )}
@@ -146,17 +148,17 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
               recipientRole: 'psychologist',
             })}
           >
-            <View style={[styles.actionIcon, { backgroundColor: '#E8F4FD' }]}>
-              <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
+            <View style={[styles.actionIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+              <Ionicons name="chatbubbles" size={20} color={colors.primary} />
             </View>
-            <Text style={styles.actionLabel}>Mensagem</Text>
+            <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>Mensagem</Text>
           </TouchableOpacity>
           {profile.email && (
             <TouchableOpacity style={styles.actionBtn} onPress={() => Linking.openURL(`mailto:${profile.email}`)}>
-              <View style={[styles.actionIcon, { backgroundColor: '#E8F4FD' }]}>
-                <Ionicons name="mail" size={20} color="#4A90E2" />
+              <View style={[styles.actionIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+                <Ionicons name="mail" size={20} color={colors.primary} />
               </View>
-              <Text style={styles.actionLabel}>Email</Text>
+              <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>Email</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -164,26 +166,26 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
         <View style={styles.content}>
           {/* Sobre */}
           {tp?.descricaoTrabalho && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Sobre</Text>
-              <Text style={styles.sectionText}>{tp.descricaoTrabalho}</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Sobre</Text>
+              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{tp.descricaoTrabalho}</Text>
             </View>
           )}
 
           {/* Formação */}
           {(tp?.formacaoAcademica || tp?.posGraduacao) && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Formação</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Formação</Text>
               {tp?.formacaoAcademica && (
                 <View style={styles.formationItem}>
-                  <Ionicons name="school-outline" size={18} color="#4A90E2" />
-                  <Text style={styles.formationText}>{tp.formacaoAcademica}</Text>
+                  <Ionicons name="school-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.formationText, { color: colors.textSecondary }]}>{tp.formacaoAcademica}</Text>
                 </View>
               )}
               {tp?.posGraduacao && (
                 <View style={styles.formationItem}>
-                  <Ionicons name="ribbon-outline" size={18} color="#4A90E2" />
-                  <Text style={styles.formationText}>{tp.posGraduacao}</Text>
+                  <Ionicons name="ribbon-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.formationText, { color: colors.textSecondary }]}>{tp.posGraduacao}</Text>
                 </View>
               )}
             </View>
@@ -191,12 +193,12 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
           {/* Especialidades */}
           {profile.specialties && profile.specialties.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Especialidades</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Especialidades</Text>
               <View style={styles.chipGroup}>
                 {profile.specialties.map((s, i) => (
-                  <View key={i} style={styles.chip}>
-                    <Text style={styles.chipText}>{s}</Text>
+                  <View key={i} style={[styles.chip, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
+                    <Text style={[styles.chipText, { color: colors.primary }]}>{s}</Text>
                   </View>
                 ))}
               </View>
@@ -205,12 +207,12 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
           {/* Público-alvo */}
           {tp?.publicosEspecificos && tp.publicosEspecificos.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Público-alvo</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Público-alvo</Text>
               <View style={styles.chipGroup}>
                 {tp.publicosEspecificos.map((p, i) => (
-                  <View key={i} style={[styles.chip, styles.chipAlt]}>
-                    <Text style={[styles.chipText, styles.chipTextAlt]}>{p}</Text>
+                  <View key={i} style={[styles.chip, { backgroundColor: isDark ? colors.surfaceSecondary : '#FFF5E6' }]}>
+                    <Text style={[styles.chipText, { color: isDark ? '#F0C060' : '#E6A000' }]}>{p}</Text>
                   </View>
                 ))}
               </View>
@@ -219,12 +221,12 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
           {/* Temas */}
           {tp?.temasEspecializados && tp.temasEspecializados.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Temas Especializados</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Temas Especializados</Text>
               <View style={styles.chipGroup}>
                 {tp.temasEspecializados.map((t, i) => (
-                  <View key={i} style={[styles.chip, styles.chipTheme]}>
-                    <Text style={[styles.chipText, styles.chipTextTheme]}>{t}</Text>
+                  <View key={i} style={[styles.chip, { backgroundColor: isDark ? colors.surfaceSecondary : '#F0E8FF' }]}>
+                    <Text style={[styles.chipText, { color: isDark ? '#A890FF' : '#7B61FF' }]}>{t}</Text>
                   </View>
                 ))}
               </View>
@@ -233,33 +235,33 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
           {/* Diferenciais */}
           {tp?.diferenciais && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Diferenciais</Text>
-              <Text style={styles.sectionText}>{tp.diferenciais}</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Diferenciais</Text>
+              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{tp.diferenciais}</Text>
             </View>
           )}
 
           {/* Atendimento */}
           {profile.settings && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Atendimento</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Atendimento</Text>
               <View style={styles.settingsRow}>
                 <View style={styles.settingsItem}>
-                  <Ionicons name="time-outline" size={20} color="#666" />
-                  <Text style={styles.settingsText}>
+                  <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
+                  <Text style={[styles.settingsText, { color: colors.textSecondary }]}>
                     {profile.settings.defaultSessionDuration || 50} min/sessão
                   </Text>
                 </View>
                 {profile.settings.acceptsOnline && (
                   <View style={styles.settingsItem}>
                     <Ionicons name="videocam-outline" size={20} color="#50C878" />
-                    <Text style={styles.settingsText}>Online</Text>
+                    <Text style={[styles.settingsText, { color: colors.textSecondary }]}>Online</Text>
                   </View>
                 )}
                 {profile.settings.acceptsInPerson && (
                   <View style={styles.settingsItem}>
-                    <Ionicons name="location-outline" size={20} color="#4A90E2" />
-                    <Text style={styles.settingsText}>Presencial</Text>
+                    <Ionicons name="location-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.settingsText, { color: colors.textSecondary }]}>Presencial</Text>
                   </View>
                 )}
               </View>
@@ -268,17 +270,17 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 
           {/* Clínica */}
           {profile.clinicId && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Clínica</Text>
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Clínica</Text>
               <TouchableOpacity
-                style={styles.clinicCard}
+                style={[styles.clinicCard, { backgroundColor: colors.surfaceSecondary }]}
                 onPress={() => navigation.navigate('ClinicInfo')}
               >
                 <View style={styles.clinicCardLeft}>
-                  <Ionicons name="business-outline" size={24} color="#4A90E2" />
-                  <Text style={styles.clinicName}>{profile.clinicId.name}</Text>
+                  <Ionicons name="business-outline" size={24} color={colors.primary} />
+                  <Text style={[styles.clinicName, { color: colors.textPrimary }]}>{profile.clinicId.name}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
               </TouchableOpacity>
             </View>
           )}
@@ -293,18 +295,15 @@ export default function PsychologistProfileScreen({ navigation, route }: Props) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: '#666',
   },
   emptyContainer: {
     flex: 1,
@@ -314,7 +313,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
   },
   headerBar: {
     flexDirection: 'row',
@@ -322,9 +320,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   backBtn: {
     padding: 8,
@@ -332,12 +328,10 @@ const styles = StyleSheet.create({
   headerBarTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#333',
   },
   profileHeader: {
     alignItems: 'center',
     paddingVertical: 24,
-    backgroundColor: '#fff',
   },
   avatar: {
     width: 90,
@@ -346,7 +340,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   avatarPlaceholder: {
-    backgroundColor: '#4A90E2',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -358,16 +351,13 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#333',
   },
   profileCrp: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   approachBadge: {
     marginTop: 10,
-    backgroundColor: '#E8F4FD',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
@@ -375,16 +365,13 @@ const styles = StyleSheet.create({
   approachBadgeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#4A90E2',
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   actionBtn: {
     alignItems: 'center',
@@ -399,26 +386,22 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontSize: 12,
-    color: '#666',
   },
   content: {
     padding: 16,
     gap: 16,
   },
   section: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 10,
   },
   sectionText: {
     fontSize: 14,
-    color: '#555',
     lineHeight: 22,
   },
   formationItem: {
@@ -430,7 +413,6 @@ const styles = StyleSheet.create({
   formationText: {
     flex: 1,
     fontSize: 14,
-    color: '#555',
     lineHeight: 20,
   },
   chipGroup: {
@@ -439,27 +421,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    backgroundColor: '#E8F4FD',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   chipText: {
     fontSize: 13,
-    color: '#4A90E2',
     fontWeight: '500',
-  },
-  chipAlt: {
-    backgroundColor: '#FFF5E6',
-  },
-  chipTextAlt: {
-    color: '#E6A000',
-  },
-  chipTheme: {
-    backgroundColor: '#F0E8FF',
-  },
-  chipTextTheme: {
-    color: '#7B61FF',
   },
   settingsRow: {
     flexDirection: 'row',
@@ -473,13 +441,11 @@ const styles = StyleSheet.create({
   },
   settingsText: {
     fontSize: 14,
-    color: '#555',
   },
   clinicCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f9f9f9',
     padding: 14,
     borderRadius: 10,
   },
@@ -491,6 +457,5 @@ const styles = StyleSheet.create({
   clinicName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
 });

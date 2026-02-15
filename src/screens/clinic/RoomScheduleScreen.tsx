@@ -12,11 +12,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as roomService from '../../services/roomService';
 import { RoomSchedule } from '../../services/roomService';
 
 export default function RoomScheduleScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const clinicId = user?._id || user?.id || '';
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -101,18 +103,18 @@ export default function RoomScheduleScreen({ navigation }: any) {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Agenda das Salas</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Agenda das Salas</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/* Date Selector */}
-      <View style={styles.dateSelector}>
+      <View style={[styles.dateSelector, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => changeDate(-1)} style={styles.dateArrow}>
           <Ionicons name="chevron-back" size={24} color="#4A90E2" />
         </TouchableOpacity>
@@ -120,7 +122,7 @@ export default function RoomScheduleScreen({ navigation }: any) {
           onPress={() => setSelectedDate(new Date())}
           style={styles.dateCenter}
         >
-          <Text style={styles.dateText}>{displayDate}</Text>
+          <Text style={[styles.dateText, { color: colors.textPrimary }]}>{displayDate}</Text>
           {!isToday && <Text style={styles.todayLink}>Ir para hoje</Text>}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => changeDate(1)} style={styles.dateArrow}>
@@ -138,19 +140,19 @@ export default function RoomScheduleScreen({ navigation }: any) {
           </View>
         ) : schedules.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>Nenhuma sala com agenda</Text>
+            <Ionicons name="calendar-outline" size={64} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma sala com agenda</Text>
           </View>
         ) : (
           schedules.map((schedule) => (
-            <View key={schedule.room._id} style={styles.roomSection}>
-              <View style={styles.roomSectionHeader}>
+            <View key={schedule.room._id} style={[styles.roomSection, { backgroundColor: colors.surface }]}>
+              <View style={[styles.roomSectionHeader, { backgroundColor: colors.surfaceSecondary, borderBottomColor: colors.borderLight }]}>
                 <Ionicons name="business" size={18} color="#4A90E2" />
-                <Text style={styles.roomSectionName}>{schedule.room.name}</Text>
+                <Text style={[styles.roomSectionName, { color: colors.textPrimary }]}>{schedule.room.name}</Text>
                 {schedule.room.number && (
-                  <Text style={styles.roomSectionNumber}>#{schedule.room.number}</Text>
+                  <Text style={[styles.roomSectionNumber, { color: colors.textSecondary }]}>#{schedule.room.number}</Text>
                 )}
-                <View style={styles.appointmentCount}>
+                <View style={[styles.appointmentCount, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
                   <Text style={styles.appointmentCountText}>
                     {schedule.appointments.length}
                   </Text>
@@ -167,18 +169,18 @@ export default function RoomScheduleScreen({ navigation }: any) {
                     key={appt._id}
                     style={[
                       styles.appointmentItem,
-                      { borderLeftColor: getStatusColor(appt.roomStatus) },
+                      { borderLeftColor: getStatusColor(appt.roomStatus), borderBottomColor: colors.borderLight },
                     ]}
                   >
                     <View style={styles.appointmentTime}>
-                      <Text style={styles.timeStart}>{formatTime(appt.date)}</Text>
-                      <Text style={styles.timeEnd}>{formatEndTime(appt.date, appt.duration)}</Text>
+                      <Text style={[styles.timeStart, { color: colors.textPrimary }]}>{formatTime(appt.date)}</Text>
+                      <Text style={[styles.timeEnd, { color: colors.textTertiary }]}>{formatEndTime(appt.date, appt.duration)}</Text>
                     </View>
                     <View style={styles.appointmentDetails}>
-                      <Text style={styles.appointmentPsychologist}>
+                      <Text style={[styles.appointmentPsychologist, { color: colors.textPrimary }]}>
                         {appt.psychologistId?.name || 'Psicologo'}
                       </Text>
-                      <Text style={styles.appointmentPatient}>
+                      <Text style={[styles.appointmentPatient, { color: colors.textSecondary }]}>
                         {appt.patientId?.name || 'Paciente'}
                       </Text>
                     </View>
@@ -203,7 +205,6 @@ export default function RoomScheduleScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -211,9 +212,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   backBtn: {
     padding: 8,
@@ -221,7 +220,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#333',
   },
   dateSelector: {
     flexDirection: 'row',
@@ -229,9 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   dateArrow: {
     padding: 8,
@@ -242,7 +238,6 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     textTransform: 'capitalize',
   },
   todayLink: {
@@ -265,10 +260,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
   },
   roomSection: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
@@ -278,22 +271,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 14,
-    backgroundColor: '#fafafa',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   roomSectionName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
   },
   roomSectionNumber: {
     fontSize: 13,
-    color: '#666',
   },
   appointmentCount: {
-    backgroundColor: '#E8F4FD',
     borderRadius: 10,
     minWidth: 24,
     height: 24,
@@ -320,7 +308,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
     borderLeftWidth: 4,
   },
   appointmentTime: {
@@ -330,11 +317,9 @@ const styles = StyleSheet.create({
   timeStart: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
   },
   timeEnd: {
     fontSize: 12,
-    color: '#999',
   },
   appointmentDetails: {
     flex: 1,
@@ -343,11 +328,9 @@ const styles = StyleSheet.create({
   appointmentPsychologist: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
   },
   appointmentPatient: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   roomStatusBadge: {

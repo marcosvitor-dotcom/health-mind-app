@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as clinicService from '../../services/clinicService';
 import { ClinicPsychologist } from '../../services/clinicService';
 
 export default function PsychologistsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [psychologists, setPsychologists] = useState<ClinicPsychologist[]>([]);
@@ -141,28 +143,28 @@ export default function PsychologistsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Psicólogos da Clínica</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Psicólogos da Clínica</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Psicólogos da Clínica</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Psicólogos da Clínica</Text>
       </View>
 
       {/* Barra de ações */}
-      <View style={styles.actionsBar}>
+      <View style={[styles.actionsBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
-          style={styles.actionBarButton}
+          style={[styles.actionBarButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
           onPress={() => navigation.navigate('Invitations')}
         >
           <Ionicons name="mail-open" size={18} color="#4A90E2" />
@@ -170,7 +172,7 @@ export default function PsychologistsScreen({ navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.actionBarButton}
+          style={[styles.actionBarButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
           onPress={() => navigation.navigate('InvitePsychologist')}
         >
           <Ionicons name="send" size={18} color="#4A90E2" />
@@ -188,16 +190,16 @@ export default function PsychologistsScreen({ navigation }: any) {
         {error ? (
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={loadData}>
               <Text style={styles.retryButtonText}>Tentar novamente</Text>
             </TouchableOpacity>
           </View>
         ) : psychologists.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyTitle}>Nenhum psicólogo cadastrado</Text>
-            <Text style={styles.emptyText}>
+            <Ionicons name="people-outline" size={64} color={colors.textTertiary} />
+            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Nenhum psicólogo cadastrado</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               Convide ou cadastre psicólogos para começar a usar o sistema.
             </Text>
             <TouchableOpacity
@@ -225,20 +227,20 @@ export default function PsychologistsScreen({ navigation }: any) {
                     </View>
                   )}
                   <View style={styles.psychologistInfo}>
-                    <Text style={styles.name}>{psychologist.name}</Text>
-                    <Text style={styles.crp}>{psychologist.crp}</Text>
+                    <Text style={[styles.name, { color: colors.textPrimary }]}>{psychologist.name}</Text>
+                    <Text style={[styles.crp, { color: colors.textSecondary }]}>{psychologist.crp}</Text>
                   </View>
                 </View>
 
               {psychologist.specialties && psychologist.specialties.length > 0 && (
                 <View style={styles.specialtiesContainer}>
                   {psychologist.specialties.slice(0, 3).map((specialty, index) => (
-                    <View key={index} style={styles.specialtyTag}>
+                    <View key={index} style={[styles.specialtyTag, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
                       <Text style={styles.specialtyText}>{specialty}</Text>
                     </View>
                   ))}
                   {psychologist.specialties.length > 3 && (
-                    <View style={[styles.specialtyTag, styles.moreTag]}>
+                    <View style={[styles.specialtyTag, styles.moreTag, { backgroundColor: colors.borderLight }]}>
                       <Text style={styles.specialtyText}>+{psychologist.specialties.length - 3}</Text>
                     </View>
                   )}
@@ -247,14 +249,14 @@ export default function PsychologistsScreen({ navigation }: any) {
 
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
-                  <Ionicons name="people" size={16} color="#666" />
-                  <Text style={styles.statText}>
+                  <Ionicons name="people" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.statText, { color: colors.textSecondary }]}>
                     {psychologist.patientCount || 0} pacientes
                   </Text>
                 </View>
                 <View style={styles.stat}>
-                  <Ionicons name="time" size={16} color="#666" />
-                  <Text style={styles.statText}>
+                  <Ionicons name="time" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.statText, { color: colors.textSecondary }]}>
                     Próxima: {formatNextAppointment(psychologist.nextAppointment)}
                   </Text>
                 </View>
@@ -280,11 +282,11 @@ export default function PsychologistsScreen({ navigation }: any) {
         onRequestClose={() => setShowContactModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Psicólogo</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes do Psicólogo</Text>
               <TouchableOpacity onPress={() => setShowContactModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -298,28 +300,28 @@ export default function PsychologistsScreen({ navigation }: any) {
                   )}
                 </View>
 
-                <Text style={styles.contactName}>{contactPsychologist.name}</Text>
-                <Text style={styles.contactCrp}>{contactPsychologist.crp}</Text>
+                <Text style={[styles.contactName, { color: colors.textPrimary }]}>{contactPsychologist.name}</Text>
+                <Text style={[styles.contactCrp, { color: colors.textSecondary }]}>{contactPsychologist.crp}</Text>
 
                 <View style={styles.contactInfo}>
-                  <View style={styles.contactInfoRow}>
-                    <Ionicons name="mail" size={20} color="#666" />
-                    <Text style={styles.contactInfoText}>
+                  <View style={[styles.contactInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="mail" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.contactInfoText, { color: colors.textPrimary }]}>
                       {contactPsychologist.email || 'Email não disponível'}
                     </Text>
                   </View>
 
-                  <View style={styles.contactInfoRow}>
-                    <Ionicons name="call" size={20} color="#666" />
-                    <Text style={styles.contactInfoText}>
+                  <View style={[styles.contactInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="call" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.contactInfoText, { color: colors.textPrimary }]}>
                       {contactPsychologist.phone || 'Telefone não disponível'}
                     </Text>
                   </View>
 
                   {contactPsychologist.specialties && contactPsychologist.specialties.length > 0 && (
-                    <View style={styles.contactInfoRow}>
-                      <Ionicons name="briefcase" size={20} color="#666" />
-                      <Text style={styles.contactInfoText}>
+                    <View style={[styles.contactInfoRow, { borderBottomColor: colors.borderLight }]}>
+                      <Ionicons name="briefcase" size={20} color={colors.textSecondary} />
+                      <Text style={[styles.contactInfoText, { color: colors.textPrimary }]}>
                         {contactPsychologist.specialties.join(', ')}
                       </Text>
                     </View>
@@ -348,56 +350,56 @@ export default function PsychologistsScreen({ navigation }: any) {
 
                 {/* Seção de Estatísticas */}
                 <View style={styles.statsSection}>
-                  <Text style={styles.sectionTitle}>Estatísticas</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Estatísticas</Text>
 
                   <View style={styles.statsGrid}>
-                    <View style={styles.statsCard}>
+                    <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                       <Ionicons name="people" size={32} color="#4A90E2" />
-                      <Text style={styles.statsNumber}>{contactPsychologist.patientCount || 0}</Text>
-                      <Text style={styles.statsLabel}>Pacientes</Text>
+                      <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>{contactPsychologist.patientCount || 0}</Text>
+                      <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Pacientes</Text>
                     </View>
 
-                    <View style={styles.statsCard}>
+                    <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                       <Ionicons name="calendar" size={32} color="#27AE60" />
-                      <Text style={styles.statsNumber}>
+                      <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                         {contactPsychologist.nextAppointment ? formatNextAppointment(contactPsychologist.nextAppointment) : '--:--'}
                       </Text>
-                      <Text style={styles.statsLabel}>Próxima Sessão</Text>
+                      <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Próxima Sessão</Text>
                     </View>
 
-                    <View style={styles.statsCard}>
+                    <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                       <Ionicons name="cash" size={32} color="#F39C12" />
-                      <Text style={styles.statsNumber}>R$ 0,00</Text>
-                      <Text style={styles.statsLabel}>A Receber</Text>
+                      <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>R$ 0,00</Text>
+                      <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>A Receber</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Lista de Pacientes */}
                 <View style={styles.patientsSection}>
-                  <Text style={styles.sectionTitle}>Pacientes ({psychologistPatients.length})</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Pacientes ({psychologistPatients.length})</Text>
 
                   {loadingModalData ? (
                     <ActivityIndicator color="#4A90E2" style={{ marginVertical: 20 }} />
                   ) : psychologistPatients.length === 0 ? (
-                    <Text style={styles.emptyText}>Nenhum paciente vinculado</Text>
+                    <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Nenhum paciente vinculado</Text>
                   ) : (
                     psychologistPatients.slice(0, 5).map((patient: any) => (
-                      <View key={patient._id || patient.id} style={styles.patientItem}>
-                        <Ionicons name="person" size={20} color="#666" />
-                        <Text style={styles.patientName}>{patient.name}</Text>
+                      <View key={patient._id || patient.id} style={[styles.patientItem, { borderBottomColor: colors.borderLight }]}>
+                        <Ionicons name="person" size={20} color={colors.textSecondary} />
+                        <Text style={[styles.patientName, { color: colors.textPrimary }]}>{patient.name}</Text>
                       </View>
                     ))
                   )}
 
                   {psychologistPatients.length > 5 && (
-                    <Text style={styles.moreText}>E mais {psychologistPatients.length - 5} pacientes...</Text>
+                    <Text style={[styles.moreText, { color: colors.textTertiary }]}>E mais {psychologistPatients.length - 5} pacientes...</Text>
                   )}
                 </View>
 
                 {/* Botão de Desvincular */}
                 <TouchableOpacity
-                  style={styles.unlinkButtonModal}
+                  style={[styles.unlinkButtonModal, { backgroundColor: isDark ? '#3D1F1F' : '#FFE8E8' }]}
                   onPress={() => {
                     setShowContactModal(false);
                     handleUnlinkPsychologist(contactPsychologist);
@@ -408,10 +410,10 @@ export default function PsychologistsScreen({ navigation }: any) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.closeContactButton}
+                  style={[styles.closeContactButton, { backgroundColor: colors.borderLight }]}
                   onPress={() => setShowContactModal(false)}
                 >
-                  <Text style={styles.closeContactButtonText}>Fechar</Text>
+                  <Text style={[styles.closeContactButtonText, { color: colors.textSecondary }]}>Fechar</Text>
                 </TouchableOpacity>
               </ScrollView>
             )}
@@ -425,26 +427,20 @@ export default function PsychologistsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   actionsBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     gap: 8,
   },
   actionBarButton: {
@@ -452,7 +448,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E8F4FF',
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 8,
@@ -471,7 +466,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -483,7 +477,6 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   retryButton: {
@@ -509,12 +502,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   emptyText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -567,11 +558,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   crp: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
   specialtiesContainer: {
@@ -581,14 +570,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   specialtyTag: {
-    backgroundColor: '#E8F4FD',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
-  moreTag: {
-    backgroundColor: '#f0f0f0',
-  },
+  moreTag: {},
   specialtyText: {
     fontSize: 12,
     color: '#4A90E2',
@@ -605,7 +591,6 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 6,
   },
   actionsRow: {
@@ -628,7 +613,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFE8E8',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
@@ -646,7 +630,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -661,7 +644,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   // Contact Modal styles
   contactAvatar: {
@@ -676,12 +658,10 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
   },
   contactCrp: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -693,11 +673,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   contactInfoText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 12,
     flex: 1,
   },
@@ -721,7 +699,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   closeContactButton: {
-    backgroundColor: '#f0f0f0',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -729,7 +706,6 @@ const styles = StyleSheet.create({
   closeContactButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   statsSection: {
     marginTop: 20,
@@ -738,7 +714,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   statsGrid: {
@@ -747,7 +722,6 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -755,12 +729,10 @@ const styles = StyleSheet.create({
   statsNumber: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 8,
   },
   statsLabel: {
     fontSize: 12,
-    color: '#666',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -772,16 +744,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   patientName: {
     fontSize: 14,
-    color: '#333',
     marginLeft: 10,
   },
   moreText: {
     fontSize: 12,
-    color: '#999',
     fontStyle: 'italic',
     marginTop: 8,
   },
@@ -789,7 +758,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFE8E8',
     paddingVertical: 14,
     borderRadius: 8,
     gap: 8,

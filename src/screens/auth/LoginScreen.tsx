@@ -15,9 +15,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function LoginScreen() {
   const navigation = useNavigation<any>();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,7 +47,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: isDark ? colors.background : '#1A252F' }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -63,12 +65,12 @@ export default function LoginScreen() {
           <Text style={styles.subtitle}>Plataforma de Saúde Mental</Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="seu@email.com"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -76,12 +78,12 @@ export default function LoginScreen() {
             editable={!loading}
           />
 
-          <Text style={styles.label}>Senha</Text>
-          <View style={styles.passwordContainer}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Senha</Text>
+          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}>
             <TextInput
-              style={styles.passwordInput}
+              style={[styles.passwordInput, { color: colors.textPrimary }]}
               placeholder="********"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -95,7 +97,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={24}
-                color="#666"
+                color={colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
@@ -116,21 +118,21 @@ export default function LoginScreen() {
             style={styles.forgotPassword}
             disabled={loading}
           >
-            <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+            <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>Esqueceu a senha?</Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={styles.firstAccessButton}
+          style={[styles.firstAccessButton, { borderColor: isDark ? colors.border : 'rgba(74, 144, 226, 0.3)' }]}
           onPress={() => navigation.navigate('FirstAccess')}
           disabled={loading}
         >
-          <Ionicons name="key-outline" size={18} color="#4A90E2" />
-          <Text style={styles.firstAccessText}>Primeiro acesso? Completar cadastro</Text>
+          <Ionicons name="key-outline" size={18} color={colors.primary} />
+          <Text style={[styles.firstAccessText, { color: colors.primary }]}>Primeiro acesso? Completar cadastro</Text>
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Health Mind App - Versão 1.0.0</Text>
+          <Text style={[styles.footerText, { color: colors.textTertiary }]}>Health Mind App - Versão 1.0.0</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -140,7 +142,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A252F',
   },
   scrollContent: {
     flexGrow: 1,
@@ -164,7 +165,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -176,33 +176,28 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
-    color: '#333',
   },
   passwordContainer: {
-    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 8,
   },
   passwordInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    flex: 1,
     padding: 12,
     paddingRight: 48,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
   },
   eyeButton: {
     position: 'absolute',
@@ -230,7 +225,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   forgotPasswordText: {
-    color: '#4A90E2',
     fontSize: 14,
   },
   firstAccessButton: {
@@ -241,11 +235,9 @@ const styles = StyleSheet.create({
     gap: 6,
     padding: 12,
     borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.3)',
     borderRadius: 10,
   },
   firstAccessText: {
-    color: '#4A90E2',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -254,7 +246,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   footerText: {
-    color: '#999',
     fontSize: 12,
   },
 });

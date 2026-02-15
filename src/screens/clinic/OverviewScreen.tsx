@@ -5,12 +5,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as clinicService from '../../services/clinicService';
 import { ClinicData, ClinicStats } from '../../services/clinicService';
 
 export default function OverviewScreen() {
   const navigation = useNavigation<any>();
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [clinicData, setClinicData] = useState<ClinicData | null>(null);
@@ -79,10 +81,10 @@ export default function OverviewScreen() {
         <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
           <Ionicons name={icon} size={24} color={color} />
         </View>
-        <Text style={styles.statValue}>{value}</Text>
-        <Text style={styles.statTitle}>{title}</Text>
+        <Text style={[styles.statValue, { color: colors.textPrimary }]}>{value}</Text>
+        <Text style={[styles.statTitle, { color: colors.textSecondary }]}>{title}</Text>
         {onPress && (
-          <Ionicons name="chevron-forward" size={16} color="#ccc" style={styles.cardArrow} />
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} style={styles.cardArrow} />
         )}
       </Card>
     );
@@ -122,10 +124,10 @@ export default function OverviewScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
         </View>
       </SafeAreaView>
     );
@@ -133,10 +135,10 @@ export default function OverviewScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]} edges={['top']}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadData}>
             <Text style={styles.retryButtonText}>Tentar novamente</Text>
           </TouchableOpacity>
@@ -146,15 +148,15 @@ export default function OverviewScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]} edges={['top']}>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#4A90E2']} />
         }
       >
-        <View style={styles.header}>
-          <Text style={styles.welcomeText}>Bem-vindo(a),</Text>
-          <Text style={styles.clinicName}>{clinicData?.name || user?.name}</Text>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>Bem-vindo(a),</Text>
+          <Text style={[styles.clinicName, { color: colors.textPrimary }]}>{clinicData?.name || user?.name}</Text>
         </View>
 
         <View style={styles.statsContainer}>
@@ -194,14 +196,14 @@ export default function OverviewScreen() {
         <TouchableOpacity activeOpacity={0.7} onPress={navigateToPatients}>
           <Card style={styles.newPatientsCard}>
             <View style={styles.newPatientsContent}>
-              <View style={[styles.newPatientsIconContainer]}>
+              <View style={[styles.newPatientsIconContainer, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}>
                 <Ionicons name="person-add" size={28} color="#4A90E2" />
               </View>
               <View style={styles.newPatientsInfo}>
                 <Text style={styles.newPatientsValue}>{newPatientsThisMonth}</Text>
-                <Text style={styles.newPatientsTitle}>Novos Pacientes em {getCurrentMonthName()}</Text>
+                <Text style={[styles.newPatientsTitle, { color: colors.textSecondary }]}>Novos Pacientes em {getCurrentMonthName()}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
             </View>
           </Card>
         </TouchableOpacity>
@@ -209,19 +211,19 @@ export default function OverviewScreen() {
         <Card style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Ionicons name="business" size={24} color="#4A90E2" />
-            <Text style={styles.infoTitle}>Informações da Clínica</Text>
+            <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>Informações da Clínica</Text>
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="location" size={20} color="#666" />
-            <Text style={styles.infoText}>{formatAddress(clinicData?.address)}</Text>
+            <Ionicons name="location" size={20} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{formatAddress(clinicData?.address)}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="call" size={20} color="#666" />
-            <Text style={styles.infoText}>{clinicData?.phone || 'Telefone não cadastrado'}</Text>
+            <Ionicons name="call" size={20} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{clinicData?.phone || 'Telefone não cadastrado'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="mail" size={20} color="#666" />
-            <Text style={styles.infoText}>{clinicData?.email || user?.email}</Text>
+            <Ionicons name="mail" size={20} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{clinicData?.email || user?.email}</Text>
           </View>
         </Card>
 
@@ -233,7 +235,6 @@ export default function OverviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   loadingContainer: {
     flex: 1,
@@ -243,7 +244,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -254,7 +254,6 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   retryButton: {
@@ -271,18 +270,14 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
   },
   clinicName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 4,
   },
   statsContainer: {
@@ -314,12 +309,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
-    color: '#666',
     textAlign: 'center',
   },
   infoCard: {
@@ -333,7 +326,6 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 8,
   },
   infoRow: {
@@ -343,7 +335,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 12,
     flex: 1,
   },
@@ -360,7 +351,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#E8F4FF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -375,7 +365,6 @@ const styles = StyleSheet.create({
   },
   newPatientsTitle: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
 });

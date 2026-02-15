@@ -17,7 +17,12 @@
       "bundleIdentifier": "com.healthmindapp",
       "associatedDomains": [
         "applinks:health-mind-app.vercel.app"
-      ]
+      ],
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Permitir que o Health Mind use o reconhecimento de fala para transcrever sua voz em texto.",
+        "NSMicrophoneUsageDescription": "Permitir que o Health Mind acesse o microfone para transcrever sua voz em texto.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -42,6 +47,9 @@
             "DEFAULT"
           ]
         }
+      ],
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -66,7 +74,9 @@
         {
           "microphonePermission": "Permitir que o Health Mind acesse o microfone para transcrever sua voz em texto.",
           "speechRecognitionPermission": "Permitir que o Health Mind use o reconhecimento de fala para transcrever sua voz em texto.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
         }
       ]
     ],

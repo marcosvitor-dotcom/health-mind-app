@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as appointmentService from '../../services/appointmentService';
 
@@ -24,6 +25,7 @@ interface AppointmentsByDate {
 
 export default function PsychScheduleScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
@@ -248,8 +250,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
     if (dayAppointments.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="calendar-outline" size={48} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum compromisso agendado</Text>
+          <Ionicons name="calendar-outline" size={48} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Nenhum compromisso agendado</Text>
           <TouchableOpacity
             style={styles.addAppointmentButton}
             onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
@@ -271,7 +273,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
             <View style={styles.appointmentHeader}>
               <View style={styles.timeContainer}>
                 <Ionicons name="time-outline" size={20} color="#4A90E2" />
-                <Text style={styles.appointmentTime}>{formatTime(getDateTime(appt))}</Text>
+                <Text style={[styles.appointmentTime, { color: colors.textPrimary }]}>{formatTime(getDateTime(appt))}</Text>
               </View>
               <View
                 style={[
@@ -285,13 +287,13 @@ export default function PsychScheduleScreen({ navigation }: any) {
               </View>
             </View>
 
-            <Text style={styles.patientName}>
+            <Text style={[styles.patientName, { color: colors.textPrimary }]}>
               {appt.patient?.name || 'Paciente não informado'}
             </Text>
-            <Text style={styles.appointmentType}>{getTypeLabel(appt.type)}</Text>
+            <Text style={[styles.appointmentType, { color: colors.textSecondary }]}>{getTypeLabel(appt.type)}</Text>
 
             <TouchableOpacity
-              style={styles.detailsButton}
+              style={[styles.detailsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}
               onPress={() => handleOpenDetail(appt)}
             >
               <Ionicons name="information-circle-outline" size={18} color="#4A90E2" />
@@ -305,20 +307,20 @@ export default function PsychScheduleScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando agenda...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando agenda...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Agenda</Text>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Agenda</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
@@ -329,23 +331,23 @@ export default function PsychScheduleScreen({ navigation }: any) {
 
       {/* Calendário */}
       <Calendar
-        style={styles.calendar}
+        style={[styles.calendar, { borderBottomColor: colors.border }]}
         current={selectedDate}
         onDayPress={(day) => setSelectedDate(day.dateString)}
         markedDates={markedDates}
         theme={{
-          backgroundColor: '#ffffff',
-          calendarBackground: '#ffffff',
-          textSectionTitleColor: '#4A90E2',
+          backgroundColor: isDark ? colors.surface : '#ffffff',
+          calendarBackground: isDark ? colors.surface : '#ffffff',
+          textSectionTitleColor: colors.primary,
           selectedDayBackgroundColor: '#4A90E2',
           selectedDayTextColor: '#ffffff',
           todayTextColor: '#4A90E2',
-          dayTextColor: '#2d4150',
-          textDisabledColor: '#d9e1e8',
+          dayTextColor: isDark ? colors.textPrimary : '#2d4150',
+          textDisabledColor: isDark ? '#555' : '#d9e1e8',
           dotColor: '#4A90E2',
           selectedDotColor: '#ffffff',
           arrowColor: '#4A90E2',
-          monthTextColor: '#2d4150',
+          monthTextColor: isDark ? colors.textPrimary : '#2d4150',
           indicatorColor: '#4A90E2',
           textDayFontWeight: '300',
           textMonthFontWeight: 'bold',
@@ -357,9 +359,9 @@ export default function PsychScheduleScreen({ navigation }: any) {
       />
 
       {/* Data Selecionada */}
-      <View style={styles.selectedDateContainer}>
+      <View style={[styles.selectedDateContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Ionicons name="calendar" size={20} color="#4A90E2" />
-        <Text style={styles.selectedDateText}>
+        <Text style={[styles.selectedDateText, { color: colors.textPrimary }]}>
           {new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR', {
             weekday: 'long',
             year: 'numeric',
@@ -380,11 +382,11 @@ export default function PsychScheduleScreen({ navigation }: any) {
         onRequestClose={() => setShowDetailModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes da Consulta</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes da Consulta</Text>
               <TouchableOpacity onPress={() => setShowDetailModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -395,8 +397,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="person-outline" size={24} color="#4A90E2" />
                       <View style={styles.modalInfoContent}>
-                        <Text style={styles.modalInfoLabel}>Paciente</Text>
-                        <Text style={styles.modalInfoValue}>
+                        <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Paciente</Text>
+                        <Text style={[styles.modalInfoValue, { color: colors.textPrimary }]}>
                           {selectedAppointment.patient?.name || 'Não informado'}
                         </Text>
                       </View>
@@ -405,8 +407,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="calendar-outline" size={24} color="#4A90E2" />
                       <View style={styles.modalInfoContent}>
-                        <Text style={styles.modalInfoLabel}>Data</Text>
-                        <Text style={styles.modalInfoValue}>
+                        <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Data</Text>
+                        <Text style={[styles.modalInfoValue, { color: colors.textPrimary }]}>
                           {formatDate(getDateTime(selectedAppointment))}
                         </Text>
                       </View>
@@ -415,8 +417,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="time-outline" size={24} color="#4A90E2" />
                       <View style={styles.modalInfoContent}>
-                        <Text style={styles.modalInfoLabel}>Horário</Text>
-                        <Text style={styles.modalInfoValue}>
+                        <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Horário</Text>
+                        <Text style={[styles.modalInfoValue, { color: colors.textPrimary }]}>
                           {formatTime(getDateTime(selectedAppointment))}
                         </Text>
                       </View>
@@ -425,8 +427,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="medical-outline" size={24} color="#4A90E2" />
                       <View style={styles.modalInfoContent}>
-                        <Text style={styles.modalInfoLabel}>Tipo</Text>
-                        <Text style={styles.modalInfoValue}>
+                        <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Tipo</Text>
+                        <Text style={[styles.modalInfoValue, { color: colors.textPrimary }]}>
                           {getTypeLabel(selectedAppointment.type)}
                         </Text>
                       </View>
@@ -435,7 +437,7 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="information-circle-outline" size={24} color="#4A90E2" />
                       <View style={styles.modalInfoContent}>
-                        <Text style={styles.modalInfoLabel}>Status</Text>
+                        <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Status</Text>
                         <View
                           style={[
                             styles.statusBadge,
@@ -461,8 +463,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                       <View style={styles.modalInfoRow}>
                         <Ionicons name="document-text-outline" size={24} color="#4A90E2" />
                         <View style={styles.modalInfoContent}>
-                          <Text style={styles.modalInfoLabel}>Observações</Text>
-                          <Text style={styles.modalInfoValue}>
+                          <Text style={[styles.modalInfoLabel, { color: colors.textSecondary }]}>Observações</Text>
+                          <Text style={[styles.modalInfoValue, { color: colors.textPrimary }]}>
                             {selectedAppointment.notes}
                           </Text>
                         </View>
@@ -472,10 +474,10 @@ export default function PsychScheduleScreen({ navigation }: any) {
 
                   {/* Seção de Pagamento */}
                   {(selectedAppointment as any).paymentId && (
-                    <View style={styles.paymentSection}>
-                      <Text style={styles.paymentTitle}>Pagamento</Text>
+                    <View style={[styles.paymentSection, { backgroundColor: colors.surfaceSecondary }]}>
+                      <Text style={[styles.paymentTitle, { color: colors.textPrimary }]}>Pagamento</Text>
                       <View style={styles.paymentRow}>
-                        <Text style={styles.paymentLabel}>Status:</Text>
+                        <Text style={[styles.paymentLabel, { color: colors.textSecondary }]}>Status:</Text>
                         <View style={[styles.paymentBadge, { backgroundColor: getPaymentStatusColor((selectedAppointment as any).paymentId.status) + '20' }]}>
                           <Text style={[styles.paymentBadgeText, { color: getPaymentStatusColor((selectedAppointment as any).paymentId.status) }]}>
                             {getPaymentStatusLabel((selectedAppointment as any).paymentId.status)}
@@ -484,8 +486,8 @@ export default function PsychScheduleScreen({ navigation }: any) {
                       </View>
                       {(selectedAppointment as any).paymentId.finalValue > 0 && (
                         <View style={styles.paymentRow}>
-                          <Text style={styles.paymentLabel}>Valor:</Text>
-                          <Text style={styles.paymentValue}>
+                          <Text style={[styles.paymentLabel, { color: colors.textSecondary }]}>Valor:</Text>
+                          <Text style={[styles.paymentValue, { color: colors.textPrimary }]}>
                             R$ {(selectedAppointment as any).paymentId.finalValue.toFixed(2).replace('.', ',')}
                           </Text>
                         </View>
@@ -535,7 +537,6 @@ export default function PsychScheduleScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -545,41 +546,33 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
   },
   addButton: {
     padding: 4,
   },
   calendar: {
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   selectedDateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   selectedDateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 8,
     textTransform: 'capitalize',
   },
@@ -604,7 +597,6 @@ const styles = StyleSheet.create({
   appointmentTime: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginLeft: 6,
   },
   statusBadge: {
@@ -619,12 +611,10 @@ const styles = StyleSheet.create({
   patientName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   appointmentType: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 12,
   },
   detailsButton: {
@@ -633,7 +623,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#E8F4FD',
   },
   detailsButtonText: {
     fontSize: 14,
@@ -650,7 +639,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
     marginTop: 16,
     marginBottom: 20,
   },
@@ -674,7 +662,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -685,12 +672,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   modalBody: {
     padding: 20,
@@ -709,13 +694,11 @@ const styles = StyleSheet.create({
   },
   modalInfoLabel: {
     fontSize: 12,
-    color: '#666',
     marginBottom: 4,
   },
   modalInfoValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   modalActions: {
     marginTop: 20,
@@ -741,7 +724,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   paymentSection: {
-    backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 12,
     marginTop: 16,
@@ -750,7 +732,6 @@ const styles = StyleSheet.create({
   paymentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   paymentRow: {
@@ -761,12 +742,10 @@ const styles = StyleSheet.create({
   },
   paymentLabel: {
     fontSize: 14,
-    color: '#666',
   },
   paymentValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   paymentBadge: {
     paddingHorizontal: 12,

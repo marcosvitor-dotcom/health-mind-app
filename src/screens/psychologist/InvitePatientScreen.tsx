@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as authService from '../../services/authService';
 
 interface InvitePatientScreenProps {
@@ -19,6 +20,7 @@ interface InvitePatientScreenProps {
 }
 
 export default function InvitePatientScreen({ navigation }: InvitePatientScreenProps) {
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -81,7 +83,7 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -92,18 +94,18 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
       >
         <View style={styles.header}>
           <Ionicons name="person-add" size={64} color="#50C878" />
-          <Text style={styles.title}>Convidar Paciente</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Convidar Paciente</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Envie um convite para um novo paciente iniciar o tratamento
           </Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email *</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="paciente@email.com"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -111,32 +113,32 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
             editable={!loading}
           />
 
-          <Text style={styles.label}>Nome Completo *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="Maria Santos"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             editable={!loading}
           />
 
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="(11) 98765-4321"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             editable={!loading}
           />
 
-          <Text style={styles.label}>Data de Nascimento</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Data de Nascimento</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="DD/MM/AAAA"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={birthDate}
             onChangeText={formatBirthDate}
             keyboardType="numeric"
@@ -144,7 +146,7 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
             editable={!loading}
           />
 
-          <View style={styles.infoBox}>
+          <View style={[styles.infoBox, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}>
             <Ionicons name="information-circle" size={20} color="#4A90E2" />
             <Text style={styles.infoText}>
               O paciente receberá um e-mail com um link para completar o cadastro e definir sua senha.
@@ -174,7 +176,6 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
@@ -188,17 +189,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 16,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
     marginTop: 8,
     textAlign: 'center',
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -210,23 +208,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
-    color: '#333',
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#E8F4FF',
     padding: 12,
     borderRadius: 8,
     marginTop: 12,

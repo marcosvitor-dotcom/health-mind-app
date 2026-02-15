@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 
 interface PatientStats {
@@ -26,6 +27,7 @@ interface PatientStats {
 
 export default function ClientsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [patients, setPatients] = useState<psychologistService.Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -175,22 +177,22 @@ export default function ClientsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando pacientes...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando pacientes...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meus Pacientes</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Meus Pacientes</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
-            style={styles.invitationsButton}
+            style={[styles.invitationsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8FFF0' }]}
             onPress={() => navigation.navigate('Invitations')}
           >
             <Ionicons name="mail-open" size={18} color="#50C878" />
@@ -211,12 +213,12 @@ export default function ClientsScreen({ navigation }: any) {
         </View>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" />
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Ionicons name="search" size={20} color={colors.textTertiary} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.textPrimary }]}
           placeholder="Buscar paciente..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.textTertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -242,7 +244,7 @@ export default function ClientsScreen({ navigation }: any) {
               )}
               <View style={styles.clientInfo}>
                 <View style={styles.nameRow}>
-                  <Text style={styles.name}>{patient.name}</Text>
+                  <Text style={[styles.name, { color: colors.textPrimary }]}>{patient.name}</Text>
                   {patient.status && (
                     <View
                       style={[
@@ -261,12 +263,12 @@ export default function ClientsScreen({ navigation }: any) {
                     </View>
                   )}
                 </View>
-                <Text style={styles.email}>{patient.email}</Text>
+                <Text style={[styles.email, { color: colors.textSecondary }]}>{patient.email}</Text>
               </View>
             </View>
 
             <TouchableOpacity
-              style={styles.detailsButton}
+              style={[styles.detailsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}
               onPress={() => handleOpenModal(patient)}
             >
               <Ionicons name="information-circle-outline" size={20} color="#4A90E2" />
@@ -277,8 +279,8 @@ export default function ClientsScreen({ navigation }: any) {
 
         {filteredPatients.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyStateText}>
+            <Ionicons name="people-outline" size={64} color={colors.textTertiary} />
+            <Text style={[styles.emptyStateText, { color: colors.textTertiary }]}>
               {searchQuery ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
             </Text>
           </View>
@@ -293,11 +295,11 @@ export default function ClientsScreen({ navigation }: any) {
         onRequestClose={() => setShowModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Paciente</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes do Paciente</Text>
               <TouchableOpacity onPress={() => setShowModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -320,10 +322,10 @@ export default function ClientsScreen({ navigation }: any) {
                         </Text>
                       </View>
                     )}
-                    <Text style={styles.modalName}>{selectedPatient.name}</Text>
-                    <Text style={styles.modalEmail}>{selectedPatient.email}</Text>
+                    <Text style={[styles.modalName, { color: colors.textPrimary }]}>{selectedPatient.name}</Text>
+                    <Text style={[styles.modalEmail, { color: colors.textSecondary }]}>{selectedPatient.email}</Text>
                     {selectedPatient.phone && (
-                      <Text style={styles.modalPhone}>{selectedPatient.phone}</Text>
+                      <Text style={[styles.modalPhone, { color: colors.textSecondary }]}>{selectedPatient.phone}</Text>
                     )}
                   </View>
 
@@ -331,39 +333,39 @@ export default function ClientsScreen({ navigation }: any) {
                   {loadingStats ? (
                     <View style={styles.modalSection}>
                       <ActivityIndicator size="small" color="#4A90E2" />
-                      <Text style={styles.loadingStatsText}>Carregando estatísticas...</Text>
+                      <Text style={[styles.loadingStatsText, { color: colors.textSecondary }]}>Carregando estatísticas...</Text>
                     </View>
                   ) : patientStats ? (
                     <View style={styles.modalSection}>
-                      <Text style={styles.sectionTitle}>Estatísticas</Text>
+                      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Estatísticas</Text>
                       <View style={styles.statsGrid}>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
-                          <Text style={styles.statsNumber}>{patientStats.sessionsCount}</Text>
-                          <Text style={styles.statsLabel}>Sessões Realizadas</Text>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>{patientStats.sessionsCount}</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Sessões Realizadas</Text>
                         </View>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="cash-outline" size={32} color="#50C878" />
-                          <Text style={styles.statsNumber}>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                             {formatCurrency(patientStats.totalPaid)}
                           </Text>
-                          <Text style={styles.statsLabel}>Pago</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Pago</Text>
                         </View>
                       </View>
                       <View style={styles.statsGrid}>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="time-outline" size={32} color="#FF9800" />
-                          <Text style={styles.statsDate}>
+                          <Text style={[styles.statsDate, { color: colors.textPrimary }]}>
                             {formatDate(patientStats.nextAppointment)}
                           </Text>
-                          <Text style={styles.statsLabel}>Próxima Sessão</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Próxima Sessão</Text>
                         </View>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="wallet-outline" size={32} color="#E74C3C" />
-                          <Text style={styles.statsNumber}>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                             {formatCurrency(patientStats.totalPending)}
                           </Text>
-                          <Text style={styles.statsLabel}>A Receber</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>A Receber</Text>
                         </View>
                       </View>
                     </View>
@@ -371,9 +373,9 @@ export default function ClientsScreen({ navigation }: any) {
 
                   {/* Ações */}
                   <View style={styles.modalSection}>
-                    <Text style={styles.sectionTitle}>Ações</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ações</Text>
                     <TouchableOpacity
-                      style={styles.modalActionButton}
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
                       onPress={() => {
                         setShowModal(false);
                         const patientId = selectedPatient?._id || selectedPatient?.id;
@@ -385,14 +387,14 @@ export default function ClientsScreen({ navigation }: any) {
                       }}
                     >
                       <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
-                      <Text style={styles.modalActionText}>Enviar Mensagem</Text>
+                      <Text style={[styles.modalActionText, { color: colors.textPrimary }]}>Enviar Mensagem</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.modalActionButton}>
+                    <TouchableOpacity style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}>
                       <Ionicons name="document-text" size={20} color="#4A90E2" />
-                      <Text style={styles.modalActionText}>Ver Prontuário</Text>
+                      <Text style={[styles.modalActionText, { color: colors.textPrimary }]}>Ver Prontuário</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.modalActionButton}
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
                       onPress={() => {
                         setShowModal(false);
                         const patientId = selectedPatient?._id || selectedPatient?.id;
@@ -408,7 +410,7 @@ export default function ClientsScreen({ navigation }: any) {
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.modalActionButton}
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
                       onPress={() => {
                         setShowModal(false);
                         navigation.navigate('AppointmentBooking', {
@@ -435,7 +437,6 @@ export default function ClientsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -445,21 +446,17 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   headerButtons: {
     flexDirection: 'row',
@@ -469,7 +466,6 @@ const styles = StyleSheet.create({
   invitationsButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#E8FFF0',
   },
   inviteButton: {
     flexDirection: 'row',
@@ -491,19 +487,16 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     margin: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     marginLeft: 8,
-    color: '#333',
   },
   list: {
     flex: 1,
@@ -544,11 +537,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   email: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
   statusBadge: {
@@ -566,7 +557,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#E8F4FD',
     marginTop: 8,
   },
   detailsButtonText: {
@@ -582,7 +572,6 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16,
-    color: '#999',
     marginTop: 16,
   },
   modalOverlay: {
@@ -591,7 +580,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
@@ -602,12 +590,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   modalBody: {
     padding: 20,
@@ -639,22 +625,18 @@ const styles = StyleSheet.create({
   modalName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   modalEmail: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 4,
   },
   modalPhone: {
     fontSize: 14,
-    color: '#666',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
     alignSelf: 'flex-start',
     width: '100%',
@@ -667,7 +649,6 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -676,24 +657,20 @@ const styles = StyleSheet.create({
   statsNumber: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 8,
   },
   statsDate: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginTop: 8,
   },
   statsLabel: {
     fontSize: 12,
-    color: '#666',
     marginTop: 4,
     textAlign: 'center',
   },
   loadingStatsText: {
     fontSize: 14,
-    color: '#666',
     marginTop: 8,
   },
   modalActionButton: {
@@ -701,12 +678,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
     width: '100%',
   },
   modalActionText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 12,
     fontWeight: '500',
   },

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as subleaseService from '../../services/subleaseService';
 import { SubleaseSummary, RoomSublease } from '../../services/subleaseService';
@@ -33,6 +34,7 @@ interface FinancialData {
 
 export default function ReportsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
@@ -160,21 +162,21 @@ export default function ReportsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando relatórios...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando relatórios...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Relatórios Financeiros</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Relatórios Financeiros</Text>
         {user?.clinicId && (
-          <View style={styles.clinicBadge}>
+          <View style={[styles.clinicBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
             <Ionicons name="business" size={14} color="#50C878" />
             <Text style={styles.clinicBadgeText}>Vinculado</Text>
           </View>
@@ -186,7 +188,7 @@ export default function ReportsScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Period Selector */}
-        <View style={styles.periodSelector}>
+        <View style={[styles.periodSelector, { backgroundColor: colors.surface }]}>
           <TouchableOpacity
             style={[styles.periodButton, selectedPeriod === 'month' && styles.periodButtonActive]}
             onPress={() => setSelectedPeriod('month')}
@@ -194,6 +196,7 @@ export default function ReportsScreen({ navigation }: any) {
             <Text
               style={[
                 styles.periodButtonText,
+                { color: colors.textSecondary },
                 selectedPeriod === 'month' && styles.periodButtonTextActive,
               ]}
             >
@@ -207,6 +210,7 @@ export default function ReportsScreen({ navigation }: any) {
             <Text
               style={[
                 styles.periodButtonText,
+                { color: colors.textSecondary },
                 selectedPeriod === 'year' && styles.periodButtonTextActive,
               ]}
             >
@@ -221,7 +225,7 @@ export default function ReportsScreen({ navigation }: any) {
             <View style={styles.revenueHeader}>
               <Ionicons name="trending-up" size={32} color="#50C878" />
               <View style={styles.revenueInfo}>
-                <Text style={styles.revenueLabel}>
+                <Text style={[styles.revenueLabel, { color: colors.textSecondary }]}>
                   {selectedPeriod === 'month' ? 'Recebido (Mês)' : 'Recebido (Ano)'}
                 </Text>
                 <Text style={styles.revenueValue}>
@@ -239,7 +243,7 @@ export default function ReportsScreen({ navigation }: any) {
             <View style={styles.revenueHeader}>
               <Ionicons name="time-outline" size={32} color="#FF9800" />
               <View style={styles.revenueInfo}>
-                <Text style={styles.revenueLabel}>A Receber</Text>
+                <Text style={[styles.revenueLabel, { color: colors.textSecondary }]}>A Receber</Text>
                 <Text style={[styles.revenueValue, { color: '#FF9800' }]}>
                   {formatCurrency(financialData?.pendingRevenue || 0)}
                 </Text>
@@ -250,36 +254,36 @@ export default function ReportsScreen({ navigation }: any) {
 
         {/* Sessions Stats */}
         <Card style={styles.statsCard}>
-          <Text style={styles.cardTitle}>Estatísticas de Sessões</Text>
+          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Estatísticas de Sessões</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <View style={[styles.statIcon, { backgroundColor: '#E8F4FD' }]}>
+              <View style={[styles.statIcon, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
                 <Ionicons name="checkmark-circle" size={28} color="#4A90E2" />
               </View>
-              <Text style={styles.statNumber}>{financialData?.completedSessions || 0}</Text>
-              <Text style={styles.statLabel}>Concluídas</Text>
+              <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{financialData?.completedSessions || 0}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Concluídas</Text>
             </View>
 
             <View style={styles.statItem}>
-              <View style={[styles.statIcon, { backgroundColor: '#FFF4E6' }]}>
+              <View style={[styles.statIcon, { backgroundColor: isDark ? '#3D3020' : '#FFF4E6' }]}>
                 <Ionicons name="hourglass-outline" size={28} color="#FF9800" />
               </View>
-              <Text style={styles.statNumber}>{financialData?.pendingSessions || 0}</Text>
-              <Text style={styles.statLabel}>Pendentes</Text>
+              <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{financialData?.pendingSessions || 0}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pendentes</Text>
             </View>
 
             <View style={styles.statItem}>
-              <View style={[styles.statIcon, { backgroundColor: '#FFEBEE' }]}>
+              <View style={[styles.statIcon, { backgroundColor: isDark ? '#3D1F1F' : '#FFEBEE' }]}>
                 <Ionicons name="close-circle" size={28} color="#E74C3C" />
               </View>
-              <Text style={styles.statNumber}>{financialData?.cancelledSessions || 0}</Text>
-              <Text style={styles.statLabel}>Canceladas</Text>
+              <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{financialData?.cancelledSessions || 0}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Canceladas</Text>
             </View>
           </View>
 
-          <View style={styles.averageSection}>
-            <Ionicons name="calculator-outline" size={20} color="#666" />
-            <Text style={styles.averageText}>
+          <View style={[styles.averageSection, { borderTopColor: colors.borderLight }]}>
+            <Ionicons name="calculator-outline" size={20} color={colors.textSecondary} />
+            <Text style={[styles.averageText, { color: colors.textSecondary }]}>
               Valor médio por sessão:{' '}
               <Text style={styles.averageValue}>
                 {formatCurrency(financialData?.averageSessionValue || 0)}
@@ -291,15 +295,15 @@ export default function ReportsScreen({ navigation }: any) {
         {/* Top Patients */}
         {financialData?.topPatients && financialData.topPatients.length > 0 && (
           <Card style={styles.topPatientsCard}>
-            <Text style={styles.cardTitle}>Principais Pacientes</Text>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Principais Pacientes</Text>
             {financialData.topPatients.slice(0, 5).map((patient, index) => (
-              <View key={index} style={styles.patientItem}>
-                <View style={styles.patientRank}>
+              <View key={index} style={[styles.patientItem, { borderBottomColor: colors.borderLight }]}>
+                <View style={[styles.patientRank, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
                   <Text style={styles.rankNumber}>{index + 1}</Text>
                 </View>
                 <View style={styles.patientInfo}>
-                  <Text style={styles.patientName}>{patient.name}</Text>
-                  <Text style={styles.patientSessions}>{patient.sessionsCount} sessões</Text>
+                  <Text style={[styles.patientName, { color: colors.textPrimary }]}>{patient.name}</Text>
+                  <Text style={[styles.patientSessions, { color: colors.textSecondary }]}>{patient.sessionsCount} sessões</Text>
                 </View>
                 <Text style={styles.patientValue}>{formatCurrency(patient.totalPaid)}</Text>
               </View>
@@ -308,12 +312,12 @@ export default function ReportsScreen({ navigation }: any) {
         )}
 
         {/* Info Card */}
-        <Card style={styles.infoCard}>
+        <Card style={[styles.infoCard, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
           <View style={styles.infoHeader}>
             <Ionicons name="information-circle" size={24} color="#4A90E2" />
-            <Text style={styles.infoTitle}>Sobre os Relatórios</Text>
+            <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>Sobre os Relatórios</Text>
           </View>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             {user?.clinicId
               ? 'Como você está vinculado a uma clínica, os valores podem incluir taxas ou comissões. Verifique com a administração da clínica para mais detalhes.'
               : 'Estes são seus relatórios financeiros individuais. Os valores mostram suas receitas de sessões com pacientes.'}
@@ -325,18 +329,18 @@ export default function ReportsScreen({ navigation }: any) {
           <Card style={styles.subleaseCard}>
             <View style={styles.subleaseTitleRow}>
               <Ionicons name="key-outline" size={22} color="#4A90E2" />
-              <Text style={styles.cardTitle}>Sublocacoes do Mes</Text>
+              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Sublocacoes do Mes</Text>
             </View>
 
             <View style={styles.subleaseSummaryRow}>
               <View style={styles.subleaseSummaryItem}>
-                <Text style={styles.subleaseSummaryLabel}>Pendente</Text>
+                <Text style={[styles.subleaseSummaryLabel, { color: colors.textSecondary }]}>Pendente</Text>
                 <Text style={[styles.subleaseSummaryValue, { color: '#E8A317' }]}>
                   {formatCurrency(subleaseSummary?.pendingValue || 0)}
                 </Text>
               </View>
               <View style={styles.subleaseSummaryItem}>
-                <Text style={styles.subleaseSummaryLabel}>Pago</Text>
+                <Text style={[styles.subleaseSummaryLabel, { color: colors.textSecondary }]}>Pago</Text>
                 <Text style={[styles.subleaseSummaryValue, { color: '#50C878' }]}>
                   {formatCurrency(subleaseSummary?.paidValue || 0)}
                 </Text>
@@ -345,23 +349,25 @@ export default function ReportsScreen({ navigation }: any) {
 
             {recentSubleases.length > 0 ? (
               recentSubleases.map((sublease) => (
-                <View key={sublease._id} style={styles.subleaseItem}>
+                <View key={sublease._id} style={[styles.subleaseItem, { borderTopColor: colors.borderLight }]}>
                   <View style={styles.subleaseItemInfo}>
-                    <Text style={styles.subleaseRoomName}>
+                    <Text style={[styles.subleaseRoomName, { color: colors.textPrimary }]}>
                       {typeof sublease.roomId === 'object' ? sublease.roomId.name : 'Sala'}
                     </Text>
-                    <Text style={styles.subleaseDate}>
+                    <Text style={[styles.subleaseDate, { color: colors.textSecondary }]}>
                       {new Date(sublease.appointmentDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                     </Text>
                   </View>
-                  <Text style={styles.subleaseValue}>
+                  <Text style={[styles.subleaseValue, { color: colors.textPrimary }]}>
                     {formatCurrency(sublease.value)}
                   </Text>
                   <View
                     style={[
                       styles.subleaseStatusBadge,
                       {
-                        backgroundColor: sublease.status === 'paid' ? '#E8FFF0' : '#FFF8E1',
+                        backgroundColor: sublease.status === 'paid'
+                          ? (isDark ? '#1F3D1F' : '#E8FFF0')
+                          : (isDark ? '#3D3020' : '#FFF8E1'),
                       },
                     ]}
                   >
@@ -379,7 +385,7 @@ export default function ReportsScreen({ navigation }: any) {
                 </View>
               ))
             ) : (
-              <Text style={styles.subleaseEmpty}>Nenhuma sublocacao este mes</Text>
+              <Text style={[styles.subleaseEmpty, { color: colors.textTertiary }]}>Nenhuma sublocacao este mes</Text>
             )}
           </Card>
         )}
@@ -389,9 +395,9 @@ export default function ReportsScreen({ navigation }: any) {
           <View style={styles.therapeuticHeader}>
             <View style={styles.therapeuticTitleRow}>
               <Ionicons name="sparkles" size={22} color="#9C27B0" />
-              <Text style={styles.cardTitle}>Relatórios Terapêuticos</Text>
+              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Relatórios Terapêuticos</Text>
             </View>
-            <Text style={styles.therapeuticSubtitle}>
+            <Text style={[styles.therapeuticSubtitle, { color: colors.textSecondary }]}>
               Gere relatórios com IA a partir das conversas dos pacientes
             </Text>
           </View>
@@ -399,7 +405,7 @@ export default function ReportsScreen({ navigation }: any) {
             patients.map((patient) => (
               <TouchableOpacity
                 key={patient._id || patient.id}
-                style={styles.therapeuticPatientItem}
+                style={[styles.therapeuticPatientItem, { borderTopColor: colors.borderLight }]}
                 onPress={() =>
                   navigation.navigate('TherapeuticReportList', {
                     patientId: patient._id || patient.id,
@@ -407,7 +413,7 @@ export default function ReportsScreen({ navigation }: any) {
                   })
                 }
               >
-                <View style={styles.therapeuticPatientAvatar}>
+                <View style={[styles.therapeuticPatientAvatar, { backgroundColor: isDark ? '#2D1F3D' : '#F3E5F5' }]}>
                   <Text style={styles.therapeuticPatientInitials}>
                     {patient.name
                       .split(' ')
@@ -417,26 +423,26 @@ export default function ReportsScreen({ navigation }: any) {
                       .slice(0, 2)}
                   </Text>
                 </View>
-                <Text style={styles.therapeuticPatientName}>{patient.name}</Text>
+                <Text style={[styles.therapeuticPatientName, { color: colors.textPrimary }]}>{patient.name}</Text>
                 <Ionicons name="chevron-forward" size={20} color="#9C27B0" />
               </TouchableOpacity>
             ))
           ) : (
-            <Text style={styles.therapeuticEmpty}>Nenhum paciente cadastrado</Text>
+            <Text style={[styles.therapeuticEmpty, { color: colors.textTertiary }]}>Nenhum paciente cadastrado</Text>
           )}
         </Card>
 
         {/* Export Options */}
         <Card style={styles.exportCard}>
-          <Text style={styles.cardTitle}>Exportar Relatório</Text>
-          <TouchableOpacity style={styles.exportButton}>
+          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Exportar Relatório</Text>
+          <TouchableOpacity style={[styles.exportButton, { backgroundColor: colors.surfaceSecondary }]}>
             <Ionicons name="document-text-outline" size={20} color="#4A90E2" />
-            <Text style={styles.exportButtonText}>Exportar como PDF</Text>
+            <Text style={[styles.exportButtonText, { color: colors.textPrimary }]}>Exportar como PDF</Text>
             <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.exportButton}>
+          <TouchableOpacity style={[styles.exportButton, { backgroundColor: colors.surfaceSecondary }]}>
             <Ionicons name="download-outline" size={20} color="#50C878" />
-            <Text style={styles.exportButtonText}>Exportar como Excel</Text>
+            <Text style={[styles.exportButtonText, { color: colors.textPrimary }]}>Exportar como Excel</Text>
             <Ionicons name="chevron-forward" size={20} color="#50C878" />
           </TouchableOpacity>
         </Card>
@@ -448,7 +454,6 @@ export default function ReportsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -458,26 +463,21 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   clinicBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8FFF0',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -494,7 +494,6 @@ const styles = StyleSheet.create({
   },
   periodSelector: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 4,
     marginBottom: 16,
@@ -511,7 +510,6 @@ const styles = StyleSheet.create({
   periodButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
   },
   periodButtonTextActive: {
     color: '#fff',
@@ -532,7 +530,6 @@ const styles = StyleSheet.create({
   },
   revenueLabel: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 4,
   },
   revenueValue: {
@@ -546,7 +543,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 16,
   },
   statsGrid: {
@@ -568,12 +564,10 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
   },
   averageSection: {
     flexDirection: 'row',
@@ -581,11 +575,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   averageText: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 8,
   },
   averageValue: {
@@ -600,13 +592,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   patientRank: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E8F4FD',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -622,12 +612,10 @@ const styles = StyleSheet.create({
   patientName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 2,
   },
   patientSessions: {
     fontSize: 12,
-    color: '#666',
   },
   patientValue: {
     fontSize: 16,
@@ -635,7 +623,6 @@ const styles = StyleSheet.create({
     color: '#50C878',
   },
   infoCard: {
-    backgroundColor: '#E8F4FD',
     borderWidth: 1,
     borderColor: '#4A90E2',
     marginBottom: 16,
@@ -648,12 +635,10 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
   },
   therapeuticCard: {
@@ -670,7 +655,6 @@ const styles = StyleSheet.create({
   },
   therapeuticSubtitle: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
   },
   therapeuticPatientItem: {
@@ -678,13 +662,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   therapeuticPatientAvatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F3E5F5',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -698,11 +680,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
   },
   therapeuticEmpty: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
     paddingVertical: 16,
   },
@@ -714,7 +694,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -722,7 +701,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
     marginLeft: 12,
   },
   subleaseCard: {
@@ -745,7 +723,6 @@ const styles = StyleSheet.create({
   },
   subleaseSummaryLabel: {
     fontSize: 13,
-    color: '#666',
     marginBottom: 4,
   },
   subleaseSummaryValue: {
@@ -757,7 +734,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   subleaseItemInfo: {
     flex: 1,
@@ -765,17 +741,14 @@ const styles = StyleSheet.create({
   subleaseRoomName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 2,
   },
   subleaseDate: {
     fontSize: 12,
-    color: '#666',
   },
   subleaseValue: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#333',
     marginRight: 10,
   },
   subleaseStatusBadge: {
@@ -789,7 +762,6 @@ const styles = StyleSheet.create({
   },
   subleaseEmpty: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
     paddingVertical: 16,
   },

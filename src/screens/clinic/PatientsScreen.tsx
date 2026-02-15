@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as clinicService from '../../services/clinicService';
 import { PatientBasic, ClinicPsychologist } from '../../services/clinicService';
 
@@ -30,6 +31,7 @@ interface Patient extends PatientBasic {
 
 export default function PatientsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -274,45 +276,46 @@ export default function PatientsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Pacientes da Clínica</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Pacientes da Clínica</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <View>
-          <Text style={styles.headerTitle}>Pacientes da Clínica</Text>
-          <Text style={styles.headerSubtitle}>{patients.length} pacientes</Text>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Pacientes da Clínica</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{patients.length} pacientes</Text>
         </View>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
+        <TouchableOpacity style={[styles.filterButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]} onPress={() => setShowFilterModal(true)}>
           <Ionicons name="filter" size={24} color="#4A90E2" />
           {(searchText || selectedPsychologistFilter) && <View style={styles.filterBadge} />}
         </TouchableOpacity>
       </View>
 
       {/* Barra de busca */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" />
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Ionicons name="search" size={20} color={colors.textTertiary} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.textPrimary }]}
           placeholder="Buscar paciente por nome..."
+          placeholderTextColor={colors.textTertiary}
           value={searchText}
           onChangeText={setSearchText}
           onSubmitEditing={loadPatients}
         />
         {searchText !== '' && (
           <TouchableOpacity onPress={() => setSearchText('')}>
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         )}
       </View>
@@ -324,16 +327,16 @@ export default function PatientsScreen({ navigation }: any) {
         {error ? (
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={loadPatients}>
               <Text style={styles.retryButtonText}>Tentar novamente</Text>
             </TouchableOpacity>
           </View>
         ) : patients.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyTitle}>Nenhum paciente encontrado</Text>
-            <Text style={styles.emptyText}>
+            <Ionicons name="people-outline" size={64} color={colors.textTertiary} />
+            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Nenhum paciente encontrado</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {searchText || selectedPsychologistFilter
                 ? 'Tente ajustar os filtros de busca.'
                 : 'Vincule pacientes à clínica para gerenciá-los.'}
@@ -360,24 +363,24 @@ export default function PatientsScreen({ navigation }: any) {
                       </View>
                     )}
                     <View style={styles.patientInfo}>
-                      <Text style={styles.name}>{patient.name}</Text>
-                      {patient.email && <Text style={styles.email}>{patient.email}</Text>}
+                      <Text style={[styles.name, { color: colors.textPrimary }]}>{patient.name}</Text>
+                      {patient.email && <Text style={[styles.email, { color: colors.textSecondary }]}>{patient.email}</Text>}
                     </View>
                   </View>
 
                 <View style={styles.infoRow}>
-                  <Ionicons name="person" size={16} color="#666" />
-                  <Text style={styles.infoLabel}>Psicólogo:</Text>
-                  <Text style={[styles.infoValue, !hasAssignedPsy && styles.noPsychologist]}>
+                  <Ionicons name="person" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Psicólogo:</Text>
+                  <Text style={[styles.infoValue, { color: colors.textPrimary }, !hasAssignedPsy && styles.noPsychologist]}>
                     {psychologistName}
                   </Text>
                 </View>
 
                 {patient.phone && (
                   <View style={styles.infoRow}>
-                    <Ionicons name="call" size={16} color="#666" />
-                    <Text style={styles.infoLabel}>Telefone:</Text>
-                    <Text style={styles.infoValue}>{patient.phone}</Text>
+                    <Ionicons name="call" size={16} color={colors.textSecondary} />
+                    <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Telefone:</Text>
+                    <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{patient.phone}</Text>
                   </View>
                 )}
 
@@ -386,7 +389,7 @@ export default function PatientsScreen({ navigation }: any) {
                   onPress={() => handleOpenContactModal(patient)}
                 >
                   <Text style={styles.viewDetailsButtonText}>Ver Detalhes</Text>
-                  <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
+                  <Ionicons name="chevron-forward" size={20} color="#fff" />
                 </TouchableOpacity>
                 </Card>
               </TouchableOpacity>
@@ -403,44 +406,46 @@ export default function PatientsScreen({ navigation }: any) {
         onRequestClose={() => setShowFilterModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filtrar Pacientes</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Filtrar Pacientes</Text>
               <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.filterSectionTitle}>Psicólogo</Text>
+            <Text style={[styles.filterSectionTitle, { color: colors.textPrimary }]}>Psicólogo</Text>
             <View style={styles.psychologistList}>
               <TouchableOpacity
                 style={[
                   styles.psychologistFilterItem,
-                  !selectedPsychologistFilter && styles.psychologistFilterItemSelected,
+                  { backgroundColor: colors.surfaceSecondary },
+                  !selectedPsychologistFilter && [styles.psychologistFilterItemSelected, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }],
                 ]}
                 onPress={() => setSelectedPsychologistFilter('')}
               >
                 <Ionicons
                   name={!selectedPsychologistFilter ? 'checkbox' : 'square-outline'}
                   size={24}
-                  color={!selectedPsychologistFilter ? '#4A90E2' : '#999'}
+                  color={!selectedPsychologistFilter ? '#4A90E2' : colors.textTertiary}
                 />
-                <Text style={styles.psychologistFilterName}>Todos os psicólogos</Text>
+                <Text style={[styles.psychologistFilterName, { color: colors.textPrimary }]}>Todos os psicólogos</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[
                   styles.psychologistFilterItem,
-                  selectedPsychologistFilter === 'none' && styles.psychologistFilterItemSelected,
+                  { backgroundColor: colors.surfaceSecondary },
+                  selectedPsychologistFilter === 'none' && [styles.psychologistFilterItemSelected, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }],
                 ]}
                 onPress={() => setSelectedPsychologistFilter('none')}
               >
                 <Ionicons
                   name={selectedPsychologistFilter === 'none' ? 'checkbox' : 'square-outline'}
                   size={24}
-                  color={selectedPsychologistFilter === 'none' ? '#4A90E2' : '#999'}
+                  color={selectedPsychologistFilter === 'none' ? '#4A90E2' : colors.textTertiary}
                 />
-                <Text style={styles.psychologistFilterName}>Sem psicólogo</Text>
+                <Text style={[styles.psychologistFilterName, { color: colors.textPrimary }]}>Sem psicólogo</Text>
               </TouchableOpacity>
 
               {psychologists.map((psy) => {
@@ -450,17 +455,21 @@ export default function PatientsScreen({ navigation }: any) {
                 return (
                   <TouchableOpacity
                     key={psyId}
-                    style={[styles.psychologistFilterItem, isSelected && styles.psychologistFilterItemSelected]}
+                    style={[
+                      styles.psychologistFilterItem,
+                      { backgroundColor: colors.surfaceSecondary },
+                      isSelected && [styles.psychologistFilterItemSelected, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }],
+                    ]}
                     onPress={() => setSelectedPsychologistFilter(psyId)}
                   >
                     <Ionicons
                       name={isSelected ? 'checkbox' : 'square-outline'}
                       size={24}
-                      color={isSelected ? '#4A90E2' : '#999'}
+                      color={isSelected ? '#4A90E2' : colors.textTertiary}
                     />
                     <View style={styles.psychologistFilterInfo}>
-                      <Text style={styles.psychologistFilterName}>{psy.name}</Text>
-                      <Text style={styles.psychologistFilterCrp}>{psy.crp}</Text>
+                      <Text style={[styles.psychologistFilterName, { color: colors.textPrimary }]}>{psy.name}</Text>
+                      <Text style={[styles.psychologistFilterCrp, { color: colors.textSecondary }]}>{psy.crp}</Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -468,8 +477,8 @@ export default function PatientsScreen({ navigation }: any) {
             </View>
 
             <View style={styles.filterActions}>
-              <TouchableOpacity style={styles.clearFiltersButton} onPress={handleClearFilters}>
-                <Text style={styles.clearFiltersButtonText}>Limpar Filtros</Text>
+              <TouchableOpacity style={[styles.clearFiltersButton, { backgroundColor: colors.borderLight }]} onPress={handleClearFilters}>
+                <Text style={[styles.clearFiltersButtonText, { color: colors.textSecondary }]}>Limpar Filtros</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -495,11 +504,11 @@ export default function PatientsScreen({ navigation }: any) {
         onRequestClose={() => setShowContactModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Paciente</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes do Paciente</Text>
               <TouchableOpacity onPress={() => setShowContactModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -513,22 +522,22 @@ export default function PatientsScreen({ navigation }: any) {
                   )}
                 </View>
 
-                <Text style={styles.contactName}>{contactPatient.name}</Text>
-                <Text style={styles.contactSubtitle}>
+                <Text style={[styles.contactName, { color: colors.textPrimary }]}>{contactPatient.name}</Text>
+                <Text style={[styles.contactSubtitle, { color: colors.textSecondary }]}>
                   {getPsychologistName(contactPatient)}
                 </Text>
 
                 <View style={styles.contactInfo}>
-                  <View style={styles.contactInfoRow}>
-                    <Ionicons name="mail" size={20} color="#666" />
-                    <Text style={styles.contactInfoText}>
+                  <View style={[styles.contactInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="mail" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.contactInfoText, { color: colors.textPrimary }]}>
                       {contactPatient.email || 'Email não disponível'}
                     </Text>
                   </View>
 
-                  <View style={styles.contactInfoRow}>
-                    <Ionicons name="call" size={20} color="#666" />
-                    <Text style={styles.contactInfoText}>
+                  <View style={[styles.contactInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="call" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.contactInfoText, { color: colors.textPrimary }]}>
                       {contactPatient.phone || 'Telefone não disponível'}
                     </Text>
                   </View>
@@ -556,22 +565,22 @@ export default function PatientsScreen({ navigation }: any) {
 
                 {/* Estatísticas do Paciente */}
                 <View style={styles.statsSection}>
-                  <Text style={styles.sectionTitle}>Estatísticas</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Estatísticas</Text>
 
                   {loadingStats ? (
                     <ActivityIndicator color="#4A90E2" style={{ marginVertical: 20 }} />
                   ) : (
                     <>
                       <View style={styles.statsGrid}>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
-                          <Text style={styles.statsNumber}>{patientStats?.sessionsCount || 0}</Text>
-                          <Text style={styles.statsLabel}>Sessões Realizadas</Text>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>{patientStats?.sessionsCount || 0}</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Sessões Realizadas</Text>
                         </View>
 
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="calendar" size={32} color="#27AE60" />
-                          <Text style={styles.statsNumber}>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                             {patientStats?.nextAppointment
                               ? new Date(patientStats.nextAppointment).toLocaleDateString('pt-BR', {
                                   day: '2-digit',
@@ -579,25 +588,25 @@ export default function PatientsScreen({ navigation }: any) {
                                 })
                               : '--/--'}
                           </Text>
-                          <Text style={styles.statsLabel}>Próxima Sessão</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Próxima Sessão</Text>
                         </View>
                       </View>
 
                       <View style={styles.statsGrid}>
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="cash-outline" size={32} color="#27AE60" />
-                          <Text style={styles.statsNumber}>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                             R$ {(patientStats?.totalPaid || 0).toFixed(2)}
                           </Text>
-                          <Text style={styles.statsLabel}>Pago</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Pago</Text>
                         </View>
 
-                        <View style={styles.statsCard}>
+                        <View style={[styles.statsCard, { backgroundColor: colors.surfaceSecondary }]}>
                           <Ionicons name="alert-circle-outline" size={32} color="#E74C3C" />
-                          <Text style={styles.statsNumber}>
+                          <Text style={[styles.statsNumber, { color: colors.textPrimary }]}>
                             R$ {(patientStats?.totalPending || 0).toFixed(2)}
                           </Text>
-                          <Text style={styles.statsLabel}>Devendo</Text>
+                          <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Devendo</Text>
                         </View>
                       </View>
                     </>
@@ -607,7 +616,7 @@ export default function PatientsScreen({ navigation }: any) {
                 {/* Botões de Ação */}
                 <View style={styles.modalActionsSection}>
                   <TouchableOpacity
-                    style={styles.reassignButtonModal}
+                    style={[styles.reassignButtonModal, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
                     onPress={() => {
                       setShowContactModal(false);
                       handleAssignPsychologist(contactPatient);
@@ -636,10 +645,10 @@ export default function PatientsScreen({ navigation }: any) {
                 </View>
 
                 <TouchableOpacity
-                  style={styles.closeContactButton}
+                  style={[styles.closeContactButton, { backgroundColor: colors.borderLight }]}
                   onPress={() => setShowContactModal(false)}
                 >
-                  <Text style={styles.closeContactButtonText}>Fechar</Text>
+                  <Text style={[styles.closeContactButtonText, { color: colors.textSecondary }]}>Fechar</Text>
                 </TouchableOpacity>
               </ScrollView>
             )}
@@ -655,17 +664,17 @@ export default function PatientsScreen({ navigation }: any) {
         onRequestClose={() => setShowAssignModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Atribuir Psicólogo</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Atribuir Psicólogo</Text>
               <TouchableOpacity onPress={() => setShowAssignModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {selectedPatient && (
               <>
-                <View style={styles.patientInfoSection}>
+                <View style={[styles.patientInfoSection, { borderBottomColor: colors.border }]}>
                   {selectedPatient.avatar ? (
                     <Image source={{ uri: selectedPatient.avatar }} style={styles.avatarLargeImage} />
                   ) : (
@@ -673,13 +682,13 @@ export default function PatientsScreen({ navigation }: any) {
                       <Text style={styles.avatarTextLarge}>{getInitial(selectedPatient.name)}</Text>
                     </View>
                   )}
-                  <Text style={styles.patientNameLarge}>{selectedPatient.name}</Text>
+                  <Text style={[styles.patientNameLarge, { color: colors.textPrimary }]}>{selectedPatient.name}</Text>
                   {selectedPatient.email && (
-                    <Text style={styles.patientEmailLarge}>{selectedPatient.email}</Text>
+                    <Text style={[styles.patientEmailLarge, { color: colors.textSecondary }]}>{selectedPatient.email}</Text>
                   )}
                 </View>
 
-                <Text style={styles.assignSectionTitle}>Selecione o psicólogo:</Text>
+                <Text style={[styles.assignSectionTitle, { color: colors.textPrimary }]}>Selecione o psicólogo:</Text>
 
                 <ScrollView style={styles.psychologistList}>
                   {psychologists.map((psy) => {
@@ -689,17 +698,21 @@ export default function PatientsScreen({ navigation }: any) {
                     return (
                       <TouchableOpacity
                         key={psyId}
-                        style={[styles.psychologistItem, isSelected && styles.psychologistItemSelected]}
+                        style={[
+                          styles.psychologistItem,
+                          { backgroundColor: colors.surfaceSecondary },
+                          isSelected && [styles.psychologistItemSelected, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }],
+                        ]}
                         onPress={() => setSelectedPsychologistId(psyId)}
                       >
                         <Ionicons
                           name={isSelected ? 'radio-button-on' : 'radio-button-off'}
                           size={24}
-                          color={isSelected ? '#4A90E2' : '#999'}
+                          color={isSelected ? '#4A90E2' : colors.textTertiary}
                         />
                         <View style={styles.psychologistItemInfo}>
-                          <Text style={styles.psychologistItemName}>{psy.name}</Text>
-                          <Text style={styles.psychologistItemCrp}>{psy.crp}</Text>
+                          <Text style={[styles.psychologistItemName, { color: colors.textPrimary }]}>{psy.name}</Text>
+                          <Text style={[styles.psychologistItemCrp, { color: colors.textSecondary }]}>{psy.crp}</Text>
                         </View>
                       </TouchableOpacity>
                     );
@@ -708,11 +721,11 @@ export default function PatientsScreen({ navigation }: any) {
 
                 <View style={styles.assignActions}>
                   <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, { backgroundColor: colors.borderLight }]}
                     onPress={() => setShowAssignModal(false)}
                     disabled={assigning}
                   >
-                    <Text style={styles.cancelButtonText}>Cancelar</Text>
+                    <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -739,31 +752,25 @@ export default function PatientsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   headerSubtitle: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   filterButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#E8F4FF',
     position: 'relative',
   },
   filterBadge: {
@@ -778,17 +785,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     gap: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
   },
   loadingContainer: {
     flex: 1,
@@ -798,7 +802,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -810,7 +813,6 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   retryButton: {
@@ -836,12 +838,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   emptyText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -882,11 +882,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   email: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   infoRow: {
@@ -896,14 +894,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 8,
     marginRight: 4,
   },
   infoValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     flex: 1,
   },
   noPsychologist: {
@@ -947,7 +943,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -962,12 +957,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   filterSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   psychologistList: {
@@ -979,11 +972,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: '#f9f9f9',
   },
-  psychologistFilterItemSelected: {
-    backgroundColor: '#E8F4FF',
-  },
+  psychologistFilterItemSelected: {},
   psychologistFilterInfo: {
     marginLeft: 12,
     flex: 1,
@@ -991,11 +981,9 @@ const styles = StyleSheet.create({
   psychologistFilterName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   psychologistFilterCrp: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   filterActions: {
@@ -1007,13 +995,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
     alignItems: 'center',
   },
   clearFiltersButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   applyFiltersButton: {
     flex: 1,
@@ -1033,7 +1019,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   avatarLarge: {
     width: 80,
@@ -1058,17 +1043,14 @@ const styles = StyleSheet.create({
   patientNameLarge: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   patientEmailLarge: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   assignSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   psychologistItem: {
@@ -1077,11 +1059,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: '#f9f9f9',
   },
-  psychologistItemSelected: {
-    backgroundColor: '#E8F4FF',
-  },
+  psychologistItemSelected: {},
   psychologistItemInfo: {
     marginLeft: 12,
     flex: 1,
@@ -1089,11 +1068,9 @@ const styles = StyleSheet.create({
   psychologistItemName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   psychologistItemCrp: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   assignActions: {
@@ -1105,13 +1082,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
     alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   confirmButton: {
     flex: 1,
@@ -1141,7 +1116,6 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -1153,11 +1127,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   contactInfoText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 12,
     flex: 1,
   },
@@ -1181,7 +1153,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   closeContactButton: {
-    backgroundColor: '#f0f0f0',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -1189,7 +1160,6 @@ const styles = StyleSheet.create({
   closeContactButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   viewDetailsButton: {
     flexDirection: 'row',
@@ -1208,7 +1178,6 @@ const styles = StyleSheet.create({
   },
   contactSubtitle: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -1219,7 +1188,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   statsGrid: {
@@ -1229,7 +1197,6 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -1237,12 +1204,10 @@ const styles = StyleSheet.create({
   statsNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 8,
   },
   statsLabel: {
     fontSize: 11,
-    color: '#666',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -1254,7 +1219,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E8F4FF',
     paddingVertical: 14,
     borderRadius: 8,
     gap: 8,

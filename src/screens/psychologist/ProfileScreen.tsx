@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ProfileScreenProps {
@@ -17,6 +18,7 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, logout } = useAuth();
+  const { colors, isDark } = useTheme();
   const [imageError, setImageError] = useState(false);
 
   const handleLogout = () => {
@@ -24,9 +26,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface }]}>
           <View style={styles.avatarContainer}>
             {user?.avatar && !imageError ? (
               <Image
@@ -41,64 +43,64 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               </View>
             )}
           </View>
-          <Text style={styles.name}>{user?.name}</Text>
-          <Text style={styles.email}>{user?.email}</Text>
-          <View style={styles.badge}>
+          <Text style={[styles.name, { color: colors.textPrimary }]}>{user?.name}</Text>
+          <Text style={[styles.email, { color: colors.textSecondary }]}>{user?.email}</Text>
+          <View style={[styles.badge, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
             <Ionicons name="medical" size={16} color="#4A90E2" />
             <Text style={styles.badgeText}>Psicólogo(a)</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Conta</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary, backgroundColor: colors.surfaceSecondary }]}>Conta</Text>
 
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}
             onPress={() => navigation.navigate('EditProfile')}
           >
-            <Ionicons name="person-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Editar Perfil</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+            <Ionicons name="person-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Editar Perfil</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
-            <Ionicons name="notifications-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Notificações</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Settings')}>
+            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Notificações</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="lock-closed-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Privacidade</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+            <Ionicons name="lock-closed-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Privacidade</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Suporte</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary, backgroundColor: colors.surfaceSecondary }]}>Suporte</Text>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'terms' })}>
-            <Ionicons name="document-text-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Termos de Uso</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('LegalDocument', { type: 'terms' })}>
+            <Ionicons name="document-text-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Termos de Uso</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('LegalDocument', { type: 'privacy' })}>
-            <Ionicons name="shield-checkmark-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Politica de Privacidade</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('LegalDocument', { type: 'privacy' })}>
+            <Ionicons name="shield-checkmark-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Politica de Privacidade</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="help-circle-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Central de Ajuda</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+            <Ionicons name="help-circle-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Central de Ajuda</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="information-circle-outline" size={24} color="#333" />
-            <Text style={styles.menuText}>Sobre</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+            <Ionicons name="information-circle-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Sobre</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
@@ -107,7 +109,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <Text style={styles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>Versão 1.0.0</Text>
+        <Text style={[styles.version, { color: colors.textTertiary }]}>Versão 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -116,7 +118,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   content: {
     padding: 20,
@@ -124,7 +125,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 30,
-    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 20,
   },
@@ -147,18 +147,15 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   email: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 12,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F4FD',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -170,7 +167,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 20,
     overflow: 'hidden',
@@ -178,21 +174,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     padding: 16,
-    backgroundColor: '#f9f9f9',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   menuText: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
     marginLeft: 12,
   },
   logoutButton: {
@@ -214,7 +206,6 @@ const styles = StyleSheet.create({
   version: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#999',
     marginBottom: 20,
   },
 });

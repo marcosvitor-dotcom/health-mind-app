@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
 import { InvitationData, User } from '../../types';
@@ -31,6 +32,7 @@ interface CompleteRegistrationScreenProps {
 export default function CompleteRegistrationScreen({ route }: CompleteRegistrationScreenProps) {
   const { token } = route.params;
   const { setAuthUser } = useAuth();
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
@@ -180,9 +182,9 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Validando convite...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Validando convite...</Text>
       </View>
     );
   }
@@ -212,7 +214,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -222,30 +224,30 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Ionicons name="mail-open" size={64} color="#4A90E2" />
-          <Text style={styles.title}>Complete seu Cadastro</Text>
-          <Text style={styles.subtitle}>
+          <Ionicons name="mail-open" size={64} color={colors.primary} />
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Complete seu Cadastro</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Bem-vindo, {invitationData.preFilledData.name}!
           </Text>
-          <View style={styles.roleTag}>
+          <View style={[styles.roleTag, { backgroundColor: colors.primary }]}>
             <Text style={styles.roleText}>{getRoleLabel()}</Text>
           </View>
         </View>
 
-        <View style={styles.form}>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
           {/* Email (read-only) */}
-          <Text style={styles.label}>Email</Text>
-          <View style={styles.inputDisabled}>
-            <Text style={styles.inputDisabledText}>{invitationData.email}</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
+          <View style={[styles.inputDisabled, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}>
+            <Text style={[styles.inputDisabledText, { color: colors.textSecondary }]}>{invitationData.email}</Text>
           </View>
 
           {/* Senha */}
-          <Text style={styles.label}>Senha *</Text>
-          <View style={styles.passwordContainer}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Senha *</Text>
+          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}>
             <TextInput
-              style={styles.passwordInput}
+              style={[styles.passwordInput, { color: colors.textPrimary }]}
               placeholder="Mínimo 8 caracteres"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -259,18 +261,18 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={24}
-                color="#666"
+                color={colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
 
           {/* Confirmar Senha */}
-          <Text style={styles.label}>Confirmar Senha *</Text>
-          <View style={styles.passwordContainer}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Confirmar Senha *</Text>
+          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}>
             <TextInput
-              style={styles.passwordInput}
+              style={[styles.passwordInput, { color: colors.textPrimary }]}
               placeholder="Digite a senha novamente"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textTertiary}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
@@ -284,7 +286,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
               <Ionicons
                 name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={24}
-                color="#666"
+                color={colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
@@ -292,37 +294,37 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
           {/* Campos específicos de Clínica */}
           {invitationData.role === 'clinic' && (
             <>
-              <Text style={styles.sectionTitle}>Informações da Clínica</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Informações da Clínica</Text>
 
-              <Text style={styles.label}>Telefone *</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="(11) 3456-7890"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
                 editable={!submitting}
               />
 
-              <Text style={styles.sectionTitle}>Endereço</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Endereço</Text>
 
-              <Text style={styles.label}>CEP *</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>CEP *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="01234-567"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={zipCode}
                 onChangeText={setZipCode}
                 keyboardType="numeric"
                 editable={!submitting}
               />
 
-              <Text style={styles.label}>Rua *</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Rua *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="Rua das Flores"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={street}
                 onChangeText={setStreet}
                 editable={!submitting}
@@ -330,11 +332,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 
               <View style={styles.row}>
                 <View style={styles.inputHalf}>
-                  <Text style={styles.label}>Número *</Text>
+                  <Text style={[styles.label, { color: colors.textPrimary }]}>Número *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                     placeholder="123"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.textTertiary}
                     value={number}
                     onChangeText={setNumber}
                     keyboardType="numeric"
@@ -343,11 +345,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
                 </View>
 
                 <View style={styles.inputHalf}>
-                  <Text style={styles.label}>Complemento</Text>
+                  <Text style={[styles.label, { color: colors.textPrimary }]}>Complemento</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                     placeholder="Sala 4"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.textTertiary}
                     value={complement}
                     onChangeText={setComplement}
                     editable={!submitting}
@@ -355,11 +357,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
                 </View>
               </View>
 
-              <Text style={styles.label}>Bairro</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Bairro</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="Centro"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={neighborhood}
                 onChangeText={setNeighborhood}
                 editable={!submitting}
@@ -367,11 +369,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 
               <View style={styles.row}>
                 <View style={[styles.inputHalf, { flex: 2 }]}>
-                  <Text style={styles.label}>Cidade *</Text>
+                  <Text style={[styles.label, { color: colors.textPrimary }]}>Cidade *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                     placeholder="São Paulo"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.textTertiary}
                     value={city}
                     onChangeText={setCity}
                     editable={!submitting}
@@ -379,11 +381,11 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
                 </View>
 
                 <View style={styles.inputHalf}>
-                  <Text style={styles.label}>Estado *</Text>
+                  <Text style={[styles.label, { color: colors.textPrimary }]}>Estado *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                     placeholder="SP"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.textTertiary}
                     value={state}
                     onChangeText={setState}
                     maxLength={2}
@@ -398,45 +400,45 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
           {/* Campos específicos de Paciente */}
           {invitationData.role === 'patient' && (
             <>
-              <Text style={styles.label}>CPF</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>CPF</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="000.000.000-00"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={cpf}
                 onChangeText={setCpf}
                 keyboardType="numeric"
                 editable={!submitting}
               />
 
-              <Text style={styles.sectionTitle}>Contato de Emergência</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Contato de Emergência</Text>
 
-              <Text style={styles.label}>Nome</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Nome</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="Nome do contato"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={emergencyName}
                 onChangeText={setEmergencyName}
                 editable={!submitting}
               />
 
-              <Text style={styles.label}>Telefone</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="(11) 98765-9999"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={emergencyPhone}
                 onChangeText={setEmergencyPhone}
                 keyboardType="phone-pad"
                 editable={!submitting}
               />
 
-              <Text style={styles.label}>Relacionamento</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Relacionamento</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="Ex: Irmão, Mãe, Amigo"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={emergencyRelationship}
                 onChangeText={setEmergencyRelationship}
                 editable={!submitting}
@@ -454,13 +456,13 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
               <Ionicons
                 name={termsAccepted ? 'checkbox' : 'square-outline'}
                 size={24}
-                color={termsAccepted ? '#4A90E2' : '#999'}
+                color={termsAccepted ? colors.primary : colors.textTertiary}
               />
             </TouchableOpacity>
-            <Text style={styles.termsText}>
+            <Text style={[styles.termsText, { color: colors.textSecondary }]}>
               Li e aceito os{' '}
               <Text
-                style={styles.termsLink}
+                style={[styles.termsLink, { color: colors.primary }]}
                 onPress={() => {
                   setLegalModalType('terms');
                   setLegalModalVisible(true);
@@ -470,7 +472,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
               </Text>
               {' '}e a{' '}
               <Text
-                style={styles.termsLink}
+                style={[styles.termsLink, { color: colors.primary }]}
                 onPress={() => {
                   setLegalModalType('privacy');
                   setLegalModalVisible(true);
@@ -501,12 +503,12 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
         animationType="slide"
         onRequestClose={() => setLegalModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={() => setLegalModalVisible(false)}>
-              <Ionicons name="close" size={28} color="#333" />
+              <Ionicons name="close" size={28} color={colors.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               {legalModalType === 'terms' ? 'Termos de Uso' : 'Politica de Privacidade'}
             </Text>
             <View style={{ width: 28 }} />
@@ -515,7 +517,7 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
             style={styles.modalContent}
             contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           >
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, { color: colors.textSecondary }]}>
               {legalModalType === 'terms' ? TERMS_OF_USE : PRIVACY_POLICY}
             </Text>
           </ScrollView>
@@ -528,18 +530,15 @@ export default function CompleteRegistrationScreen({ route }: CompleteRegistrati
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
   },
   scrollContent: {
     flexGrow: 1,
@@ -553,16 +552,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
     marginTop: 8,
   },
   roleTag: {
-    backgroundColor: '#4A90E2',
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
@@ -574,7 +570,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -587,45 +582,37 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
-    color: '#333',
   },
   inputDisabled: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#e9e9e9',
     marginBottom: 8,
   },
   inputDisabledText: {
     fontSize: 16,
-    color: '#666',
   },
   passwordContainer: {
-    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 8,
   },
   passwordInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    flex: 1,
     padding: 12,
     paddingRight: 48,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
   },
   eyeButton: {
     position: 'absolute',
@@ -640,7 +627,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 20,
     marginBottom: 8,
   },
@@ -679,17 +665,14 @@ const styles = StyleSheet.create({
   termsText: {
     flex: 1,
     fontSize: 14,
-    color: '#444',
     lineHeight: 20,
   },
   termsLink: {
-    color: '#4A90E2',
     fontWeight: '600',
     textDecorationLine: 'underline',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -698,20 +681,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     paddingTop: Platform.OS === 'ios' ? 54 : 14,
   },
   modalTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#333',
   },
   modalContent: {
     flex: 1,
   },
   modalText: {
     fontSize: 14,
-    color: '#444',
     lineHeight: 22,
   },
 });

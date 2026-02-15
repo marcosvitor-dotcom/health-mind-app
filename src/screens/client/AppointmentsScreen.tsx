@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as appointmentService from '../../services/appointmentService';
 import { AppointmentData } from '../../services/appointmentService';
 
 export default function AppointmentsScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [upcomingAppointments, setUpcomingAppointments] = useState<AppointmentData[]>([]);
   const [pastAppointments, setPastAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,14 +209,14 @@ export default function AppointmentsScreen({ navigation }: any) {
               </Text>
             </View>
             <View style={styles.appointmentInfo}>
-              <Text style={styles.time}>
+              <Text style={[styles.time, { color: colors.textPrimary }]}>
                 {date.toLocaleTimeString('pt-BR', {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
               </Text>
-              <Text style={styles.psychologist}>{getPsychologistName(appointment.psychologistId)}</Text>
-              <Text style={styles.type}>{getTypeLabel(appointment.type)}</Text>
+              <Text style={[styles.psychologist, { color: colors.textSecondary }]}>{getPsychologistName(appointment.psychologistId)}</Text>
+              <Text style={[styles.type, { color: colors.textTertiary }]}>{getTypeLabel(appointment.type)}</Text>
             </View>
             <View
               style={[
@@ -245,11 +247,11 @@ export default function AppointmentsScreen({ navigation }: any) {
                 </TouchableOpacity>
               )}
               <TouchableOpacity
-                style={styles.actionButton}
+                style={[styles.actionButton, { borderColor: colors.primary }]}
                 onPress={() => handleReschedule(appointment)}
               >
-                <Ionicons name="calendar" size={18} color="#4A90E2" />
-                <Text style={styles.actionText}>Reagendar</Text>
+                <Ionicons name="calendar" size={18} color={colors.primary} />
+                <Text style={[styles.actionText, { color: colors.primary }]}>Reagendar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton, styles.cancelButton]}
@@ -269,17 +271,17 @@ export default function AppointmentsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando consultas...</Text>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando consultas...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <TouchableOpacity
         style={styles.newAppointmentButton}
         onPress={() => navigation.navigate('BookAppointment')}
@@ -291,11 +293,11 @@ export default function AppointmentsScreen({ navigation }: any) {
       <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#4A90E2']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
         }
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Próximas Consultas</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Próximas Consultas</Text>
           {upcomingAppointments.length > 0 ? (
             upcomingAppointments.map((appointment) => (
               <AppointmentCard key={appointment._id} appointment={appointment} />
@@ -303,15 +305,15 @@ export default function AppointmentsScreen({ navigation }: any) {
           ) : (
             <Card>
               <View style={styles.emptyState}>
-                <Ionicons name="calendar-outline" size={40} color="#ccc" />
-                <Text style={styles.emptyText}>Nenhuma consulta agendada</Text>
+                <Ionicons name="calendar-outline" size={40} color={colors.textTertiary} />
+                <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma consulta agendada</Text>
               </View>
             </Card>
           )}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Consultas Anteriores</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Consultas Anteriores</Text>
           {pastAppointments.length > 0 ? (
             pastAppointments.map((appointment) => (
               <AppointmentCard
@@ -323,8 +325,8 @@ export default function AppointmentsScreen({ navigation }: any) {
           ) : (
             <Card>
               <View style={styles.emptyState}>
-                <Ionicons name="time-outline" size={40} color="#ccc" />
-                <Text style={styles.emptyText}>Nenhuma consulta anterior</Text>
+                <Ionicons name="time-outline" size={40} color={colors.textTertiary} />
+                <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhuma consulta anterior</Text>
               </View>
             </Card>
           )}
@@ -339,26 +341,26 @@ export default function AppointmentsScreen({ navigation }: any) {
         onRequestClose={() => setShowDetailModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes da Consulta</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes da Consulta</Text>
               <TouchableOpacity onPress={() => setShowDetailModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {loadingDetails ? (
               <View style={styles.modalLoading}>
-                <ActivityIndicator size="large" color="#4A90E2" />
+                <ActivityIndicator size="large" color={colors.primary} />
               </View>
             ) : selectedAppointment ? (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.detailSection}>
                   <View style={styles.detailRow}>
-                    <Ionicons name="calendar-outline" size={22} color="#4A90E2" />
+                    <Ionicons name="calendar-outline" size={22} color={colors.primary} />
                     <View style={styles.detailInfo}>
-                      <Text style={styles.detailLabel}>Data</Text>
-                      <Text style={styles.detailValue}>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Data</Text>
+                      <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                         {new Date(selectedAppointment.date).toLocaleDateString('pt-BR', {
                           weekday: 'long',
                           day: 'numeric',
@@ -370,10 +372,10 @@ export default function AppointmentsScreen({ navigation }: any) {
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Ionicons name="time-outline" size={22} color="#4A90E2" />
+                    <Ionicons name="time-outline" size={22} color={colors.primary} />
                     <View style={styles.detailInfo}>
-                      <Text style={styles.detailLabel}>Horário</Text>
-                      <Text style={styles.detailValue}>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Horário</Text>
+                      <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                         {new Date(selectedAppointment.date).toLocaleTimeString('pt-BR', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -383,27 +385,27 @@ export default function AppointmentsScreen({ navigation }: any) {
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Ionicons name="person-outline" size={22} color="#4A90E2" />
+                    <Ionicons name="person-outline" size={22} color={colors.primary} />
                     <View style={styles.detailInfo}>
-                      <Text style={styles.detailLabel}>Psicólogo</Text>
-                      <Text style={styles.detailValue}>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Psicólogo</Text>
+                      <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                         {getPsychologistName(selectedAppointment.psychologistId)}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Ionicons name={selectedAppointment.type === 'online' ? 'videocam-outline' : 'business-outline'} size={22} color="#4A90E2" />
+                    <Ionicons name={selectedAppointment.type === 'online' ? 'videocam-outline' : 'business-outline'} size={22} color={colors.primary} />
                     <View style={styles.detailInfo}>
-                      <Text style={styles.detailLabel}>Tipo</Text>
-                      <Text style={styles.detailValue}>{getTypeLabel(selectedAppointment.type)}</Text>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Tipo</Text>
+                      <Text style={[styles.detailValue, { color: colors.textPrimary }]}>{getTypeLabel(selectedAppointment.type)}</Text>
                     </View>
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Ionicons name="information-circle-outline" size={22} color="#4A90E2" />
+                    <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
                     <View style={styles.detailInfo}>
-                      <Text style={styles.detailLabel}>Status</Text>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Status</Text>
                       <View style={[styles.statusBadgeLarge, { backgroundColor: getStatusColor(selectedAppointment.status) + '20' }]}>
                         <Text style={[styles.statusTextLarge, { color: getStatusColor(selectedAppointment.status) }]}>
                           {getStatusLabel(selectedAppointment.status)}
@@ -414,22 +416,22 @@ export default function AppointmentsScreen({ navigation }: any) {
 
                   {selectedAppointment.notes && (
                     <View style={styles.detailRow}>
-                      <Ionicons name="document-text-outline" size={22} color="#4A90E2" />
+                      <Ionicons name="document-text-outline" size={22} color={colors.primary} />
                       <View style={styles.detailInfo}>
-                        <Text style={styles.detailLabel}>Observações</Text>
-                        <Text style={styles.detailValue}>{selectedAppointment.notes}</Text>
+                        <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Observações</Text>
+                        <Text style={[styles.detailValue, { color: colors.textPrimary }]}>{selectedAppointment.notes}</Text>
                       </View>
                     </View>
                   )}
                 </View>
 
                 {/* Seção de Pagamento */}
-                <View style={styles.paymentSection}>
-                  <Text style={styles.paymentTitle}>Pagamento</Text>
+                <View style={[styles.paymentSection, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Text style={[styles.paymentTitle, { color: colors.textPrimary }]}>Pagamento</Text>
                   {selectedAppointment.paymentId ? (
                     <View>
                       <View style={styles.paymentRow}>
-                        <Text style={styles.paymentLabel}>Status:</Text>
+                        <Text style={[styles.paymentLabel, { color: colors.textSecondary }]}>Status:</Text>
                         <View style={[styles.paymentBadge, { backgroundColor: getPaymentStatusColor(selectedAppointment.paymentId.status) + '20' }]}>
                           <Text style={[styles.paymentBadgeText, { color: getPaymentStatusColor(selectedAppointment.paymentId.status) }]}>
                             {getPaymentStatusLabel(selectedAppointment.paymentId.status)}
@@ -438,15 +440,15 @@ export default function AppointmentsScreen({ navigation }: any) {
                       </View>
                       {selectedAppointment.paymentId.finalValue > 0 && (
                         <View style={styles.paymentRow}>
-                          <Text style={styles.paymentLabel}>Valor:</Text>
-                          <Text style={styles.paymentValue}>
+                          <Text style={[styles.paymentLabel, { color: colors.textSecondary }]}>Valor:</Text>
+                          <Text style={[styles.paymentValue, { color: colors.textPrimary }]}>
                             R$ {selectedAppointment.paymentId.finalValue.toFixed(2).replace('.', ',')}
                           </Text>
                         </View>
                       )}
                     </View>
                   ) : (
-                    <Text style={styles.paymentNotAvailable}>Informação de pagamento não disponível</Text>
+                    <Text style={[styles.paymentNotAvailable, { color: colors.textTertiary }]}>Informação de pagamento não disponível</Text>
                   )}
                 </View>
 
@@ -489,7 +491,6 @@ export default function AppointmentsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -499,7 +500,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
   newAppointmentButton: {
     flexDirection: 'row',
@@ -525,7 +525,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   appointmentHeader: {
@@ -558,16 +557,13 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   psychologist: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
   type: {
     fontSize: 12,
-    color: '#999',
     marginTop: 2,
   },
   statusBadge: {
@@ -599,7 +595,6 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 12,
-    color: '#4A90E2',
     fontWeight: '500',
   },
   emptyState: {
@@ -609,7 +604,6 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#999',
   },
   // Modal
   modalOverlay: {
@@ -618,7 +612,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -633,7 +626,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   modalLoading: {
     paddingVertical: 40,
@@ -653,13 +645,11 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 12,
-    color: '#666',
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
     textTransform: 'capitalize',
   },
   statusBadgeLarge: {
@@ -673,7 +663,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   paymentSection: {
-    backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 12,
     marginBottom: 20,
@@ -681,7 +670,6 @@ const styles = StyleSheet.create({
   paymentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   paymentRow: {
@@ -692,12 +680,10 @@ const styles = StyleSheet.create({
   },
   paymentLabel: {
     fontSize: 14,
-    color: '#666',
   },
   paymentValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   paymentBadge: {
     paddingHorizontal: 12,
@@ -710,7 +696,6 @@ const styles = StyleSheet.create({
   },
   paymentNotAvailable: {
     fontSize: 14,
-    color: '#999',
     fontStyle: 'italic',
   },
   modalActions: {

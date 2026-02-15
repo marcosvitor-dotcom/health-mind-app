@@ -16,6 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as profileService from '../../services/profileService';
 import * as psychologistService from '../../services/psychologistService';
 
@@ -25,6 +26,7 @@ interface EditProfileScreenProps {
 
 export default function EditProfileScreen({ navigation }: EditProfileScreenProps) {
   const { user, refreshUserData } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -144,20 +146,20 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
 
   if (loading && !psychologistData) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={[styles.container, styles.centerContent, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>Carregando...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Meu Perfil</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Meu Perfil</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -183,7 +185,7 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
                 <Ionicons name="person" size={50} color="#fff" />
               </View>
             )}
-            <View style={styles.editBadge}>
+            <View style={[styles.editBadge, { borderColor: colors.surface }]}>
               {uploadingImage ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
@@ -191,54 +193,54 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
               )}
             </View>
           </TouchableOpacity>
-          <Text style={styles.avatarHint}>Toque para alterar a foto</Text>
+          <Text style={[styles.avatarHint, { color: colors.textSecondary }]}>Toque para alterar a foto</Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Informações Pessoais</Text>
 
-          <View style={styles.dataRow}>
-            <Text style={styles.dataLabel}>Nome:</Text>
-            <Text style={styles.dataValue}>{psychologistData?.name || 'Não informado'}</Text>
+          <View style={[styles.dataRow, { borderBottomColor: colors.borderLight }]}>
+            <Text style={[styles.dataLabel, { color: colors.textSecondary }]}>Nome:</Text>
+            <Text style={[styles.dataValue, { color: colors.textPrimary }]}>{psychologistData?.name || 'Não informado'}</Text>
           </View>
 
-          <View style={styles.dataRow}>
-            <Text style={styles.dataLabel}>Email:</Text>
-            <Text style={styles.dataValue}>{psychologistData?.email || 'Não informado'}</Text>
+          <View style={[styles.dataRow, { borderBottomColor: colors.borderLight }]}>
+            <Text style={[styles.dataLabel, { color: colors.textSecondary }]}>Email:</Text>
+            <Text style={[styles.dataValue, { color: colors.textPrimary }]}>{psychologistData?.email || 'Não informado'}</Text>
           </View>
 
-          <View style={styles.dataRow}>
-            <Text style={styles.dataLabel}>CRP:</Text>
-            <Text style={styles.dataValue}>{psychologistData?.crp || 'Não informado'}</Text>
+          <View style={[styles.dataRow, { borderBottomColor: colors.borderLight }]}>
+            <Text style={[styles.dataLabel, { color: colors.textSecondary }]}>CRP:</Text>
+            <Text style={[styles.dataValue, { color: colors.textPrimary }]}>{psychologistData?.crp || 'Não informado'}</Text>
           </View>
 
-          <View style={styles.dataRow}>
-            <Text style={styles.dataLabel}>Telefone:</Text>
-            <Text style={styles.dataValue}>{psychologistData?.phone || 'Não informado'}</Text>
+          <View style={[styles.dataRow, { borderBottomColor: colors.borderLight }]}>
+            <Text style={[styles.dataLabel, { color: colors.textSecondary }]}>Telefone:</Text>
+            <Text style={[styles.dataValue, { color: colors.textPrimary }]}>{psychologistData?.phone || 'Não informado'}</Text>
           </View>
 
           {user?.clinicId && (
-            <View style={styles.dataRow}>
-              <Text style={styles.dataLabel}>Status:</Text>
-              <View style={styles.clinicBadge}>
+            <View style={[styles.dataRow, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.dataLabel, { color: colors.textSecondary }]}>Status:</Text>
+              <View style={[styles.clinicBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
                 <Ionicons name="business" size={16} color="#50C878" />
                 <Text style={styles.clinicBadgeText}>Vinculado a Clínica</Text>
               </View>
             </View>
           )}
 
-          <Text style={styles.sectionTitle}>Especialidades</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Especialidades</Text>
 
           {psychologistData?.specialties && psychologistData.specialties.length > 0 ? (
             <View style={styles.specialtiesDisplay}>
               {psychologistData.specialties.map((spec: string, index: number) => (
-                <View key={index} style={styles.chipDisplay}>
+                <View key={index} style={[styles.chipDisplay, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}>
                   <Text style={styles.chipDisplayText}>{spec}</Text>
                 </View>
               ))}
             </View>
           ) : (
-            <Text style={styles.noData}>Nenhuma especialidade cadastrada</Text>
+            <Text style={[styles.noData, { color: colors.textTertiary }]}>Nenhuma especialidade cadastrada</Text>
           )}
 
           <TouchableOpacity
@@ -259,15 +261,15 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
         onRequestClose={() => setEditMode(false)}
       >
         <KeyboardAvoidingView
-          style={styles.modalContainer}
+          style={[styles.modalContainer, { backgroundColor: colors.background }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          <View style={styles.modalHeader}>
+          <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={() => setEditMode(false)} style={styles.backButton}>
-              <Ionicons name="close" size={24} color="#333" />
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Editar Perfil</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Editar Perfil</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -276,47 +278,47 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+            <View style={[styles.form, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Informações Pessoais</Text>
 
-              <Text style={styles.label}>Nome Completo *</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="Seu nome completo"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={name}
                 onChangeText={setName}
                 editable={!loading}
               />
 
-              <Text style={styles.label}>Email</Text>
-              <View style={styles.inputDisabled}>
-                <Text style={styles.inputDisabledText}>{user?.email}</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
+              <View style={[styles.inputDisabled, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceSecondary : '#e9e9e9' }]}>
+                <Text style={[styles.inputDisabledText, { color: colors.textSecondary }]}>{user?.email}</Text>
               </View>
 
-              <Text style={styles.label}>CRP</Text>
-              <View style={styles.inputDisabled}>
-                <Text style={styles.inputDisabledText}>{psychologistData?.crp || 'Não informado'}</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>CRP</Text>
+              <View style={[styles.inputDisabled, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceSecondary : '#e9e9e9' }]}>
+                <Text style={[styles.inputDisabledText, { color: colors.textSecondary }]}>{psychologistData?.crp || 'Não informado'}</Text>
               </View>
 
-              <Text style={styles.label}>Telefone</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 placeholder="(11) 98765-4321"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textTertiary}
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
                 editable={!loading}
               />
 
-              <Text style={styles.sectionTitle}>Especialidades</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Especialidades</Text>
 
               <View style={styles.specialtyContainer}>
                 <TextInput
-                  style={[styles.input, styles.specialtyInput]}
+                  style={[styles.input, styles.specialtyInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                   placeholder="Ex: TCC, Ansiedade"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textTertiary}
                   value={specialty}
                   onChangeText={setSpecialty}
                   editable={!loading}
@@ -334,13 +336,13 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
               {specialties.length > 0 && (
                 <View style={styles.specialtiesChips}>
                   {specialties.map((spec, index) => (
-                    <View key={index} style={styles.chip}>
+                    <View key={index} style={[styles.chip, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}>
                       <Text style={styles.chipText}>{spec}</Text>
                       <TouchableOpacity
                         onPress={() => removeSpecialty(index)}
                         disabled={loading}
                       >
-                        <Ionicons name="close-circle" size={20} color="#666" />
+                        <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -369,7 +371,6 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centerContent: {
     justifyContent: 'center',
@@ -378,7 +379,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   header: {
     flexDirection: 'row',
@@ -387,13 +387,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -402,9 +399,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   backButton: {
     padding: 4,
@@ -412,7 +407,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   scrollContent: {
     padding: 20,
@@ -445,15 +439,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: '#fff',
   },
   avatarHint: {
     fontSize: 14,
-    color: '#666',
     marginTop: 8,
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -465,7 +456,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 16,
     marginBottom: 8,
   },
@@ -473,24 +463,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
     alignItems: 'center',
   },
   dataLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
     width: 100,
   },
   dataValue: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
   },
   clinicBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8FFF0',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -508,7 +494,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   chipDisplay: {
-    backgroundColor: '#E8F4FF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -520,7 +505,6 @@ const styles = StyleSheet.create({
   },
   noData: {
     fontSize: 14,
-    color: '#999',
     fontStyle: 'italic',
     paddingVertical: 12,
   },
@@ -542,29 +526,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
   },
   inputDisabled: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#e9e9e9',
   },
   inputDisabledText: {
     fontSize: 16,
-    color: '#666',
   },
   specialtyContainer: {
     flexDirection: 'row',
@@ -592,7 +569,6 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F4FF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,

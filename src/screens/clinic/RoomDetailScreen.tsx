@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as roomService from '../../services/roomService';
 import { Room, AMENITIES_MAP } from '../../services/roomService';
 
@@ -25,6 +26,7 @@ const ALL_AMENITIES = Object.keys(AMENITIES_MAP);
 
 export default function RoomDetailScreen({ navigation, route }: Props) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const clinicId = user?._id || user?.id || '';
   const editRoom = route.params?.room;
   const isEditing = !!editRoom;
@@ -132,13 +134,13 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
           {isEditing ? 'Editar Sala' : 'Nova Sala'}
         </Text>
         <View style={{ width: 40 }} />
@@ -147,39 +149,39 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Nome */}
         <View style={styles.field}>
-          <Text style={styles.label}>Nome *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
             value={name}
             onChangeText={setName}
             placeholder="Ex: Consultorio 1"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textTertiary}
             maxLength={100}
           />
         </View>
 
         {/* Numero */}
         <View style={styles.field}>
-          <Text style={styles.label}>Numero</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Numero</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
             value={number}
             onChangeText={setNumber}
             placeholder="Ex: 101"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textTertiary}
             maxLength={20}
           />
         </View>
 
         {/* Descricao */}
         <View style={styles.field}>
-          <Text style={styles.label}>Descricao</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Descricao</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
             value={description}
             onChangeText={setDescription}
             placeholder="Descricao da sala..."
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textTertiary}
             multiline
             numberOfLines={3}
             maxLength={500}
@@ -188,10 +190,10 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
 
         {/* Capacidade */}
         <View style={styles.field}>
-          <Text style={styles.label}>Capacidade</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Capacidade</Text>
           <View style={styles.capacityRow}>
             <TouchableOpacity
-              style={styles.capacityBtn}
+              style={[styles.capacityBtn, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}
               onPress={() => {
                 const val = Math.max(1, parseInt(capacity) - 1);
                 setCapacity(String(val));
@@ -199,9 +201,9 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
             >
               <Ionicons name="remove" size={20} color="#4A90E2" />
             </TouchableOpacity>
-            <Text style={styles.capacityValue}>{capacity}</Text>
+            <Text style={[styles.capacityValue, { color: colors.textPrimary }]}>{capacity}</Text>
             <TouchableOpacity
-              style={styles.capacityBtn}
+              style={[styles.capacityBtn, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}
               onPress={() => {
                 const val = Math.min(10, parseInt(capacity) + 1);
                 setCapacity(String(val));
@@ -209,13 +211,13 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
             >
               <Ionicons name="add" size={20} color="#4A90E2" />
             </TouchableOpacity>
-            <Text style={styles.capacityLabel}>pessoas</Text>
+            <Text style={[styles.capacityLabel, { color: colors.textSecondary }]}>pessoas</Text>
           </View>
         </View>
 
         {/* Amenidades */}
         <View style={styles.field}>
-          <Text style={styles.label}>Amenidades</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Amenidades</Text>
           <View style={styles.amenitiesGrid}>
             {ALL_AMENITIES.map((key) => {
               const selected = amenities.includes(key);
@@ -223,7 +225,7 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
               return (
                 <TouchableOpacity
                   key={key}
-                  style={[styles.amenityChip, selected && styles.amenityChipSelected]}
+                  style={[styles.amenityChip, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD', borderColor: isDark ? '#1A2E3D' : '#E8F4FD' }, selected && styles.amenityChipSelected]}
                   onPress={() => toggleAmenity(key)}
                 >
                   <Ionicons
@@ -240,30 +242,30 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        {/* Valor de Sublocação */}
+        {/* Valor de Sublocacao */}
         <View style={styles.field}>
-          <Text style={styles.label}>Valor de Sublocacao (R$)</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Valor de Sublocacao (R$)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.border }]}
             value={subleasePrice}
             onChangeText={setSubleasePrice}
             placeholder="Ex: 80,00"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textTertiary}
             keyboardType="decimal-pad"
           />
-          <Text style={styles.fieldHint}>
+          <Text style={[styles.fieldHint, { color: colors.textTertiary }]}>
             Cobrado quando psicologo usa a sala para pacientes externos a clinica
           </Text>
         </View>
 
-        {/* Ativo/Inativo (somente edição) */}
+        {/* Ativo/Inativo (somente edicao) */}
         {isEditing && (
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Sala Ativa</Text>
+          <View style={[styles.switchRow, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.switchLabel, { color: colors.textPrimary }]}>Sala Ativa</Text>
             <Switch
               value={isActive}
               onValueChange={setIsActive}
-              trackColor={{ false: '#ccc', true: '#4A90E2' }}
+              trackColor={{ false: isDark ? '#555' : '#ccc', true: '#4A90E2' }}
               thumbColor="#fff"
             />
           </View>
@@ -284,7 +286,7 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
           )}
         </TouchableOpacity>
 
-        {/* Botao Excluir (somente edição) */}
+        {/* Botao Excluir (somente edicao) */}
         {isEditing && (
           <TouchableOpacity
             style={[styles.deleteButton, deleting && styles.buttonDisabled]}
@@ -311,7 +313,6 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -319,9 +320,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   backBtn: {
     padding: 8,
@@ -329,7 +328,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#333',
   },
   scrollContent: {
     padding: 16,
@@ -340,22 +338,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#333',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   fieldHint: {
     fontSize: 12,
-    color: '#999',
     marginTop: 4,
   },
   textArea: {
@@ -371,20 +364,17 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
   capacityValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
     minWidth: 30,
     textAlign: 'center',
   },
   capacityLabel: {
     fontSize: 14,
-    color: '#666',
   },
   amenitiesGrid: {
     flexDirection: 'row',
@@ -398,9 +388,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#E8F4FD',
     borderWidth: 1,
-    borderColor: '#E8F4FD',
   },
   amenityChipSelected: {
     backgroundColor: '#4A90E2',
@@ -418,7 +406,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 10,
     marginBottom: 20,
@@ -426,7 +413,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
   saveButton: {
     backgroundColor: '#4A90E2',

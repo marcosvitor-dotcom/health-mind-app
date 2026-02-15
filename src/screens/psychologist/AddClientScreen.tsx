@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ClientFormData {
   name: string;
@@ -25,6 +26,8 @@ interface ClientFormData {
 }
 
 export default function AddClientScreen({ navigation }: any) {
+  const { colors, isDark } = useTheme();
+
   const [formData, setFormData] = useState<ClientFormData>({
     name: '',
     email: '',
@@ -101,7 +104,7 @@ export default function AddClientScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -113,48 +116,53 @@ export default function AddClientScreen({ navigation }: any) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Dados Pessoais</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Dados Pessoais</Text>
 
-          <Text style={styles.label}>Nome Completo *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="Digite o nome completo"
+            placeholderTextColor={colors.textTertiary}
             value={formData.name}
             onChangeText={(text) => handleInputChange('name', text)}
           />
 
-          <Text style={styles.label}>Email *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="exemplo@email.com"
+            placeholderTextColor={colors.textTertiary}
             value={formData.email}
             onChangeText={(text) => handleInputChange('email', text)}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>Telefone *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="(00) 00000-0000"
+            placeholderTextColor={colors.textTertiary}
             value={formData.phone}
             onChangeText={(text) => handleInputChange('phone', text)}
             keyboardType="phone-pad"
           />
 
-          <Text style={styles.label}>Data de Nascimento</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Data de Nascimento</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="DD/MM/AAAA"
+            placeholderTextColor={colors.textTertiary}
             value={formData.birthDate}
             onChangeText={(text) => handleInputChange('birthDate', text)}
             keyboardType="number-pad"
           />
 
-          <Text style={styles.label}>Endereço</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Endereço</Text>
           <TextInput
-            style={[styles.input, styles.multilineInput]}
+            style={[styles.input, styles.multilineInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="Rua, número, complemento, bairro, cidade - UF"
+            placeholderTextColor={colors.textTertiary}
             value={formData.address}
             onChangeText={(text) => handleInputChange('address', text)}
             multiline
@@ -163,20 +171,22 @@ export default function AddClientScreen({ navigation }: any) {
         </Card>
 
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Contato de Emergência</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Contato de Emergência</Text>
 
-          <Text style={styles.label}>Nome do Contato</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome do Contato</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="Nome completo"
+            placeholderTextColor={colors.textTertiary}
             value={formData.emergencyContact}
             onChangeText={(text) => handleInputChange('emergencyContact', text)}
           />
 
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="(00) 00000-0000"
+            placeholderTextColor={colors.textTertiary}
             value={formData.emergencyPhone}
             onChangeText={(text) => handleInputChange('emergencyPhone', text)}
             keyboardType="phone-pad"
@@ -188,8 +198,8 @@ export default function AddClientScreen({ navigation }: any) {
             <View style={styles.anamneseTitleContainer}>
               <Ionicons name="document-text" size={24} color="#4A90E2" />
               <View style={styles.anamneseTextContainer}>
-                <Text style={styles.sectionTitle}>Ficha de Anamnese</Text>
-                <Text style={styles.anamneseSubtitle}>
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ficha de Anamnese</Text>
+                <Text style={[styles.anamneseSubtitle, { color: colors.textSecondary }]}>
                   {anamneseAttached ? 'Anexada' : 'Opcional'}
                 </Text>
               </View>
@@ -202,7 +212,7 @@ export default function AddClientScreen({ navigation }: any) {
           <TouchableOpacity
             style={[
               styles.anamneseButton,
-              anamneseAttached && styles.anamneseButtonAttached,
+              anamneseAttached && [styles.anamneseButtonAttached, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }],
             ]}
             onPress={handleAttachAnamnese}
           >
@@ -222,9 +232,9 @@ export default function AddClientScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {anamneseAttached && (
-            <View style={styles.anamneseInfo}>
-              <Ionicons name="information-circle" size={16} color="#666" />
-              <Text style={styles.anamneseInfoText}>
+            <View style={[styles.anamneseInfo, { backgroundColor: colors.surfaceSecondary }]}>
+              <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
+              <Text style={[styles.anamneseInfoText, { color: colors.textSecondary }]}>
                 A ficha de anamnese pode ser preenchida ou modificada após o
                 cadastro
               </Text>
@@ -232,15 +242,15 @@ export default function AddClientScreen({ navigation }: any) {
           )}
         </Card>
 
-        <Text style={styles.requiredNote}>* Campos obrigatórios</Text>
+        <Text style={[styles.requiredNote, { color: colors.textTertiary }]}>* Campos obrigatórios</Text>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         <TouchableOpacity
-          style={styles.cancelButton}
+          style={[styles.cancelButton, { borderColor: colors.border }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
+          <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Ionicons name="checkmark-circle" size={24} color="#fff" />
@@ -254,7 +264,6 @@ export default function AddClientScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   content: {
     flex: 1,
@@ -266,24 +275,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#333',
-    backgroundColor: '#fff',
   },
   multilineInput: {
     height: 80,
@@ -304,7 +308,6 @@ const styles = StyleSheet.create({
   },
   anamneseSubtitle: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   anamneseButton: {
@@ -316,7 +319,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   anamneseButtonAttached: {
-    backgroundColor: '#E8F4FD',
     borderWidth: 1,
     borderColor: '#4A90E2',
   },
@@ -333,19 +335,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#f9f9f9',
     borderRadius: 8,
   },
   anamneseInfoText: {
     fontSize: 12,
-    color: '#666',
     marginLeft: 8,
     flex: 1,
     lineHeight: 16,
   },
   requiredNote: {
     fontSize: 12,
-    color: '#999',
     fontStyle: 'italic',
     textAlign: 'center',
     marginVertical: 16,
@@ -353,16 +352,13 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     padding: 16,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
   },
   cancelButton: {
     flex: 1,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
@@ -370,7 +366,6 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   saveButton: {
     flex: 2,

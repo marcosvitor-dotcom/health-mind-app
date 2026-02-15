@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as authService from '../../services/authService';
 import { Invitation, InvitationStatus } from '../../types';
 
@@ -21,6 +22,7 @@ interface InvitationsScreenProps {
 type FilterStatus = 'all' | InvitationStatus;
 
 export default function InvitationsScreen({ navigation }: InvitationsScreenProps) {
+  const { colors, isDark } = useTheme();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -133,7 +135,7 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
     const isLoading = actionLoading === id;
 
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.surface }]}>
         <View style={styles.cardHeader}>
           <View style={styles.patientBadge}>
             <Text style={styles.patientBadgeText}>Paciente</Text>
@@ -143,24 +145,24 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
           </View>
         </View>
 
-        <Text style={styles.cardName}>{item.preFilledData?.name || 'Sem nome'}</Text>
-        <Text style={styles.cardEmail}>{item.email}</Text>
+        <Text style={[styles.cardName, { color: colors.textPrimary }]}>{item.preFilledData?.name || 'Sem nome'}</Text>
+        <Text style={[styles.cardEmail, { color: colors.textSecondary }]}>{item.email}</Text>
 
         <View style={styles.cardDates}>
-          <Text style={styles.cardDateText}>
+          <Text style={[styles.cardDateText, { color: colors.textTertiary }]}>
             Enviado: {formatDate(item.createdAt)}
           </Text>
           {item.status === 'pending' && (
-            <Text style={styles.cardDateText}>
+            <Text style={[styles.cardDateText, { color: colors.textTertiary }]}>
               Expira: {formatDate(item.expiresAt)}
             </Text>
           )}
         </View>
 
         {item.status === 'pending' && (
-          <View style={styles.cardActions}>
+          <View style={[styles.cardActions, { borderTopColor: colors.border }]}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.resendButton]}
+              style={[styles.actionButton, styles.resendButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}
               onPress={() => handleResend(item)}
               disabled={isLoading}
             >
@@ -175,7 +177,7 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
+              style={[styles.actionButton, styles.cancelButton, { backgroundColor: isDark ? '#3D1F1F' : '#FFEBEE' }]}
               onPress={() => handleCancel(item)}
               disabled={isLoading}
             >
@@ -198,26 +200,26 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
     onPress: () => void;
   }) => (
     <TouchableOpacity
-      style={[styles.filterButton, active && styles.filterButtonActive]}
+      style={[styles.filterButton, { backgroundColor: colors.borderLight }, active && styles.filterButtonActive]}
       onPress={onPress}
     >
-      <Text style={[styles.filterButtonText, active && styles.filterButtonTextActive]}>
+      <Text style={[styles.filterButtonText, { color: colors.textSecondary }, active && styles.filterButtonTextActive]}>
         {label}
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.title}>Convites de Pacientes</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Convites de Pacientes</Text>
       </View>
 
-      <View style={styles.filtersContainer}>
-        <Text style={styles.filterLabel}>Status:</Text>
+      <View style={[styles.filtersContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>Status:</Text>
         <View style={styles.filterRow}>
           <FilterButton
             label="Todos"
@@ -257,8 +259,8 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="mail-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>Nenhum convite encontrado</Text>
+              <Ionicons name="mail-outline" size={64} color={colors.textTertiary} />
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhum convite encontrado</Text>
             </View>
           }
         />
@@ -277,7 +279,6 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -285,9 +286,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   backButton: {
     marginRight: 16,
@@ -295,18 +294,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   filtersContainer: {
-    backgroundColor: '#fff',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
     marginBottom: 8,
   },
   filterRow: {
@@ -318,14 +313,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#f0f0f0',
   },
   filterButtonActive: {
     backgroundColor: '#50C878',
   },
   filterButtonText: {
     fontSize: 13,
-    color: '#666',
   },
   filterButtonTextActive: {
     color: '#fff',
@@ -341,7 +334,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -380,12 +372,10 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   cardEmail: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 8,
   },
   cardDates: {
@@ -395,13 +385,11 @@ const styles = StyleSheet.create({
   },
   cardDateText: {
     fontSize: 12,
-    color: '#999',
   },
   cardActions: {
     flexDirection: 'row',
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     paddingTop: 12,
   },
   actionButton: {
@@ -413,17 +401,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 6,
   },
-  resendButton: {
-    backgroundColor: '#E8F4FF',
-  },
+  resendButton: {},
   resendButtonText: {
     color: '#4A90E2',
     fontSize: 14,
     fontWeight: '500',
   },
-  cancelButton: {
-    backgroundColor: '#FFEBEE',
-  },
+  cancelButton: {},
   cancelButtonText: {
     color: '#E74C3C',
     fontSize: 14,
@@ -438,7 +422,6 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#999',
   },
   fab: {
     position: 'absolute',

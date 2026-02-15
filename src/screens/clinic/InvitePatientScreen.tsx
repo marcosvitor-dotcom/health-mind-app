@@ -14,6 +14,7 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../services/api';
 import * as authService from '../../services/authService';
 
@@ -30,6 +31,7 @@ interface PsychologistOption {
 }
 
 export default function InvitePatientScreen({ navigation }: InvitePatientScreenProps) {
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [loadingPsychologists, setLoadingPsychologists] = useState(true);
   const [email, setEmail] = useState('');
@@ -110,19 +112,19 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
 
   const renderPsychologistOption = ({ item }: { item: PsychologistOption }) => (
     <TouchableOpacity
-      style={styles.psychologistOption}
+      style={[styles.psychologistOption, { borderBottomColor: colors.borderLight }]}
       onPress={() => {
         setSelectedPsychologist(item);
         setShowPsychologistModal(false);
       }}
     >
-      <View style={styles.psychologistAvatar}>
+      <View style={[styles.psychologistAvatar, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}>
         <Ionicons name="person" size={24} color="#4A90E2" />
       </View>
       <View style={styles.psychologistInfo}>
-        <Text style={styles.psychologistName}>{item.name}</Text>
-        <Text style={styles.psychologistEmail}>{item.email}</Text>
-        {item.crp && <Text style={styles.psychologistCrp}>CRP: {item.crp}</Text>}
+        <Text style={[styles.psychologistName, { color: colors.textPrimary }]}>{item.name}</Text>
+        <Text style={[styles.psychologistEmail, { color: colors.textSecondary }]}>{item.email}</Text>
+        {item.crp && <Text style={[styles.psychologistCrp, { color: colors.textTertiary }]}>CRP: {item.crp}</Text>}
       </View>
       {selectedPsychologist && (selectedPsychologist._id || selectedPsychologist.id) === (item._id || item.id) && (
         <Ionicons name="checkmark-circle" size={24} color="#50C878" />
@@ -132,7 +134,7 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -143,18 +145,18 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
       >
         <View style={styles.header}>
           <Ionicons name="person-add" size={64} color="#50C878" />
-          <Text style={styles.title}>Convidar Paciente</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Convidar Paciente</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Envie um convite para um novo paciente iniciar o tratamento
           </Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email *</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="paciente@email.com"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -162,32 +164,32 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
             editable={!loading}
           />
 
-          <Text style={styles.label}>Nome Completo *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="Maria Santos"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             editable={!loading}
           />
 
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="(11) 98765-4321"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             editable={!loading}
           />
 
-          <Text style={styles.label}>Data de Nascimento</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Data de Nascimento</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="DD/MM/AAAA"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={birthDate}
             onChangeText={formatBirthDate}
             keyboardType="numeric"
@@ -195,35 +197,35 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
             editable={!loading}
           />
 
-          <Text style={styles.label}>Psicólogo Responsável</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Psicólogo Responsável</Text>
           <TouchableOpacity
-            style={styles.selectButton}
+            style={[styles.selectButton, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}
             onPress={() => setShowPsychologistModal(true)}
             disabled={loading || loadingPsychologists}
           >
             {loadingPsychologists ? (
-              <ActivityIndicator size="small" color="#666" />
+              <ActivityIndicator size="small" color={colors.textSecondary} />
             ) : selectedPsychologist ? (
               <View style={styles.selectedPsychologist}>
-                <Text style={styles.selectedPsychologistName}>
+                <Text style={[styles.selectedPsychologistName, { color: colors.textPrimary }]}>
                   {selectedPsychologist.name}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setSelectedPsychologist(null)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <Ionicons name="close-circle" size={20} color="#999" />
+                  <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
             ) : (
-              <Text style={styles.selectButtonPlaceholder}>
+              <Text style={[styles.selectButtonPlaceholder, { color: colors.textTertiary }]}>
                 Selecionar psicólogo (opcional)
               </Text>
             )}
-            <Ionicons name="chevron-down" size={20} color="#666" />
+            <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
 
-          <View style={styles.infoBox}>
+          <View style={[styles.infoBox, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}>
             <Ionicons name="information-circle" size={20} color="#4A90E2" />
             <Text style={styles.infoText}>
               O paciente receberá um e-mail com um link para completar o cadastro e definir sua senha.
@@ -254,17 +256,17 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
         onRequestClose={() => setShowPsychologistModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Selecionar Psicólogo</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Selecionar Psicólogo</Text>
               <TouchableOpacity onPress={() => setShowPsychologistModal(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {psychologists.length === 0 ? (
               <View style={styles.emptyPsychologists}>
-                <Text style={styles.emptyText}>Nenhum psicólogo cadastrado</Text>
+                <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Nenhum psicólogo cadastrado</Text>
               </View>
             ) : (
               <FlatList
@@ -284,7 +286,6 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
@@ -298,17 +299,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 16,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
     marginTop: 8,
     textAlign: 'center',
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -320,34 +318,27 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
-    color: '#333',
   },
   selectButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
   },
   selectButtonPlaceholder: {
     fontSize: 16,
-    color: '#999',
     flex: 1,
   },
   selectedPsychologist: {
@@ -358,12 +349,10 @@ const styles = StyleSheet.create({
   },
   selectedPsychologistName: {
     fontSize: 16,
-    color: '#333',
     flex: 1,
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#E8F4FF',
     padding: 12,
     borderRadius: 8,
     marginTop: 12,
@@ -401,7 +390,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '70%',
@@ -413,25 +401,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   psychologistOption: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   psychologistAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#E8F4FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -442,16 +426,13 @@ const styles = StyleSheet.create({
   psychologistName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   psychologistEmail: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
   psychologistCrp: {
     fontSize: 12,
-    color: '#999',
     marginTop: 2,
   },
   emptyPsychologists: {
@@ -460,6 +441,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
   },
 });

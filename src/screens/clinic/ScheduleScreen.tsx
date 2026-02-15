@@ -17,6 +17,7 @@ import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as clinicService from '../../services/clinicService';
 import { ClinicPsychologist, ClinicAppointment, PatientBasic } from '../../services/clinicService';
 
@@ -47,6 +48,7 @@ const extractId = (idField: any): string | null => {
 
 export default function ScheduleScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
@@ -727,9 +729,9 @@ export default function ScheduleScreen({ navigation }: any) {
     const dayAppts = appointments[selectedDate] || [];
 
     return (
-      <ScrollView style={styles.dayViewContainer}>
-        <View style={styles.dayHeader}>
-          <Text style={styles.dayHeaderText}>
+      <ScrollView style={[styles.dayViewContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.dayHeader, { backgroundColor: colors.surfaceSecondary, borderBottomColor: colors.borderLight }]}>
+          <Text style={[styles.dayHeaderText, { color: colors.textPrimary }]}>
             {new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR', {
               weekday: 'long',
               day: 'numeric',
@@ -743,9 +745,9 @@ export default function ScheduleScreen({ navigation }: any) {
           const formattedHour = `${hour.toString().padStart(2, '0')}:00`;
 
           return (
-            <View key={hour} style={styles.hourRow}>
-              <View style={styles.hourLabel}>
-                <Text style={styles.hourText}>{formattedHour}</Text>
+            <View key={hour} style={[styles.hourRow, { borderBottomColor: colors.borderLight }]}>
+              <View style={[styles.hourLabel, { backgroundColor: colors.surfaceSecondary, borderRightColor: colors.borderLight }]}>
+                <Text style={[styles.hourText, { color: colors.textSecondary }]}>{formattedHour}</Text>
               </View>
               <View style={styles.hourContent}>
                 {hourAppts.length === 0 ? (
@@ -754,14 +756,14 @@ export default function ScheduleScreen({ navigation }: any) {
                   hourAppts.map((appt, idx) => (
                     <TouchableOpacity
                       key={appt._id || idx}
-                      style={[styles.hourAppointment, { borderLeftColor: getStatusColor(appt.status) }]}
+                      style={[styles.hourAppointment, { borderLeftColor: getStatusColor(appt.status), backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
                       onPress={() => handleEditAppointment(appt)}
                     >
                       <Text style={styles.hourApptTime}>{getAppointmentTime(appt)}</Text>
-                      <Text style={styles.hourApptPatient} numberOfLines={1}>
+                      <Text style={[styles.hourApptPatient, { color: colors.textPrimary }]} numberOfLines={1}>
                         {getPatientName(appt)}
                       </Text>
-                      <Text style={styles.hourApptPsy} numberOfLines={1}>
+                      <Text style={[styles.hourApptPsy, { color: colors.textSecondary }]} numberOfLines={1}>
                         Dr(a). {getPsychologistName(appt)}
                       </Text>
                     </TouchableOpacity>
@@ -781,9 +783,9 @@ export default function ScheduleScreen({ navigation }: any) {
       <View style={styles.appointmentHeader}>
         <View style={styles.timeContainer}>
           <Ionicons name="time-outline" size={20} color="#4A90E2" />
-          <Text style={styles.appointmentTime}>
+          <Text style={[styles.appointmentTime, { color: colors.textPrimary }]}>
             {showDate && (
-              <Text style={styles.appointmentDate}>
+              <Text style={[styles.appointmentDate, { color: colors.textSecondary }]}>
                 {new Date(getAppointmentDate(appt) + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} -{' '}
               </Text>
             )}
@@ -800,22 +802,22 @@ export default function ScheduleScreen({ navigation }: any) {
       <View style={styles.appointmentInfo}>
         <View style={styles.infoRow}>
           <Ionicons name="person" size={16} color="#4A90E2" />
-          <Text style={styles.infoLabel}>Psicólogo:</Text>
-          <Text style={styles.infoValue}>{getPsychologistName(appt)}</Text>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Psicólogo:</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{getPsychologistName(appt)}</Text>
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="people" size={16} color="#50C878" />
-          <Text style={styles.infoLabel}>Paciente:</Text>
-          <Text style={styles.infoValue}>{getPatientName(appt)}</Text>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Paciente:</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{getPatientName(appt)}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Ionicons name="document-text" size={16} color="#666" />
-          <Text style={styles.infoLabel}>Tipo:</Text>
-          <Text style={styles.infoValue}>{getAppointmentTypeLabel(appt.type)}</Text>
+          <Ionicons name="document-text" size={16} color={colors.textSecondary} />
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Tipo:</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{getAppointmentTypeLabel(appt.type)}</Text>
         </View>
       </View>
 
-      <View style={styles.appointmentActions}>
+      <View style={[styles.appointmentActions, { borderTopColor: colors.borderLight }]}>
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => handleViewPatient(appt)}
@@ -839,9 +841,9 @@ export default function ScheduleScreen({ navigation }: any) {
     if (displayAppointments.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="calendar-outline" size={48} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum compromisso agendado</Text>
-          <Text style={styles.emptySubtext}>
+          <Ionicons name="calendar-outline" size={48} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Nenhum compromisso agendado</Text>
+          <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
             {viewMode === 'week' ? 'Nesta semana' : 'Neste dia'}
           </Text>
         </View>
@@ -862,32 +864,32 @@ export default function ScheduleScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Agenda da Clínica</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Agenda da Clínica</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando agenda...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando agenda...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <View>
-          <Text style={styles.headerTitle}>Agenda da Clínica</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Agenda da Clínica</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
             {selectedPsychologists.length === psychologists.length
               ? 'Todos os psicólogos'
               : `${selectedPsychologists.length} psicólogo(s) selecionado(s)`}
           </Text>
         </View>
         <TouchableOpacity
-          style={styles.filterButton}
+          style={[styles.filterButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
           onPress={() => setShowFilterModal(true)}
         >
           <Ionicons name="filter" size={24} color="#4A90E2" />
@@ -895,12 +897,12 @@ export default function ScheduleScreen({ navigation }: any) {
       </View>
 
       {/* Seletor de Visualização */}
-      <View style={styles.viewSelector}>
+      <View style={[styles.viewSelector, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
         <TouchableOpacity
           style={[styles.viewButton, viewMode === 'day' && styles.viewButtonActive]}
           onPress={() => setViewMode('day')}
         >
-          <Text style={[styles.viewButtonText, viewMode === 'day' && styles.viewButtonTextActive]}>
+          <Text style={[styles.viewButtonText, { color: colors.textSecondary }, viewMode === 'day' && styles.viewButtonTextActive]}>
             Dia
           </Text>
         </TouchableOpacity>
@@ -908,7 +910,7 @@ export default function ScheduleScreen({ navigation }: any) {
           style={[styles.viewButton, viewMode === 'week' && styles.viewButtonActive]}
           onPress={() => setViewMode('week')}
         >
-          <Text style={[styles.viewButtonText, viewMode === 'week' && styles.viewButtonTextActive]}>
+          <Text style={[styles.viewButtonText, { color: colors.textSecondary }, viewMode === 'week' && styles.viewButtonTextActive]}>
             Semana
           </Text>
         </TouchableOpacity>
@@ -916,48 +918,48 @@ export default function ScheduleScreen({ navigation }: any) {
           style={[styles.viewButton, viewMode === 'month' && styles.viewButtonActive]}
           onPress={() => setViewMode('month')}
         >
-          <Text style={[styles.viewButtonText, viewMode === 'month' && styles.viewButtonTextActive]}>
+          <Text style={[styles.viewButtonText, { color: colors.textSecondary }, viewMode === 'month' && styles.viewButtonTextActive]}>
             Mês
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Resumo de estatísticas */}
-      <View style={styles.statsBar}>
+      <View style={[styles.statsBar, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{stats.total}</Text>
-          <Text style={styles.statLabel}>Total ({stats.label})</Text>
+          <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats.total}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total ({stats.label})</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: '#50C878' }]}>{stats.confirmed}</Text>
-          <Text style={styles.statLabel}>Confirmadas</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Confirmadas</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: '#FFB347' }]}>{stats.pending}</Text>
-          <Text style={styles.statLabel}>Pendentes</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pendentes</Text>
         </View>
       </View>
 
       {/* Calendário (esconde na visão diária) */}
       {viewMode !== 'day' && (
         <Calendar
-          style={styles.calendar}
+          style={[styles.calendar, { borderBottomColor: colors.borderLight }]}
           current={selectedDate}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
           theme={{
-            backgroundColor: '#ffffff',
-            calendarBackground: '#ffffff',
+            backgroundColor: isDark ? colors.surface : '#ffffff',
+            calendarBackground: isDark ? colors.surface : '#ffffff',
             textSectionTitleColor: '#4A90E2',
             selectedDayBackgroundColor: '#4A90E2',
             selectedDayTextColor: '#ffffff',
             todayTextColor: '#4A90E2',
-            dayTextColor: '#2d4150',
-            textDisabledColor: '#d9e1e8',
+            dayTextColor: isDark ? colors.textPrimary : '#2d4150',
+            textDisabledColor: isDark ? colors.textTertiary : '#d9e1e8',
             dotColor: '#4A90E2',
             selectedDotColor: '#ffffff',
             arrowColor: '#4A90E2',
-            monthTextColor: '#2d4150',
+            monthTextColor: isDark ? colors.textPrimary : '#2d4150',
             indicatorColor: '#4A90E2',
             textDayFontWeight: '300',
             textMonthFontWeight: 'bold',
@@ -971,10 +973,10 @@ export default function ScheduleScreen({ navigation }: any) {
 
       {/* Data selecionada (apenas para mês) */}
       {viewMode === 'month' && (
-        <View style={styles.selectedDateContainer}>
+        <View style={[styles.selectedDateContainer, { backgroundColor: colors.surface, borderBottomColor: colors.borderLight }]}>
           <View style={styles.selectedDateInfo}>
             <Ionicons name="calendar" size={20} color="#4A90E2" />
-            <Text style={styles.selectedDateText}>
+            <Text style={[styles.selectedDateText, { color: colors.textPrimary }]}>
               {new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR', {
                 weekday: 'long',
                 day: 'numeric',
@@ -989,7 +991,7 @@ export default function ScheduleScreen({ navigation }: any) {
       {error ? (
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadAppointments}>
             <Text style={styles.retryButtonText}>Tentar novamente</Text>
           </TouchableOpacity>
@@ -1008,20 +1010,20 @@ export default function ScheduleScreen({ navigation }: any) {
         onRequestClose={() => setShowFilterModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filtrar Agenda</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Filtrar Agenda</Text>
               <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.filterSectionTitle}>Psicólogos</Text>
+            <Text style={[styles.filterSectionTitle, { color: colors.textPrimary }]}>Psicólogos</Text>
             <View style={styles.filterActions}>
-              <TouchableOpacity style={styles.filterActionButton} onPress={selectAllPsychologists}>
+              <TouchableOpacity style={[styles.filterActionButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]} onPress={selectAllPsychologists}>
                 <Text style={styles.filterActionText}>Selecionar todos</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterActionButton} onPress={clearPsychologistSelection}>
+              <TouchableOpacity style={[styles.filterActionButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]} onPress={clearPsychologistSelection}>
                 <Text style={styles.filterActionText}>Limpar</Text>
               </TouchableOpacity>
             </View>
@@ -1033,17 +1035,17 @@ export default function ScheduleScreen({ navigation }: any) {
                 return (
                   <TouchableOpacity
                     key={psyId}
-                    style={[styles.filterItem, isSelected && styles.filterItemSelected]}
+                    style={[styles.filterItem, { backgroundColor: colors.surfaceSecondary }, isSelected && { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
                     onPress={() => togglePsychologist(psyId)}
                   >
                     <Ionicons
                       name={isSelected ? 'checkbox' : 'square-outline'}
                       size={24}
-                      color={isSelected ? '#4A90E2' : '#999'}
+                      color={isSelected ? '#4A90E2' : colors.textTertiary}
                     />
                     <View style={styles.filterItemInfo}>
-                      <Text style={styles.filterItemName}>{psy.name}</Text>
-                      <Text style={styles.filterItemCrp}>{psy.crp}</Text>
+                      <Text style={[styles.filterItemName, { color: colors.textPrimary }]}>{psy.name}</Text>
+                      <Text style={[styles.filterItemCrp, { color: colors.textSecondary }]}>{psy.crp}</Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -1073,21 +1075,21 @@ export default function ScheduleScreen({ navigation }: any) {
         onRequestClose={() => setShowEditModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Agendamento</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes do Agendamento</Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {selectedAppointment && (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.editSection}>
-                  <Text style={styles.editLabel}>Data e Hora</Text>
+                  <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Data e Hora</Text>
                   <View style={styles.editRow}>
                     <Ionicons name="calendar" size={20} color="#4A90E2" />
-                    <Text style={styles.editValue}>
+                    <Text style={[styles.editValue, { color: colors.textPrimary }]}>
                       {new Date(getAppointmentDate(selectedAppointment) + 'T00:00:00').toLocaleDateString('pt-BR', {
                         weekday: 'long',
                         day: 'numeric',
@@ -1098,35 +1100,35 @@ export default function ScheduleScreen({ navigation }: any) {
                   </View>
                   <View style={styles.editRow}>
                     <Ionicons name="time" size={20} color="#4A90E2" />
-                    <Text style={styles.editValue}>{getAppointmentTime(selectedAppointment)}</Text>
+                    <Text style={[styles.editValue, { color: colors.textPrimary }]}>{getAppointmentTime(selectedAppointment)}</Text>
                   </View>
                 </View>
 
                 <View style={styles.editSection}>
-                  <Text style={styles.editLabel}>Paciente</Text>
+                  <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Paciente</Text>
                   <TouchableOpacity
-                    style={styles.editRowClickable}
+                    style={[styles.editRowClickable, { backgroundColor: colors.surfaceSecondary }]}
                     onPress={() => {
                       setShowEditModal(false);
                       handleViewPatient(selectedAppointment);
                     }}
                   >
                     <Ionicons name="person" size={20} color="#50C878" />
-                    <Text style={styles.editValue}>{getPatientName(selectedAppointment)}</Text>
-                    <Ionicons name="chevron-forward" size={20} color="#999" />
+                    <Text style={[styles.editValue, { color: colors.textPrimary }]}>{getPatientName(selectedAppointment)}</Text>
+                    <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.editSection}>
-                  <Text style={styles.editLabel}>Psicólogo</Text>
+                  <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Psicólogo</Text>
                   <View style={styles.editRow}>
                     <Ionicons name="person" size={20} color="#4A90E2" />
-                    <Text style={styles.editValue}>{getPsychologistName(selectedAppointment)}</Text>
+                    <Text style={[styles.editValue, { color: colors.textPrimary }]}>{getPsychologistName(selectedAppointment)}</Text>
                   </View>
                 </View>
 
                 <View style={styles.editSection}>
-                  <Text style={styles.editLabel}>Status</Text>
+                  <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Status</Text>
                   <View style={[styles.statusBadgeLarge, { backgroundColor: getStatusColor(selectedAppointment.status) + '20' }]}>
                     <Text style={[styles.statusTextLarge, { color: getStatusColor(selectedAppointment.status) }]}>
                       {getStatusLabel(selectedAppointment.status)}
@@ -1135,14 +1137,14 @@ export default function ScheduleScreen({ navigation }: any) {
                 </View>
 
                 <View style={styles.editSection}>
-                  <Text style={styles.editLabel}>Tipo</Text>
-                  <Text style={styles.editValue}>{getAppointmentTypeLabel(selectedAppointment.type)}</Text>
+                  <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Tipo</Text>
+                  <Text style={[styles.editValue, { color: colors.textPrimary }]}>{getAppointmentTypeLabel(selectedAppointment.type)}</Text>
                 </View>
 
                 {selectedAppointment.notes && (
                   <View style={styles.editSection}>
-                    <Text style={styles.editLabel}>Observações</Text>
-                    <Text style={styles.editNotes}>{selectedAppointment.notes}</Text>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Observações</Text>
+                    <Text style={[styles.editNotes, { color: colors.textSecondary, backgroundColor: colors.surfaceSecondary }]}>{selectedAppointment.notes}</Text>
                   </View>
                 )}
 
@@ -1210,32 +1212,34 @@ export default function ScheduleScreen({ navigation }: any) {
         onRequestClose={() => setShowRescheduleModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '90%' }]}>
+          <View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Editar Agendamento</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Editar Agendamento</Text>
               <TouchableOpacity onPress={() => setShowRescheduleModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.rescheduleLabel}>Data (AAAA-MM-DD)</Text>
+              <Text style={[styles.rescheduleLabel, { color: colors.textPrimary }]}>Data (AAAA-MM-DD)</Text>
               <TextInput
-                style={styles.rescheduleInput}
+                style={[styles.rescheduleInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 value={editDate}
                 onChangeText={setEditDate}
                 placeholder="Ex: 2026-01-25"
+                placeholderTextColor={colors.textTertiary}
               />
 
-              <Text style={styles.rescheduleLabel}>Horário (HH:MM)</Text>
+              <Text style={[styles.rescheduleLabel, { color: colors.textPrimary }]}>Horário (HH:MM)</Text>
               <TextInput
-                style={styles.rescheduleInput}
+                style={[styles.rescheduleInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 value={editTime}
                 onChangeText={setEditTime}
                 placeholder="Ex: 14:30"
+                placeholderTextColor={colors.textTertiary}
               />
 
-              <Text style={styles.rescheduleLabel}>Psicólogo</Text>
+              <Text style={[styles.rescheduleLabel, { color: colors.textPrimary }]}>Psicólogo</Text>
               <View style={styles.typeSelector}>
                 {psychologists.map((psy) => {
                   const psyId = psy._id || psy.id;
@@ -1243,7 +1247,7 @@ export default function ScheduleScreen({ navigation }: any) {
                   return (
                     <TouchableOpacity
                       key={psyId}
-                      style={[styles.typeButton, isSelected && styles.typeButtonActive]}
+                      style={[styles.typeButton, { borderColor: '#4A90E2' }, isSelected && styles.typeButtonActive]}
                       onPress={() => setEditPsychologistId(psyId)}
                     >
                       <Text style={[styles.typeButtonText, isSelected && styles.typeButtonTextActive]} numberOfLines={1}>
@@ -1254,12 +1258,12 @@ export default function ScheduleScreen({ navigation }: any) {
                 })}
               </View>
 
-              <Text style={styles.rescheduleLabel}>Tipo de Atendimento</Text>
+              <Text style={[styles.rescheduleLabel, { color: colors.textPrimary }]}>Tipo de Atendimento</Text>
               <View style={styles.typeSelector}>
                 {APPOINTMENT_TYPES.map((type) => (
                   <TouchableOpacity
                     key={type.value}
-                    style={[styles.typeButton, editType === type.value && styles.typeButtonActive]}
+                    style={[styles.typeButton, { borderColor: '#4A90E2' }, editType === type.value && styles.typeButtonActive]}
                     onPress={() => setEditType(type.value)}
                   >
                     <Ionicons
@@ -1274,12 +1278,13 @@ export default function ScheduleScreen({ navigation }: any) {
                 ))}
               </View>
 
-              <Text style={styles.rescheduleLabel}>Observações</Text>
+              <Text style={[styles.rescheduleLabel, { color: colors.textPrimary }]}>Observações</Text>
               <TextInput
-                style={[styles.rescheduleInput, styles.textArea]}
+                style={[styles.rescheduleInput, styles.textArea, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
                 value={editNotes}
                 onChangeText={setEditNotes}
                 placeholder="Adicione observações sobre a consulta..."
+                placeholderTextColor={colors.textTertiary}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -1287,11 +1292,11 @@ export default function ScheduleScreen({ navigation }: any) {
 
               <View style={styles.rescheduleActions}>
                 <TouchableOpacity
-                  style={[styles.rescheduleButton, styles.rescheduleCancel]}
+                  style={[styles.rescheduleButton, { backgroundColor: colors.borderLight }]}
                   onPress={() => setShowRescheduleModal(false)}
                   disabled={isSaving}
                 >
-                  <Text style={styles.rescheduleButtonText}>Cancelar</Text>
+                  <Text style={[styles.rescheduleButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1319,18 +1324,18 @@ export default function ScheduleScreen({ navigation }: any) {
         onRequestClose={() => setShowPatientModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Dados do Paciente</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Dados do Paciente</Text>
               <TouchableOpacity onPress={() => setShowPatientModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             {loadingPatient ? (
               <View style={styles.patientLoadingContainer}>
                 <ActivityIndicator size="large" color="#4A90E2" />
-                <Text style={styles.loadingText}>Carregando...</Text>
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
               </View>
             ) : patientData ? (
               <View>
@@ -1338,19 +1343,19 @@ export default function ScheduleScreen({ navigation }: any) {
                   <Ionicons name="person-circle" size={80} color="#4A90E2" />
                 </View>
 
-                <Text style={styles.patientName}>{patientData.name}</Text>
+                <Text style={[styles.patientName, { color: colors.textPrimary }]}>{patientData.name}</Text>
 
                 <View style={styles.patientInfo}>
-                  <View style={styles.patientInfoRow}>
-                    <Ionicons name="mail" size={20} color="#666" />
-                    <Text style={styles.patientInfoText}>
+                  <View style={[styles.patientInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="mail" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.patientInfoText, { color: colors.textPrimary }]}>
                       {patientData.email || 'Email não disponível'}
                     </Text>
                   </View>
 
-                  <View style={styles.patientInfoRow}>
-                    <Ionicons name="call" size={20} color="#666" />
-                    <Text style={styles.patientInfoText}>
+                  <View style={[styles.patientInfoRow, { borderBottomColor: colors.borderLight }]}>
+                    <Ionicons name="call" size={20} color={colors.textSecondary} />
+                    <Text style={[styles.patientInfoText, { color: colors.textPrimary }]}>
                       {patientData.phone || 'Telefone não disponível'}
                     </Text>
                   </View>
@@ -1377,16 +1382,16 @@ export default function ScheduleScreen({ navigation }: any) {
                 )}
 
                 <TouchableOpacity
-                  style={styles.closePatientButton}
+                  style={[styles.closePatientButton, { backgroundColor: colors.borderLight }]}
                   onPress={() => setShowPatientModal(false)}
                 >
-                  <Text style={styles.closePatientButtonText}>Fechar</Text>
+                  <Text style={[styles.closePatientButtonText, { color: colors.textSecondary }]}>Fechar</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.patientLoadingContainer}>
-                <Ionicons name="person-circle" size={64} color="#ccc" />
-                <Text style={styles.loadingText}>Paciente não encontrado</Text>
+                <Ionicons name="person-circle" size={64} color={colors.textTertiary} />
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Paciente não encontrado</Text>
               </View>
             )}
           </View>
@@ -1399,31 +1404,25 @@ export default function ScheduleScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   headerSubtitle: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   filterButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#E8F4FF',
   },
   loadingContainer: {
     flex: 1,
@@ -1433,7 +1432,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -1444,7 +1442,6 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   retryButton: {
@@ -1461,11 +1458,9 @@ const styles = StyleSheet.create({
   },
   viewSelector: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     padding: 10,
     justifyContent: 'space-around',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   viewButton: {
     paddingVertical: 8,
@@ -1477,7 +1472,6 @@ const styles = StyleSheet.create({
   },
   viewButtonText: {
     fontSize: 14,
-    color: '#666',
     fontWeight: '500',
   },
   viewButtonTextActive: {
@@ -1486,10 +1480,8 @@ const styles = StyleSheet.create({
   statsBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#fff',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   statItem: {
     alignItems: 'center',
@@ -1497,25 +1489,20 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   statLabel: {
     fontSize: 11,
-    color: '#666',
     marginTop: 2,
   },
   calendar: {
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   selectedDateContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   selectedDateInfo: {
     flexDirection: 'row',
@@ -1525,7 +1512,6 @@ const styles = StyleSheet.create({
   selectedDateText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 8,
     textTransform: 'capitalize',
   },
@@ -1550,13 +1536,11 @@ const styles = StyleSheet.create({
   appointmentTime: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginLeft: 6,
   },
   appointmentDate: {
     fontSize: 14,
     fontWeight: 'normal',
-    color: '#666',
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -1577,21 +1561,18 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 8,
     marginRight: 4,
   },
   infoValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     flex: 1,
   },
   appointmentActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     paddingTop: 12,
   },
   actionButton: {
@@ -1615,50 +1596,40 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     marginTop: 8,
     textAlign: 'center',
   },
   // Day View
   dayViewContainer: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   dayHeader: {
     padding: 16,
-    backgroundColor: '#f9f9f9',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   dayHeaderText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     textTransform: 'capitalize',
   },
   hourRow: {
     flexDirection: 'row',
     minHeight: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   hourLabel: {
     width: 60,
     padding: 8,
-    backgroundColor: '#f9f9f9',
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderRightWidth: 1,
-    borderRightColor: '#eee',
   },
   hourText: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
   hourContent: {
@@ -1669,7 +1640,6 @@ const styles = StyleSheet.create({
     height: 52,
   },
   hourAppointment: {
-    backgroundColor: '#E8F4FF',
     padding: 8,
     borderRadius: 6,
     marginBottom: 4,
@@ -1683,12 +1653,10 @@ const styles = StyleSheet.create({
   hourApptPatient: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#333',
     marginTop: 2,
   },
   hourApptPsy: {
     fontSize: 11,
-    color: '#666',
     marginTop: 1,
   },
   // Modal
@@ -1698,7 +1666,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -1713,12 +1680,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   filterSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   filterActions: {
@@ -1730,7 +1695,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: '#E8F4FF',
   },
   filterActionText: {
     fontSize: 12,
@@ -1746,10 +1710,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: '#f9f9f9',
   },
   filterItemSelected: {
-    backgroundColor: '#E8F4FF',
+    // Kept for backwards compatibility; overridden by inline style
   },
   filterItemInfo: {
     marginLeft: 12,
@@ -1758,11 +1721,9 @@ const styles = StyleSheet.create({
   filterItemName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   filterItemCrp: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   applyFilterButton: {
@@ -1787,7 +1748,6 @@ const styles = StyleSheet.create({
   editLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
     marginBottom: 8,
   },
   editRow: {
@@ -1800,20 +1760,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
     padding: 8,
-    backgroundColor: '#f9f9f9',
     borderRadius: 8,
   },
   editValue: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 8,
     flex: 1,
   },
   editNotes: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
-    backgroundColor: '#f9f9f9',
     padding: 12,
     borderRadius: 8,
   },
@@ -1850,17 +1806,14 @@ const styles = StyleSheet.create({
   rescheduleLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   rescheduleInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
   },
   textArea: {
     minHeight: 100,
@@ -1878,7 +1831,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#4A90E2',
     gap: 6,
   },
   typeButtonActive: {
@@ -1905,7 +1857,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rescheduleCancel: {
-    backgroundColor: '#f0f0f0',
+    // Kept for backwards compatibility; overridden by inline style
   },
   rescheduleSave: {
     backgroundColor: '#4A90E2',
@@ -1913,7 +1865,6 @@ const styles = StyleSheet.create({
   rescheduleButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   // Patient Modal
   patientLoadingContainer: {
@@ -1927,7 +1878,6 @@ const styles = StyleSheet.create({
   patientName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -1939,11 +1889,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   patientInfoText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 12,
     flex: 1,
   },
@@ -1967,7 +1915,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   closePatientButton: {
-    backgroundColor: '#f0f0f0',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -1975,6 +1922,5 @@ const styles = StyleSheet.create({
   closePatientButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
 });

@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { UserRole } from '../../types';
 
 export default function LoginScreen() {
@@ -17,6 +18,7 @@ export default function LoginScreen() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('client');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { colors } = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,58 +37,72 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Health Mind</Text>
-        <Text style={styles.subtitle}>Cuidando da sua mente</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>Health Mind</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Cuidando da sua mente</Text>
       </View>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Tipo de Acesso</Text>
+      <View style={[styles.form, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.label, { color: colors.textPrimary }]}>Tipo de Acesso</Text>
 
         <View style={styles.roleContainer}>
           <TouchableOpacity
-            style={selectedRole === 'client' ? styles.roleButtonActive : styles.roleButton}
+            style={selectedRole === 'client'
+              ? [styles.roleButtonActive]
+              : [styles.roleButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
             onPress={() => setSelectedRole('client')}
           >
-            <Text style={selectedRole === 'client' ? styles.roleButtonTextActive : styles.roleButtonText}>
+            <Text style={selectedRole === 'client'
+              ? styles.roleButtonTextActive
+              : [styles.roleButtonText, { color: colors.textSecondary }]}>
               Cliente
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={selectedRole === 'psychologist' ? styles.roleButtonActive : styles.roleButton}
+            style={selectedRole === 'psychologist'
+              ? [styles.roleButtonActive]
+              : [styles.roleButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
             onPress={() => setSelectedRole('psychologist')}
           >
-            <Text style={selectedRole === 'psychologist' ? styles.roleButtonTextActive : styles.roleButtonText}>
+            <Text style={selectedRole === 'psychologist'
+              ? styles.roleButtonTextActive
+              : [styles.roleButtonText, { color: colors.textSecondary }]}>
               Psicólogo
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={selectedRole === 'clinic' ? styles.roleButtonActive : styles.roleButton}
+            style={selectedRole === 'clinic'
+              ? [styles.roleButtonActive]
+              : [styles.roleButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
             onPress={() => setSelectedRole('clinic')}
           >
-            <Text style={selectedRole === 'clinic' ? styles.roleButtonTextActive : styles.roleButtonText}>
+            <Text style={selectedRole === 'clinic'
+              ? styles.roleButtonTextActive
+              : [styles.roleButtonText, { color: colors.textSecondary }]}>
               Clínica
             </Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Email</Text>
+        <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
           placeholder="seu@email.com"
+          placeholderTextColor={colors.textTertiary}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
 
-        <Text style={styles.label}>Senha</Text>
+        <Text style={[styles.label, { color: colors.textPrimary }]}>Senha</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
           placeholder="********"
+          placeholderTextColor={colors.textTertiary}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={true}
@@ -106,7 +122,7 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Versão 1.0.0 - Demo</Text>
+        <Text style={[styles.footerText, { color: colors.textTertiary }]}>Versão 1.0.0 - Demo</Text>
       </View>
     </View>
   );
@@ -115,7 +131,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     padding: 20,
   },
@@ -126,15 +141,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#4A90E2',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -146,14 +158,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   roleContainer: {
     flexDirection: 'row',
     marginBottom: 8,
-    
   },
   roleButton: {
     flex: 1,
@@ -161,8 +171,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   roleButtonActive: {
@@ -177,7 +185,6 @@ const styles = StyleSheet.create({
   },
   roleButtonText: {
     fontSize: 14,
-    color: '#666',
     fontWeight: '500',
   },
   roleButtonTextActive: {
@@ -187,11 +194,9 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
   },
   button: {
@@ -211,7 +216,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   footerText: {
-    color: '#999',
     fontSize: 12,
   },
 });

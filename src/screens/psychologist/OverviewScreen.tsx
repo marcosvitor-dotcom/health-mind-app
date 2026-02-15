@@ -11,10 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 
 export default function OverviewScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<psychologistService.OverviewStats | null>(null);
@@ -66,17 +68,17 @@ export default function OverviewScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Carregando...</Text>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -85,11 +87,11 @@ export default function OverviewScreen({ navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Olá, {user?.name?.split(' ')[0]}!</Text>
-            <Text style={styles.subtitle}>Aqui está um resumo do seu dia</Text>
+            <Text style={[styles.greeting, { color: colors.textPrimary }]}>Olá, {user?.name?.split(' ')[0]}!</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Aqui está um resumo do seu dia</Text>
           </View>
           {user?.clinicId && (
-            <View style={styles.clinicBadge}>
+            <View style={[styles.clinicBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
               <Ionicons name="business" size={16} color="#50C878" />
               <Text style={styles.clinicBadgeText}>Vinculado</Text>
             </View>
@@ -98,60 +100,60 @@ export default function OverviewScreen({ navigation }: any) {
 
         {/* Quick Stats */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: '#E8F4FD' }]}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
             <Ionicons name="people" size={32} color="#4A90E2" />
-            <Text style={styles.statNumber}>{stats?.totalPatients || 0}</Text>
-            <Text style={styles.statLabel}>Pacientes</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{stats?.totalPatients || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pacientes</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#FFF4E6' }]}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? '#3D3020' : '#FFF4E6' }]}>
             <Ionicons name="calendar-outline" size={32} color="#FF9800" />
-            <Text style={styles.statNumber}>{stats?.todayAppointments.length || 0}</Text>
-            <Text style={styles.statLabel}>Hoje</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{stats?.todayAppointments.length || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Hoje</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#E8FFF0' }]}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
             <Ionicons name="time-outline" size={32} color="#50C878" />
-            <Text style={styles.statNumber}>{stats?.pendingSessions || 0}</Text>
-            <Text style={styles.statLabel}>Pendentes</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{stats?.pendingSessions || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pendentes</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#F3E5F5' }]}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? '#2D1F3D' : '#F3E5F5' }]}>
             <Ionicons name="checkmark-circle-outline" size={32} color="#9C27B0" />
-            <Text style={styles.statNumber}>{stats?.completedSessions || 0}</Text>
-            <Text style={styles.statLabel}>Completas</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{stats?.completedSessions || 0}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Completas</Text>
           </View>
         </View>
 
         {/* Next Appointment */}
         {stats?.nextAppointment && (
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="alarm-outline" size={24} color="#4A90E2" />
-              <Text style={styles.sectionTitle}>Próxima Consulta</Text>
+              <Ionicons name="alarm-outline" size={24} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Próxima Consulta</Text>
             </View>
-            <View style={styles.appointmentCard}>
+            <View style={[styles.appointmentCard, { backgroundColor: colors.surfaceSecondary }]}>
               <View style={styles.appointmentTime}>
                 <Text style={styles.appointmentTimeText}>
                   {formatDateTime(getDateTime(stats.nextAppointment)).time}
                 </Text>
-                <Text style={styles.appointmentDateText}>
+                <Text style={[styles.appointmentDateText, { color: colors.textSecondary }]}>
                   {formatDateTime(getDateTime(stats.nextAppointment)).date}
                 </Text>
               </View>
               <View style={styles.appointmentInfo}>
-                <Text style={styles.appointmentPatient}>
+                <Text style={[styles.appointmentPatient, { color: colors.textPrimary }]}>
                   {stats.nextAppointment.patient?.name || 'Paciente'}
                 </Text>
                 <View style={styles.appointmentMeta}>
-                  <Ionicons name="time" size={14} color="#666" />
-                  <Text style={styles.appointmentMetaText}>
+                  <Ionicons name="time" size={14} color={colors.textSecondary} />
+                  <Text style={[styles.appointmentMetaText, { color: colors.textSecondary }]}>
                     {stats.nextAppointment.duration || 50} min
                   </Text>
                 </View>
               </View>
               <TouchableOpacity style={styles.appointmentButton}>
-                <Ionicons name="chevron-forward" size={24} color="#4A90E2" />
+                <Ionicons name="chevron-forward" size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -159,20 +161,20 @@ export default function OverviewScreen({ navigation }: any) {
 
         {/* Today's Appointments */}
         {stats?.todayAppointments && stats.todayAppointments.length > 0 && (
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="today-outline" size={24} color="#4A90E2" />
-              <Text style={styles.sectionTitle}>Consultas de Hoje</Text>
+              <Ionicons name="today-outline" size={24} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Consultas de Hoje</Text>
             </View>
             {stats.todayAppointments.slice(0, 3).map((appointment) => (
-              <View key={appointment._id || appointment.id} style={styles.todayAppointmentItem}>
+              <View key={appointment._id || appointment.id} style={[styles.todayAppointmentItem, { borderBottomColor: colors.borderLight }]}>
                 <View style={styles.todayAppointmentTime}>
-                  <Text style={styles.todayAppointmentTimeText}>
+                  <Text style={[styles.todayAppointmentTimeText, { color: colors.textPrimary }]}>
                     {formatDateTime(getDateTime(appointment)).time}
                   </Text>
                 </View>
                 <View style={styles.todayAppointmentInfo}>
-                  <Text style={styles.todayAppointmentPatient}>
+                  <Text style={[styles.todayAppointmentPatient, { color: colors.textPrimary }]}>
                     {appointment.patient?.name || 'Paciente'}
                   </Text>
                   <View style={styles.todayAppointmentStatus}>
@@ -189,7 +191,7 @@ export default function OverviewScreen({ navigation }: any) {
                         },
                       ]}
                     />
-                    <Text style={styles.todayAppointmentStatusText}>
+                    <Text style={[styles.todayAppointmentStatusText, { color: colors.textSecondary }]}>
                       {appointment.status === 'confirmed'
                         ? 'Confirmado'
                         : appointment.status === 'scheduled'
@@ -208,25 +210,25 @@ export default function OverviewScreen({ navigation }: any) {
                 <Text style={styles.seeAllText}>
                   Ver todas ({stats.todayAppointments.length})
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
+                <Ionicons name="chevron-forward" size={16} color={colors.primary} />
               </TouchableOpacity>
             )}
           </View>
         )}
 
         {/* Financial Summary */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="wallet-outline" size={24} color="#4A90E2" />
-            <Text style={styles.sectionTitle}>Resumo Financeiro</Text>
+            <Ionicons name="wallet-outline" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Resumo Financeiro</Text>
           </View>
           <View style={styles.financialGrid}>
-            <View style={styles.financialCard}>
-              <Text style={styles.financialLabel}>Recebido (mês)</Text>
+            <View style={[styles.financialCard, { backgroundColor: colors.surfaceSecondary }]}>
+              <Text style={[styles.financialLabel, { color: colors.textSecondary }]}>Recebido (mês)</Text>
               <Text style={styles.financialValue}>{formatCurrency(stats?.monthRevenue || 0)}</Text>
             </View>
-            <View style={styles.financialCard}>
-              <Text style={styles.financialLabel}>A Receber</Text>
+            <View style={[styles.financialCard, { backgroundColor: colors.surfaceSecondary }]}>
+              <Text style={[styles.financialLabel, { color: colors.textSecondary }]}>A Receber</Text>
               <Text style={[styles.financialValue, { color: '#FF9800' }]}>
                 {formatCurrency(stats?.pendingRevenue || 0)}
               </Text>
@@ -235,39 +237,39 @@ export default function OverviewScreen({ navigation }: any) {
         </View>
 
         {/* Quick Actions */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="flash-outline" size={24} color="#4A90E2" />
-            <Text style={styles.sectionTitle}>Ações Rápidas</Text>
+            <Ionicons name="flash-outline" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ações Rápidas</Text>
           </View>
           <View style={styles.actionsGrid}>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={[styles.actionCard, { backgroundColor: colors.surfaceSecondary }]}
               onPress={() => navigation.navigate('Clients', { screen: 'InvitePatient' })}
             >
               <Ionicons name="person-add" size={28} color="#50C878" />
-              <Text style={styles.actionText}>Convidar Paciente</Text>
+              <Text style={[styles.actionText, { color: colors.textPrimary }]}>Convidar Paciente</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={[styles.actionCard, { backgroundColor: colors.surfaceSecondary }]}
               onPress={() => navigation.navigate('Schedule')}
             >
               <Ionicons name="calendar" size={28} color="#4A90E2" />
-              <Text style={styles.actionText}>Ver Agenda</Text>
+              <Text style={[styles.actionText, { color: colors.textPrimary }]}>Ver Agenda</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={[styles.actionCard, { backgroundColor: colors.surfaceSecondary }]}
               onPress={() => navigation.navigate('Clients')}
             >
               <Ionicons name="people" size={28} color="#9C27B0" />
-              <Text style={styles.actionText}>Meus Pacientes</Text>
+              <Text style={[styles.actionText, { color: colors.textPrimary }]}>Meus Pacientes</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={[styles.actionCard, { backgroundColor: colors.surfaceSecondary }]}
               onPress={() => navigation.navigate('Reports')}
             >
               <Ionicons name="stats-chart" size={28} color="#FF9800" />
-              <Text style={styles.actionText}>Relatórios</Text>
+              <Text style={[styles.actionText, { color: colors.textPrimary }]}>Relatórios</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -279,7 +281,6 @@ export default function OverviewScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -289,7 +290,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
   },
   scrollView: {
     flex: 1,
@@ -306,17 +306,14 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   clinicBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8FFF0',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -343,16 +340,13 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 8,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   section: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -365,13 +359,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 8,
   },
   appointmentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
   },
@@ -387,7 +379,6 @@ const styles = StyleSheet.create({
   },
   appointmentDateText: {
     fontSize: 12,
-    color: '#666',
     marginTop: 4,
   },
   appointmentInfo: {
@@ -396,7 +387,6 @@ const styles = StyleSheet.create({
   appointmentPatient: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   appointmentMeta: {
@@ -405,7 +395,6 @@ const styles = StyleSheet.create({
   },
   appointmentMetaText: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 4,
   },
   appointmentButton: {
@@ -416,7 +405,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   todayAppointmentTime: {
     width: 60,
@@ -425,7 +413,6 @@ const styles = StyleSheet.create({
   todayAppointmentTimeText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   todayAppointmentInfo: {
     flex: 1,
@@ -433,7 +420,6 @@ const styles = StyleSheet.create({
   todayAppointmentPatient: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 4,
   },
   todayAppointmentStatus: {
@@ -448,7 +434,6 @@ const styles = StyleSheet.create({
   },
   todayAppointmentStatusText: {
     fontSize: 13,
-    color: '#666',
   },
   seeAllButton: {
     flexDirection: 'row',
@@ -469,14 +454,12 @@ const styles = StyleSheet.create({
   },
   financialCard: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 4,
   },
   financialLabel: {
     fontSize: 13,
-    color: '#666',
     marginBottom: 8,
   },
   financialValue: {
@@ -491,7 +474,6 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     width: '48%',
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -499,7 +481,6 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 13,
-    color: '#333',
     fontWeight: '500',
     marginTop: 8,
     textAlign: 'center',

@@ -33,7 +33,8 @@
       "Bash(node:*)",
       "Bash(ping:*)",
       "WebFetch(domain:github.com)",
-      "Bash(del \"c:\\\\Users\\\\marco\\\\OneDrive\\\\Desktop\\\\health_mind_ai\\\\health-mind-app\\\\src\\\\screens\\\\client\\\\PsychologistChatScreen.tsx\")"
+      "Bash(del \"c:\\\\Users\\\\marco\\\\OneDrive\\\\Desktop\\\\health_mind_ai\\\\health-mind-app\\\\src\\\\screens\\\\client\\\\PsychologistChatScreen.tsx\")",
+      "Bash(grep:*)"
     ]
   }
 }

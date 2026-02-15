@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
 
 export default function DocumentsScreen() {
+  const { colors, isDark } = useTheme();
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
   const documents = [
@@ -80,6 +82,7 @@ export default function DocumentsScreen() {
     <TouchableOpacity
       style={[
         styles.filterButton,
+        { backgroundColor: colors.background },
         selectedFilter === value && styles.filterButtonActive,
       ]}
       onPress={() => setSelectedFilter(value)}
@@ -87,6 +90,7 @@ export default function DocumentsScreen() {
       <Text
         style={[
           styles.filterText,
+          { color: colors.textSecondary },
           selectedFilter === value && styles.filterTextActive,
         ]}
       >
@@ -96,9 +100,9 @@ export default function DocumentsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Documentos</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Documentos</Text>
         <TouchableOpacity style={styles.addButton}>
           <Ionicons name="add-circle" size={28} color="#4A90E2" />
         </TouchableOpacity>
@@ -107,7 +111,7 @@ export default function DocumentsScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
+        style={[styles.filterContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}
       >
         <FilterButton value="all" label="Todos" />
         <FilterButton value="anamnesis" label="Anamneses" />
@@ -119,7 +123,7 @@ export default function DocumentsScreen() {
         {documents.map((document) => (
           <Card key={document.id}>
             <View style={styles.documentHeader}>
-              <View style={styles.iconContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}>
                 <Ionicons
                   name={getDocumentIcon(document.type) as any}
                   size={24}
@@ -127,8 +131,8 @@ export default function DocumentsScreen() {
                 />
               </View>
               <View style={styles.documentInfo}>
-                <Text style={styles.documentTitle}>{document.title}</Text>
-                <Text style={styles.documentType}>
+                <Text style={[styles.documentTitle, { color: colors.textPrimary }]}>{document.title}</Text>
+                <Text style={[styles.documentType, { color: colors.textSecondary }]}>
                   {getDocumentTypeLabel(document.type)}
                 </Text>
               </View>
@@ -136,12 +140,12 @@ export default function DocumentsScreen() {
 
             <View style={styles.documentDetails}>
               <View style={styles.detailRow}>
-                <Ionicons name="person" size={16} color="#666" />
-                <Text style={styles.detailText}>{document.client}</Text>
+                <Ionicons name="person" size={16} color={colors.textSecondary} />
+                <Text style={[styles.detailText, { color: colors.textSecondary }]}>{document.client}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Ionicons name="calendar" size={16} color="#666" />
-                <Text style={styles.detailText}>
+                <Ionicons name="calendar" size={16} color={colors.textSecondary} />
+                <Text style={[styles.detailText, { color: colors.textSecondary }]}>
                   {new Date(document.date).toLocaleDateString('pt-BR')}
                 </Text>
               </View>
@@ -171,8 +175,8 @@ export default function DocumentsScreen() {
                 <Ionicons name="create" size={18} color="#4A90E2" />
                 <Text style={styles.actionText}>Editar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.shareButton]}>
-                <Ionicons name="share" size={18} color="#666" />
+              <TouchableOpacity style={[styles.actionButton, { borderColor: colors.border }]}>
+                <Ionicons name="share" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
           </Card>
@@ -185,37 +189,30 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   addButton: {
     padding: 4,
   },
   filterContainer: {
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f5f5f5',
     marginRight: 8,
   },
   filterButtonActive: {
@@ -223,7 +220,6 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 14,
-    color: '#666',
     fontWeight: '500',
   },
   filterTextActive: {
@@ -242,7 +238,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#E8F4FD',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -253,18 +248,16 @@ const styles = StyleSheet.create({
   documentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   documentType: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   documentDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    
+
   },
   detailRow: {
     flexDirection: 'row',
@@ -272,7 +265,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: '#666',
     marginLeft: 4,
   },
   statusBadge: {
@@ -286,7 +278,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    
+
   },
   actionButton: {
     flex: 1,
@@ -297,12 +289,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#4A90E2',
-    
-  },
-  shareButton: {
-    flex: 0,
-    paddingHorizontal: 12,
-    borderColor: '#ddd',
+
   },
   actionText: {
     fontSize: 12,

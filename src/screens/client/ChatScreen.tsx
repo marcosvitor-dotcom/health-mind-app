@@ -21,6 +21,7 @@ import {
 } from 'expo-speech-recognition';
 import * as chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface LocalMessage {
   id: string;
@@ -31,6 +32,7 @@ interface LocalMessage {
 
 export default function ChatScreen() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -263,8 +265,8 @@ export default function ChatScreen() {
 
   if (isLoadingHistory) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <Image
             source={require('../../../assets/logo.png')}
             style={styles.logo}
@@ -273,27 +275,27 @@ export default function ChatScreen() {
           <View style={styles.headerTextContainer}>
             <View style={styles.aiIndicator}>
               <View style={styles.aiDot} />
-              <Text style={styles.aiText}>Assistente</Text>
+              <Text style={[styles.aiText, { color: colors.textPrimary }]}>Assistente</Text>
             </View>
-            <Text style={styles.subtitle}>Seu diario pessoal</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Seu diario pessoal</Text>
           </View>
         </View>
         <View style={styles.loadingHistoryContainer}>
-          <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingHistoryText}>Carregando conversas...</Text>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingHistoryText, { color: colors.textSecondary }]}>Carregando conversas...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <Image
             source={require('../../../assets/logo.png')}
             style={styles.logo}
@@ -302,9 +304,9 @@ export default function ChatScreen() {
           <View style={styles.headerTextContainer}>
             <View style={styles.aiIndicator}>
               <View style={styles.aiDot} />
-              <Text style={styles.aiText}>Assistente</Text>
+              <Text style={[styles.aiText, { color: colors.textPrimary }]}>Assistente</Text>
             </View>
-            <Text style={styles.subtitle}>Seu diario pessoal</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Seu diario pessoal</Text>
           </View>
         </View>
 
@@ -325,13 +327,15 @@ export default function ChatScreen() {
             <View
               style={[
                 styles.messageBubble,
-                msg.isAI ? styles.aiMessage : styles.userMessage,
+                msg.isAI
+                  ? [styles.aiMessage, { backgroundColor: colors.surface }]
+                  : styles.userMessage,
               ]}
             >
               <Text
                 style={[
                   styles.messageText,
-                  msg.isAI ? styles.aiMessageText : styles.userMessageText,
+                  msg.isAI ? { color: colors.textPrimary } : styles.userMessageText,
                 ]}
               >
                 {msg.text}
@@ -339,7 +343,7 @@ export default function ChatScreen() {
               <Text
                 style={[
                   styles.timestamp,
-                  msg.isAI ? styles.aiTimestamp : styles.userTimestamp,
+                  msg.isAI ? { color: colors.textTertiary } : styles.userTimestamp,
                 ]}
               >
                 {msg.timestamp.toLocaleTimeString('pt-BR', {
@@ -351,14 +355,14 @@ export default function ChatScreen() {
           </View>
         ))}
         {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#4A90E2" />
-            <Text style={styles.loadingText}>Digitando...</Text>
+          <View style={[styles.loadingContainer, { backgroundColor: colors.surface }]}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Digitando...</Text>
           </View>
         )}
         </ScrollView>
 
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
           {speechAvailable && (
             <TouchableOpacity
               style={styles.micButton}
@@ -368,6 +372,7 @@ export default function ChatScreen() {
               <Animated.View
                 style={[
                   styles.micIconContainer,
+                  { backgroundColor: colors.borderLight },
                   isRecording && styles.micIconContainerActive,
                   { transform: [{ scale: isRecording ? pulseAnim : 1 }] },
                 ]}
@@ -375,14 +380,14 @@ export default function ChatScreen() {
                 <Ionicons
                   name={isRecording ? 'stop' : 'mic'}
                   size={22}
-                  color={isRecording ? '#fff' : '#4A90E2'}
+                  color={isRecording ? '#fff' : colors.primary}
                 />
               </Animated.View>
             </TouchableOpacity>
           )}
 
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary }]}
             placeholder={
               isRecording
                 ? 'Ouvindo...'
@@ -390,6 +395,7 @@ export default function ChatScreen() {
                 ? 'Transcrevendo...'
                 : 'Escreva como voce esta se sentindo...'
             }
+            placeholderTextColor={colors.textTertiary}
             value={message}
             onChangeText={setMessage}
             multiline
@@ -400,7 +406,7 @@ export default function ChatScreen() {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              (!message.trim() || isLoading || isRecording) && styles.sendButtonDisabled,
+              (!message.trim() || isLoading || isRecording) && { backgroundColor: colors.borderLight },
             ]}
             onPress={handleSend}
             disabled={!message.trim() || isLoading || isRecording}
@@ -408,7 +414,7 @@ export default function ChatScreen() {
             <Ionicons
               name="send"
               size={24}
-              color={message.trim() && !isLoading && !isRecording ? '#fff' : '#ccc'}
+              color={message.trim() && !isLoading && !isRecording ? '#fff' : colors.textTertiary}
             />
           </TouchableOpacity>
         </View>
@@ -420,7 +426,6 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   flex: {
     flex: 1,
@@ -429,9 +434,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   logo: {
     width: 50,
@@ -458,11 +461,9 @@ const styles = StyleSheet.create({
   aiText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   subtitle: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   messagesContainer: {
@@ -486,7 +487,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   aiMessage: {
-    backgroundColor: '#fff',
     borderBottomLeftRadius: 4,
   },
   userMessage: {
@@ -497,9 +497,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
   },
-  aiMessageText: {
-    color: '#333',
-  },
   userMessageText: {
     color: '#fff',
   },
@@ -507,23 +504,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
   },
-  aiTimestamp: {
-    color: '#999',
-  },
   userTimestamp: {
     color: '#E8F4FD',
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -539,9 +530,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendButtonDisabled: {
-    backgroundColor: '#f0f0f0',
-  },
   micButton: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -551,7 +539,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -562,7 +549,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#fff',
     padding: 12,
     borderRadius: 16,
     borderBottomLeftRadius: 4,
@@ -570,7 +556,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 8,
-    color: '#666',
     fontSize: 14,
     fontStyle: 'italic',
   },
@@ -582,6 +567,5 @@ const styles = StyleSheet.create({
   loadingHistoryText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
 });

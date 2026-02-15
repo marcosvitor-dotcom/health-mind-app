@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import { getTherapeuticReport, TherapeuticReport } from '../../services/reportService';
 
 interface SectionConfig {
@@ -16,6 +17,7 @@ interface SectionConfig {
   title: string;
   icon: string;
   bgColor: string;
+  darkBgColor: string;
   iconColor: string;
 }
 
@@ -25,6 +27,7 @@ const SECTIONS: SectionConfig[] = [
     title: 'Temas Abordados',
     icon: 'chatbubbles',
     bgColor: '#E8F4FD',
+    darkBgColor: 'surfaceSecondary',
     iconColor: '#4A90E2',
   },
   {
@@ -32,6 +35,7 @@ const SECTIONS: SectionConfig[] = [
     title: 'Sentimentos Identificados',
     icon: 'heart',
     bgColor: '#FCE4EC',
+    darkBgColor: '#3D1F2D',
     iconColor: '#E91E63',
   },
   {
@@ -39,6 +43,7 @@ const SECTIONS: SectionConfig[] = [
     title: 'Padrões Comportamentais',
     icon: 'repeat',
     bgColor: '#FFF4E6',
+    darkBgColor: '#3D3020',
     iconColor: '#FF9800',
   },
   {
@@ -46,6 +51,7 @@ const SECTIONS: SectionConfig[] = [
     title: 'Pontos de Atenção',
     icon: 'warning',
     bgColor: '#FFEBEE',
+    darkBgColor: '#3D1F1F',
     iconColor: '#E74C3C',
   },
   {
@@ -53,6 +59,7 @@ const SECTIONS: SectionConfig[] = [
     title: 'Evolução Observada',
     icon: 'trending-up',
     bgColor: '#E8FFF0',
+    darkBgColor: '#1F3D1F',
     iconColor: '#50C878',
   },
   {
@@ -60,12 +67,14 @@ const SECTIONS: SectionConfig[] = [
     title: 'Sugestões para Sessão',
     icon: 'bulb',
     bgColor: '#F3E5F5',
+    darkBgColor: '#2D1F3D',
     iconColor: '#9C27B0',
   },
 ];
 
 export default function TherapeuticReportDetailScreen({ route, navigation }: any) {
   const { reportId, patientName } = route.params;
+  const { colors, isDark } = useTheme();
 
   const [report, setReport] = useState<TherapeuticReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,18 +106,24 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
     });
   };
 
+  const getSectionBgColor = (section: SectionConfig) => {
+    if (!isDark) return section.bgColor;
+    if (section.darkBgColor === 'surfaceSecondary') return colors.surfaceSecondary;
+    return section.darkBgColor;
+  };
+
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Relatório Terapêutico</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Relatório Terapêutico</Text>
           </View>
           <View style={{ width: 32 }} />
         </View>
@@ -121,22 +136,22 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
 
   if (error || !report) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Relatório Terapêutico</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Relatório Terapêutico</Text>
           </View>
           <View style={{ width: 32 }} />
         </View>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={48} color="#E74C3C" />
-          <Text style={styles.errorText}>{error || 'Relatório não encontrado'}</Text>
+          <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error || 'Relatório não encontrado'}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadReport}>
             <Text style={styles.retryText}>Tentar novamente</Text>
           </TouchableOpacity>
@@ -146,40 +161,40 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Relatório Terapêutico</Text>
-          <Text style={styles.headerSubtitle}>{patientName}</Text>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Relatório Terapêutico</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{patientName}</Text>
         </View>
         <View style={{ width: 32 }} />
       </View>
 
       <ScrollView style={styles.content}>
         {/* Período e Metadados */}
-        <View style={styles.metaCard}>
+        <View style={[styles.metaCard, { backgroundColor: colors.surface }]}>
           <View style={styles.metaRow}>
             <Ionicons name="calendar-outline" size={18} color="#9C27B0" />
-            <Text style={styles.metaLabel}>Período:</Text>
-            <Text style={styles.metaValue}>
+            <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>Período:</Text>
+            <Text style={[styles.metaValue, { color: colors.textPrimary }]}>
               {formatDate(report.periodStart)} — {formatDate(report.periodEnd)}
             </Text>
           </View>
           <View style={styles.metaRow}>
             <Ionicons name="chatbubbles-outline" size={18} color="#9C27B0" />
-            <Text style={styles.metaLabel}>Mensagens analisadas:</Text>
-            <Text style={styles.metaValue}>{report.messagesAnalyzed}</Text>
+            <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>Mensagens analisadas:</Text>
+            <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{report.messagesAnalyzed}</Text>
           </View>
           <View style={styles.metaRow}>
             <Ionicons name="time-outline" size={18} color="#9C27B0" />
-            <Text style={styles.metaLabel}>Gerado em:</Text>
-            <Text style={styles.metaValue}>
+            <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>Gerado em:</Text>
+            <Text style={[styles.metaValue, { color: colors.textPrimary }]}>
               {new Date(report.createdAt).toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'long',
@@ -193,12 +208,12 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
 
         {/* Resumo */}
         {report.summary ? (
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, { backgroundColor: isDark ? '#2D1F3D' : '#F3E5F5' }]}>
             <View style={styles.summaryHeader}>
               <Ionicons name="sparkles" size={20} color="#9C27B0" />
               <Text style={styles.summaryTitle}>Resumo Geral</Text>
             </View>
-            <Text style={styles.summaryText}>{report.summary}</Text>
+            <Text style={[styles.summaryText, { color: colors.textPrimary }]}>{report.summary}</Text>
           </View>
         ) : null}
 
@@ -208,12 +223,12 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
           if (!content) return null;
 
           return (
-            <View key={section.key} style={styles.sectionCard}>
+            <View key={section.key} style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
               <View style={styles.sectionHeader}>
                 <View
                   style={[
                     styles.sectionIconContainer,
-                    { backgroundColor: section.bgColor },
+                    { backgroundColor: getSectionBgColor(section) },
                   ]}
                 >
                   <Ionicons
@@ -222,17 +237,17 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
                     color={section.iconColor}
                   />
                 </View>
-                <Text style={styles.sectionTitle}>{section.title}</Text>
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{section.title}</Text>
               </View>
-              <Text style={styles.sectionContent}>{content}</Text>
+              <Text style={[styles.sectionContent, { color: colors.textPrimary }]}>{content}</Text>
             </View>
           );
         })}
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Ionicons name="shield-checkmark" size={16} color="#999" />
-          <Text style={styles.footerText}>
+          <Ionicons name="shield-checkmark" size={16} color={colors.textTertiary} />
+          <Text style={[styles.footerText, { color: colors.textTertiary }]}>
             Este relatório foi gerado por IA e criptografado. Ele não contém
             citações diretas das conversas do paciente.
           </Text>
@@ -245,15 +260,12 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   backButton: {
     padding: 4,
@@ -265,11 +277,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#666',
     marginTop: 2,
   },
   content: {
@@ -289,7 +299,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
     marginTop: 12,
   },
@@ -305,7 +314,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   metaCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -323,16 +331,13 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
   },
   metaValue: {
     fontSize: 13,
-    color: '#333',
     flex: 1,
   },
   summaryCard: {
-    backgroundColor: '#F3E5F5',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -350,11 +355,9 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 14,
-    color: '#333',
     lineHeight: 22,
   },
   sectionCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -380,12 +383,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
   },
   sectionContent: {
     fontSize: 14,
-    color: '#444',
     lineHeight: 22,
   },
   footer: {
@@ -399,7 +400,6 @@ const styles = StyleSheet.create({
   footerText: {
     flex: 1,
     fontSize: 12,
-    color: '#999',
     lineHeight: 17,
   },
 });

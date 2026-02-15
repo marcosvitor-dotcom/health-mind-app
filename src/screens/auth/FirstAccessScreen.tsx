@@ -12,10 +12,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../services/api';
 
 export default function FirstAccessScreen() {
   const navigation = useNavigation<any>();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -52,7 +54,7 @@ export default function FirstAccessScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: isDark ? colors.background : '#1A252F' }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -65,19 +67,19 @@ export default function FirstAccessScreen() {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <Ionicons name="key" size={64} color="#4A90E2" />
+          <Ionicons name="key" size={64} color={colors.primary} />
           <Text style={styles.title}>Primeiro Acesso</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: isDark ? colors.textSecondary : '#aaa' }]}>
             Digite o email que você recebeu o convite para completar seu cadastro.
           </Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email do convite</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email do convite</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="seu@email.com"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -100,9 +102,9 @@ export default function FirstAccessScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.infoCard}>
-          <Ionicons name="information-circle" size={20} color="#4A90E2" />
-          <Text style={styles.infoText}>
+        <View style={[styles.infoCard, { backgroundColor: isDark ? colors.surfaceSecondary : 'rgba(74, 144, 226, 0.1)' }]}>
+          <Ionicons name="information-circle" size={20} color={colors.primary} />
+          <Text style={[styles.infoText, { color: isDark ? colors.textSecondary : '#ccc' }]}>
             Se você recebeu um convite por email de uma clínica ou psicólogo, digite o email aqui para completar seu cadastro.
           </Text>
         </View>
@@ -114,7 +116,6 @@ export default function FirstAccessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A252F',
   },
   content: {
     flex: 1,
@@ -140,14 +141,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#aaa',
     marginTop: 8,
     textAlign: 'center',
     lineHeight: 20,
     paddingHorizontal: 10,
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -159,18 +158,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
     marginBottom: 8,
-    color: '#333',
   },
   button: {
     backgroundColor: '#4A90E2',
@@ -190,7 +185,6 @@ const styles = StyleSheet.create({
   infoCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
     padding: 14,
     borderRadius: 10,
     marginTop: 20,
@@ -198,7 +192,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 13,
-    color: '#ccc',
     flex: 1,
     lineHeight: 18,
   },

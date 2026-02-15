@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as profileService from '../../services/profileService';
 
 interface EditProfileScreenProps {
@@ -23,6 +24,7 @@ interface EditProfileScreenProps {
 
 export default function EditProfileScreen({ navigation }: EditProfileScreenProps) {
   const { user, refreshUserData } = useAuth();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -145,15 +147,15 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Editar Perfil</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -167,11 +169,11 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatar} />
             ) : (
-              <View style={styles.avatarPlaceholder}>
+              <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
                 <Text style={styles.avatarText}>{getInitials()}</Text>
               </View>
             )}
-            <View style={styles.editBadge}>
+            <View style={[styles.editBadge, { borderColor: colors.surface }]}>
               {uploadingImage ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
@@ -179,43 +181,43 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
               )}
             </View>
           </TouchableOpacity>
-          <Text style={styles.avatarHint}>Toque para alterar a foto</Text>
+          <Text style={[styles.avatarHint, { color: colors.textSecondary }]}>Toque para alterar a foto</Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+        <View style={[styles.form, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Informações Pessoais</Text>
 
-          <Text style={styles.label}>Nome Completo *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="Seu nome completo"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             editable={!loading}
           />
 
-          <Text style={styles.label}>Email</Text>
-          <View style={styles.inputDisabled}>
-            <Text style={styles.inputDisabledText}>{user?.email}</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
+          <View style={[styles.inputDisabled, { borderColor: colors.border, backgroundColor: isDark ? colors.surfaceSecondary : '#e9e9e9' }]}>
+            <Text style={[styles.inputDisabledText, { color: colors.textSecondary }]}>{user?.email}</Text>
           </View>
 
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="(11) 98765-4321"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             editable={!loading}
           />
 
-          <Text style={styles.label}>Data de Nascimento</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Data de Nascimento</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="DD/MM/AAAA"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={birthDate}
             onChangeText={formatBirthDate}
             keyboardType="numeric"
@@ -223,34 +225,34 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
             editable={!loading}
           />
 
-          <Text style={styles.sectionTitle}>Contato de Emergência</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Contato de Emergência</Text>
 
-          <Text style={styles.label}>Nome</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="Nome do contato"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={emergencyName}
             onChangeText={setEmergencyName}
             editable={!loading}
           />
 
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="(11) 98765-9999"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={emergencyPhone}
             onChangeText={setEmergencyPhone}
             keyboardType="phone-pad"
             editable={!loading}
           />
 
-          <Text style={styles.label}>Relacionamento</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Relacionamento</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="Ex: Irmão, Mãe, Amigo"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textTertiary}
             value={emergencyRelationship}
             onChangeText={setEmergencyRelationship}
             editable={!loading}
@@ -276,7 +278,6 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -285,9 +286,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   backButton: {
     padding: 4,
@@ -295,7 +294,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   scrollContent: {
     padding: 20,
@@ -313,7 +311,6 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#4A90E2',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -333,15 +330,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: '#fff',
   },
   avatarHint: {
     fontSize: 14,
-    color: '#666',
     marginTop: 8,
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -353,36 +347,28 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 16,
     marginBottom: 8,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
   },
   inputDisabled: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#e9e9e9',
   },
   inputDisabledText: {
     fontSize: 16,
-    color: '#666',
   },
   saveButton: {
     backgroundColor: '#50C878',
