@@ -4,7 +4,9 @@ Ultima atualizacao: Fevereiro de 2026
 
 1. OBJETO
 
-A plataforma Health Mind e um sistema digital voltado ao suporte e acompanhamento em saude mental, conectando clinicas, psicologos e pacientes. A plataforma oferece funcionalidades de agendamento de consultas, registro de sessoes, comunicacao entre profissionais e pacientes, e uma assistente terapeutica digital baseada em inteligencia artificial.
+1.1. O Health Mind App e um produto desenvolvido, licenciado e mantido pela Losning Tech (CNPJ: 61.661.169/0001-87), empresa de tecnologia sediada em Brasilia/DF.
+
+1.2. A plataforma Health Mind e um sistema digital voltado ao suporte e acompanhamento em saude mental, conectando clinicas, psicologos e pacientes. A plataforma oferece funcionalidades de agendamento de consultas, registro de sessoes, comunicacao entre profissionais e pacientes, e uma assistente terapeutica digital baseada em inteligencia artificial.
 
 2. CADASTRO E ACESSO
 
@@ -49,13 +51,15 @@ A plataforma Health Mind e um sistema digital voltado ao suporte e acompanhament
 
 5. PROPRIEDADE INTELECTUAL
 
-5.1. Todo o conteudo da plataforma, incluindo design, codigo, textos e funcionalidades, e de propriedade da Health Mind ou de seus licenciadores.
+5.1. Todo o conteudo da plataforma, incluindo design, codigo, textos e funcionalidades, e de propriedade exclusiva da Losning Tech (CNPJ: 61.661.169/0001-87), que e a empresa proprietaria e licenciadora do produto Health Mind App.
 
 5.2. Os system prompts personalizados criados pelos psicologos sao de autoria compartilhada entre o profissional e a plataforma.
 
+5.3. E vedada a reproducao, distribuicao ou uso nao autorizado de qualquer conteudo da plataforma sem autorizacao expressa da Losning Tech.
+
 6. LIMITACAO DE RESPONSABILIDADE
 
-6.1. A Health Mind nao se responsabiliza por:
+6.1. A Losning Tech, enquanto proprietaria do Health Mind App, nao se responsabiliza por:
   - Diagnosticos, tratamentos ou orientacoes fornecidas pelos profissionais;
   - Conteudo gerado pela assistente de IA que possa ser interpretado como orientacao medica;
   - Interrupcoes de servico decorrentes de fatores fora de seu controle;
@@ -67,7 +71,7 @@ A plataforma Health Mind e um sistema digital voltado ao suporte e acompanhament
 
 7.1. O usuario pode solicitar o encerramento de sua conta a qualquer momento.
 
-7.2. A Health Mind pode suspender ou encerrar contas que violem estes Termos de Uso, mediante notificacao previa quando possivel.
+7.2. A Losning Tech pode suspender ou encerrar contas que violem estes Termos de Uso, mediante notificacao previa quando possivel.
 
 7.3. Dados de prontuario e registros terapeuticos serao mantidos pelo periodo minimo exigido pela legislacao vigente (Resolucao CFP n. 001/2009).
 
@@ -79,13 +83,21 @@ A plataforma Health Mind e um sistema digital voltado ao suporte e acompanhament
 
 8.3. Estes Termos sao regidos pelas leis da Republica Federativa do Brasil.
 
-8.4. Fica eleito o foro da comarca de Brasilia/DF para dirimir quaisquer controversias decorrentes destes Termos.`;
+8.4. Fica eleito o foro da comarca de Brasilia/DF para dirimir quaisquer controversias decorrentes destes Termos.
+
+9. CONTATO
+
+Para duvidas ou solicitacoes relacionadas a estes Termos de Uso:
+  - Empresa: Losning Tech
+  - CNPJ: 61.661.169/0001-87
+  - Telefone: (61) 98373-0910
+  - Site: www.losningtech.com.br`;
 
 export const PRIVACY_POLICY = `POLITICA DE PRIVACIDADE - HEALTH MIND
 
 Ultima atualizacao: Fevereiro de 2026
 
-A Health Mind se compromete com a protecao dos dados pessoais de seus usuarios, em conformidade com a Lei Geral de Protecao de Dados Pessoais (Lei n. 13.709/2018 - LGPD).
+O Health Mind App e um produto desenvolvido, licenciado e mantido pela Losning Tech (CNPJ: 61.661.169/0001-87). A Losning Tech se compromete com a protecao dos dados pessoais de seus usuarios, em conformidade com a Lei Geral de Protecao de Dados Pessoais (Lei n. 13.709/2018 - LGPD).
 
 1. DADOS COLETADOS
 
@@ -115,7 +127,7 @@ Os dados pessoais sao tratados para as seguintes finalidades:
 
 3. BASE LEGAL (LGPD - Art. 7)
 
-O tratamento de dados pessoais na Health Mind se fundamenta nas seguintes bases legais:
+O tratamento de dados pessoais no Health Mind App se fundamenta nas seguintes bases legais:
   a) Consentimento do titular (Art. 7, I) - para dados sensiveis de saude;
   b) Execucao de contrato (Art. 7, V) - para prestacao dos servicos;
   c) Exercicio regular de direitos (Art. 7, VI) - para registros profissionais;
@@ -157,7 +169,7 @@ De acordo com a LGPD, voce tem direito a:
   g) Informacao sobre compartilhamento de dados;
   h) Revogacao do consentimento.
 
-Para exercer seus direitos, entre em contato pelo email: privacidade@healthmind.com.br
+Para exercer seus direitos, entre em contato pelo telefone: (61) 98373-0910 ou acesse www.losningtech.com.br
 
 7. RETENCAO DE DADOS
 
@@ -173,10 +185,15 @@ Para exercer seus direitos, entre em contato pelo email: privacidade@healthmind.
 
 8.2. Nao utilizamos cookies de rastreamento ou publicidade.
 
-9. CONTATO DO ENCARREGADO (DPO)
+9. CONTROLADOR DE DADOS E CONTATO
+
+A Losning Tech e a controladora dos dados pessoais tratados pelo Health Mind App.
 
 Para questoes relacionadas a protecao de dados pessoais:
-  - Email: dpo@healthmind.com.br
+  - Empresa: Losning Tech
+  - CNPJ: 61.661.169/0001-87
+  - Telefone: (61) 98373-0910
+  - Site: www.losningtech.com.br
   - Endereco: Brasilia/DF
 
 10. ALTERACOES NESTA POLITICA

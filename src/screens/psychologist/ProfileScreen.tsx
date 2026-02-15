@@ -64,14 +64,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Settings')}>
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Notificações</Text>
-            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
-            <Ionicons name="lock-closed-outline" size={24} color={colors.textPrimary} />
-            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Privacidade</Text>
+            <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Configuração</Text>
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>

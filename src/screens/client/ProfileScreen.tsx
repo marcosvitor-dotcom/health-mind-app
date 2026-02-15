@@ -139,16 +139,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Card>
           <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.menuLeft}>
-              <Ionicons name="notifications" size={20} color={colors.textSecondary} />
-              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Notificacoes</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
-            <View style={styles.menuLeft}>
-              <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
-              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Privacidade</Text>
+              <Ionicons name="settings" size={20} color={colors.textSecondary} />
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Configuracao</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>

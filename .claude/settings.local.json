@@ -34,7 +34,8 @@
       "Bash(ping:*)",
       "WebFetch(domain:github.com)",
       "Bash(del \"c:\\\\Users\\\\marco\\\\OneDrive\\\\Desktop\\\\health_mind_ai\\\\health-mind-app\\\\src\\\\screens\\\\client\\\\PsychologistChatScreen.tsx\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx expo-doctor:*)"
     ]
   }
 }
