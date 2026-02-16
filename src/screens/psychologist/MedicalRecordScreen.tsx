@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as medicalRecordService from '../../services/medicalRecordService';
-import * as DocumentPicker from 'expo-document-picker';
+// import * as DocumentPicker from 'expo-document-picker';
 import Card from '../../components/Card';
 
 export default function MedicalRecordScreen({ navigation, route }: any) {
@@ -71,6 +71,11 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
   };
 
   const handlePickDocument = async () => {
+    // Temporariamente desabilitado - requer build nativo
+    Alert.alert('Em breve', 'A funcionalidade de upload de arquivos estará disponível em breve. Por enquanto, use apenas o campo de conteúdo de texto.');
+    return;
+
+    /* DESCOMENTAR APÓS FAZER EAS BUILD
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
@@ -92,6 +97,7 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
       console.error('Erro ao selecionar arquivo:', error);
       Alert.alert('Erro', 'Não foi possível selecionar o arquivo');
     }
+    */
   };
 
   const handleSaveRecord = async () => {
