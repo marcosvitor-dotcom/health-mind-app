@@ -23,6 +23,9 @@ export interface AppointmentData {
   roomRequestedId?: string | { _id: string; name: string; number?: string };
   roomChangedTo?: string | { _id: string; name: string; number?: string };
   notes?: string;
+  sessionReport?: string;
+  sessionReportCreatedAt?: string;
+  sessionReportUpdatedAt?: string;
   paymentId?: {
     _id: string;
     status: string;
@@ -212,6 +215,65 @@ export const getAppointmentDetails = async (appointmentId: string): Promise<Appo
       return data.data;
     }
     throw new Error(data.message || 'Erro ao buscar detalhes da consulta');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Adicionar ou atualizar relato de sessão
+ */
+export const addSessionReport = async (
+  appointmentId: string,
+  sessionReport: string
+): Promise<AppointmentData> => {
+  try {
+    const { data } = await api.put<ApiResponse<AppointmentData>>(
+      `/appointments/${appointmentId}/session-report`,
+      { sessionReport }
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao adicionar relato de sessão');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Obter relato de sessão
+ */
+export interface SessionReportData {
+  sessionReport: string;
+  sessionReportCreatedAt?: string;
+  sessionReportUpdatedAt?: string;
+  appointmentDate: string;
+  appointmentStatus: string;
+  patient: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  psychologist: {
+    _id: string;
+    name: string;
+    email: string;
+    crp?: string;
+  };
+}
+
+export const getSessionReport = async (appointmentId: string): Promise<SessionReportData> => {
+  try {
+    const { data } = await api.get<ApiResponse<SessionReportData>>(
+      `/appointments/${appointmentId}/session-report`
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao buscar relato de sessão');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

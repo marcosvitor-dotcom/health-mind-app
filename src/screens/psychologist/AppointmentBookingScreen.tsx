@@ -51,6 +51,11 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
   const [notes, setNotes] = useState('');
   const [creating, setCreating] = useState(false);
 
+  // Recurring appointments
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringType, setRecurringType] = useState<'weekly' | 'biweekly'>('weekly');
+  const [recurringCount, setRecurringCount] = useState<number>(4);
+
   // Room selection
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -62,6 +67,16 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
       loadPatients();
     }
   }, []);
+
+  // Recarregar pacientes quando voltar da tela de adicionar paciente
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!preSelectedPatient && route?.params?.refreshPatients) {
+        loadPatients();
+      }
+    });
+    return unsubscribe;
+  }, [navigation, preSelectedPatient]);
 
   useEffect(() => {
     if (step === 2 && selectedDate && psychologistId) {
@@ -141,23 +156,74 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
     try {
       // Use local timezone offset to ensure the selected time matches what's displayed
       const localDate = new Date(`${selectedDate}T${selectedSlot}:00`);
-      const dateTime = localDate.toISOString();
 
-      await appointmentService.createAppointment({
-        patientId,
-        psychologistId,
-        date: dateTime,
-        type: appointmentType,
-        notes: notes.trim() || undefined,
-        roomId: selectedRoomId || undefined,
-      });
+      if (isRecurring) {
+        // Criar múltiplas consultas recorrentes
+        const appointmentsToCreate = [];
+        const daysToAdd = recurringType === 'weekly' ? 7 : 14;
 
-      Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+        for (let i = 0; i < recurringCount; i++) {
+          const appointmentDate = new Date(localDate);
+          appointmentDate.setDate(appointmentDate.getDate() + (daysToAdd * i));
+
+          appointmentsToCreate.push({
+            patientId,
+            psychologistId,
+            date: appointmentDate.toISOString(),
+            type: appointmentType,
+            notes: notes.trim() || undefined,
+            roomId: selectedRoomId || undefined,
+          });
+        }
+
+        // Criar todas as consultas
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const appointmentData of appointmentsToCreate) {
+          try {
+            await appointmentService.createAppointment(appointmentData);
+            successCount++;
+          } catch (error) {
+            console.error('Erro ao criar consulta recorrente:', error);
+            failCount++;
+          }
+        }
+
+        if (successCount > 0) {
+          const message = failCount > 0
+            ? `${successCount} consulta(s) agendada(s) com sucesso. ${failCount} falhou(aram).`
+            : `${successCount} consulta(s) recorrente(s) agendada(s) com sucesso!`;
+
+          Alert.alert('Sucesso', message, [
+            {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+            },
+          ]);
+        } else {
+          Alert.alert('Erro', 'Não foi possível agendar as consultas recorrentes');
+        }
+      } else {
+        // Criar apenas uma consulta
+        const dateTime = localDate.toISOString();
+
+        await appointmentService.createAppointment({
+          patientId,
+          psychologistId,
+          date: dateTime,
+          type: appointmentType,
+          notes: notes.trim() || undefined,
+          roomId: selectedRoomId || undefined,
+        });
+
+        Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      }
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Não foi possível agendar a consulta');
     } finally {
@@ -207,6 +273,31 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
           onChangeText={setSearchQuery}
         />
       </View>
+
+      {/* Botão para convidar novo paciente */}
+      <TouchableOpacity
+        style={[styles.addNewPatientButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}
+        onPress={() => {
+          Alert.alert(
+            'Convidar Paciente',
+            'Para agendar com um novo paciente, você precisa primeiro convidá-lo. O paciente receberá um email para completar o cadastro.',
+            [
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+              },
+              {
+                text: 'Convidar',
+                onPress: () => navigation.navigate('InvitePatient'),
+              },
+            ]
+          );
+        }}
+      >
+        <Ionicons name="person-add" size={22} color="#4A90E2" />
+        <Text style={styles.addNewPatientText}>Convidar Novo Paciente</Text>
+        <Ionicons name="arrow-forward" size={18} color="#4A90E2" />
+      </TouchableOpacity>
 
       {loadingPatients ? (
         <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 40 }} />
@@ -490,6 +581,109 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
         textAlignVertical="top"
       />
 
+      {/* Consulta Recorrente */}
+      <View style={styles.recurringSection}>
+        <View style={styles.recurringHeader}>
+          <View style={styles.recurringHeaderLeft}>
+            <Ionicons name="repeat" size={22} color="#4A90E2" />
+            <View style={styles.recurringHeaderText}>
+              <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginBottom: 0 }]}>Consulta Recorrente</Text>
+              <Text style={[styles.recurringSubtitle, { color: colors.textSecondary }]}>
+                Agendar múltiplas consultas
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={[styles.recurringToggle, isRecurring && styles.recurringToggleActive]}
+            onPress={() => setIsRecurring(!isRecurring)}
+          >
+            <View style={[styles.recurringToggleThumb, isRecurring && styles.recurringToggleThumbActive]} />
+          </TouchableOpacity>
+        </View>
+
+        {isRecurring && (
+          <View style={[styles.recurringOptions, { backgroundColor: colors.surfaceSecondary }]}>
+            <Text style={[styles.recurringLabel, { color: colors.textPrimary }]}>Frequência</Text>
+            <View style={styles.recurringTypeSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.recurringTypeButton,
+                  { backgroundColor: colors.surface },
+                  recurringType === 'weekly' && styles.recurringTypeButtonActive,
+                ]}
+                onPress={() => setRecurringType('weekly')}
+              >
+                <Ionicons
+                  name="calendar"
+                  size={18}
+                  color={recurringType === 'weekly' ? '#fff' : '#4A90E2'}
+                />
+                <Text
+                  style={[
+                    styles.recurringTypeText,
+                    recurringType === 'weekly' && styles.recurringTypeTextActive,
+                  ]}
+                >
+                  Semanal
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.recurringTypeButton,
+                  { backgroundColor: colors.surface },
+                  recurringType === 'biweekly' && styles.recurringTypeButtonActive,
+                ]}
+                onPress={() => setRecurringType('biweekly')}
+              >
+                <Ionicons
+                  name="calendar-outline"
+                  size={18}
+                  color={recurringType === 'biweekly' ? '#fff' : '#4A90E2'}
+                />
+                <Text
+                  style={[
+                    styles.recurringTypeText,
+                    recurringType === 'biweekly' && styles.recurringTypeTextActive,
+                  ]}
+                >
+                  Quinzenal
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.recurringLabel, { color: colors.textPrimary }]}>
+              Número de consultas: {recurringCount}
+            </Text>
+            <View style={styles.recurringCountSelector}>
+              <TouchableOpacity
+                style={[styles.recurringCountButton, { backgroundColor: colors.surface }]}
+                onPress={() => setRecurringCount(Math.max(2, recurringCount - 1))}
+              >
+                <Ionicons name="remove" size={20} color="#4A90E2" />
+              </TouchableOpacity>
+              <Text style={[styles.recurringCountText, { color: colors.textPrimary }]}>
+                {recurringCount}
+              </Text>
+              <TouchableOpacity
+                style={[styles.recurringCountButton, { backgroundColor: colors.surface }]}
+                onPress={() => setRecurringCount(Math.min(12, recurringCount + 1))}
+              >
+                <Ionicons name="add" size={20} color="#4A90E2" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.recurringInfo, { backgroundColor: isDark ? '#2D3E4F' : '#E8F4FD' }]}>
+              <Ionicons name="information-circle" size={18} color="#4A90E2" />
+              <Text style={[styles.recurringInfoText, { color: colors.textPrimary }]}>
+                {recurringCount} consulta(s) serão agendadas {recurringType === 'weekly' ? 'semanalmente' : 'quinzenalmente'},{' '}
+                sempre {selectedSlot && `às ${selectedSlot} `}
+                {recurringType === 'weekly' ? 'toda semana' : 'a cada 15 dias'} no mesmo dia da semana.
+              </Text>
+            </View>
+          </View>
+        )}
+      </View>
+
       <View style={styles.confirmActions}>
         <TouchableOpacity
           style={styles.backButton}
@@ -607,6 +801,23 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 8,
+  },
+  addNewPatientButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+  },
+  addNewPatientText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#4A90E2',
   },
   patientList: {
     flex: 1,
@@ -849,6 +1060,116 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#E8A317',
     fontWeight: '500',
+    lineHeight: 18,
+  },
+  // Recurring appointments
+  recurringSection: {
+    marginBottom: 20,
+  },
+  recurringHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  recurringHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  recurringHeaderText: {
+    flex: 1,
+  },
+  recurringSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  recurringToggle: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#DDD',
+    justifyContent: 'center',
+    padding: 3,
+  },
+  recurringToggleActive: {
+    backgroundColor: '#4A90E2',
+  },
+  recurringToggleThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#fff',
+  },
+  recurringToggleThumbActive: {
+    transform: [{ translateX: 22 }],
+  },
+  recurringOptions: {
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  recurringLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  recurringTypeSelector: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  recurringTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+    gap: 6,
+  },
+  recurringTypeButtonActive: {
+    backgroundColor: '#4A90E2',
+  },
+  recurringTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4A90E2',
+  },
+  recurringTypeTextActive: {
+    color: '#fff',
+  },
+  recurringCountSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  recurringCountButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+  },
+  recurringCountText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    minWidth: 40,
+    textAlign: 'center',
+  },
+  recurringInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  recurringInfoText: {
+    flex: 1,
+    fontSize: 13,
     lineHeight: 18,
   },
 });
