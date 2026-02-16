@@ -278,20 +278,9 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
       <TouchableOpacity
         style={[styles.addNewPatientButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }]}
         onPress={() => {
-          Alert.alert(
-            'Convidar Paciente',
-            'Para agendar com um novo paciente, você precisa primeiro convidá-lo. O paciente receberá um email para completar o cadastro.',
-            [
-              {
-                text: 'Cancelar',
-                style: 'cancel',
-              },
-              {
-                text: 'Convidar',
-                onPress: () => navigation.navigate('InvitePatient'),
-              },
-            ]
-          );
+          navigation.navigate('InvitePatient', {
+            fromAppointmentBooking: true,
+          });
         }}
       >
         <Ionicons name="person-add" size={22} color="#4A90E2" />

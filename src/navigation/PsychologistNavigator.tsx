@@ -17,6 +17,7 @@ import InvitationsScreen from '../screens/psychologist/InvitationsScreen';
 import AppointmentBookingScreen from '../screens/psychologist/AppointmentBookingScreen';
 import TherapeuticReportListScreen from '../screens/psychologist/TherapeuticReportListScreen';
 import TherapeuticReportDetailScreen from '../screens/psychologist/TherapeuticReportDetailScreen';
+import MedicalRecordScreen from '../screens/psychologist/MedicalRecordScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 import DirectChatScreen from '../screens/shared/DirectChatScreen';
@@ -74,6 +75,11 @@ function ClientsStack() {
       <Stack.Screen
         name="TherapeuticReportDetail"
         component={TherapeuticReportDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MedicalRecord"
+        component={MedicalRecordScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

@@ -19,13 +19,14 @@ interface InvitePatientScreenProps {
   navigation: any;
 }
 
-export default function InvitePatientScreen({ navigation }: InvitePatientScreenProps) {
+export default function InvitePatientScreen({ navigation, route }: any) {
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const fromAppointmentBooking = route?.params?.fromAppointmentBooking;
 
   const formatBirthDate = (text: string) => {
     // Remove tudo que não é número
@@ -64,16 +65,32 @@ export default function InvitePatientScreen({ navigation }: InvitePatientScreenP
         birthDate: formattedBirthDate || undefined,
       });
 
-      Alert.alert(
-        'Convite Enviado!',
-        `Um e-mail foi enviado para ${email} com instruções para completar o cadastro.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      if (fromAppointmentBooking) {
+        Alert.alert(
+          'Convite Enviado!',
+          `Um e-mail foi enviado para ${email} com instruções para completar o cadastro. Você poderá agendar consultas após o paciente aceitar o convite.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Volta para a tela de agendamento
+                navigation.navigate('Schedule');
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Convite Enviado!',
+          `Um e-mail foi enviado para ${email} com instruções para completar o cadastro.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
+      }
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao enviar convite');
     } finally {

@@ -389,7 +389,15 @@ export default function ClientsScreen({ navigation }: any) {
                       <Ionicons name="chatbubbles" size={20} color="#4A90E2" />
                       <Text style={[styles.modalActionText, { color: colors.textPrimary }]}>Enviar Mensagem</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}>
+                    <TouchableOpacity
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
+                      onPress={() => {
+                        setShowModal(false);
+                        navigation.navigate('MedicalRecord', {
+                          patient: selectedPatient,
+                        });
+                      }}
+                    >
                       <Ionicons name="document-text" size={20} color="#4A90E2" />
                       <Text style={[styles.modalActionText, { color: colors.textPrimary }]}>Ver Prontuário</Text>
                     </TouchableOpacity>
