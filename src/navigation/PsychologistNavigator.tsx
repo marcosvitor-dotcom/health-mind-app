@@ -21,6 +21,8 @@ import MedicalRecordScreen from '../screens/psychologist/MedicalRecordScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 import DirectChatScreen from '../screens/shared/DirectChatScreen';
+import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
+import PsychologistFinancialScreen from '../screens/psychologist/PsychologistFinancialScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -87,6 +89,11 @@ function ClientsStack() {
         component={DirectChatScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationCenterScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -96,6 +103,7 @@ function ScheduleStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ScheduleMain" component={PsychScheduleScreen} />
       <Stack.Screen name="AppointmentBooking" component={AppointmentBookingScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );
 }
@@ -106,6 +114,16 @@ function ReportsStack() {
       <Stack.Screen name="ReportsMain" component={ReportsScreen} />
       <Stack.Screen name="TherapeuticReportList" component={TherapeuticReportListScreen} />
       <Stack.Screen name="TherapeuticReportDetail" component={TherapeuticReportDetailScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function FinancialStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="FinancialMain" component={PsychologistFinancialScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );
 }
@@ -163,6 +181,16 @@ export default function PsychologistNavigator() {
           title: 'Agenda',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Financial"
+        component={FinancialStack}
+        options={{
+          title: 'Financeiro',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={size} color={color} />
           ),
         }}
       />

@@ -6,6 +6,7 @@ import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getPatient, PatientWithPsychologist } from '../../services/profileService';
+import NotificationBell from '../../components/NotificationBell';
 
 export default function EmergencyScreen({ navigation }: any) {
   const { user } = useAuth();
@@ -47,6 +48,10 @@ export default function EmergencyScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.emergencyHeader, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.emergencyHeaderTitle, { color: colors.textPrimary }]}>Emergência</Text>
+        <NotificationBell onPress={() => navigation.navigate('Notifications')} />
+      </View>
       <ScrollView>
         <Card style={[styles.alertCard, { backgroundColor: isDark ? '#3D1F1F' : '#FFF5F5', borderColor: '#FF6B6B' }]}>
           <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
@@ -206,6 +211,18 @@ export default function EmergencyScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  emergencyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  emergencyHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
   },
   alertCard: {
     margin: 16,

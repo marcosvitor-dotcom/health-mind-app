@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as appointmentService from '../../services/appointmentService';
+import NotificationBell from '../../components/NotificationBell';
 
 interface AppointmentsByDate {
   [date: string]: psychologistService.Appointment[];
@@ -321,12 +322,15 @@ export default function PsychScheduleScreen({ navigation }: any) {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Agenda</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
-        >
-          <Ionicons name="add-circle" size={28} color="#4A90E2" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AppointmentBooking', { date: selectedDate })}
+          >
+            <Ionicons name="add-circle" size={28} color="#4A90E2" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Calendário */}

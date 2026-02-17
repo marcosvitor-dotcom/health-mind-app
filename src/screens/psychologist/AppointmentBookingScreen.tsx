@@ -18,6 +18,7 @@ import * as psychologistService from '../../services/psychologistService';
 import * as appointmentService from '../../services/appointmentService';
 import * as roomService from '../../services/roomService';
 import { Room } from '../../services/roomService';
+import * as clinicService from '../../services/clinicService';
 
 export default function AppointmentBookingScreen({ navigation, route }: any) {
   const { user } = useAuth();
@@ -56,6 +57,10 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
   const [recurringType, setRecurringType] = useState<'weekly' | 'biweekly'>('weekly');
   const [recurringCount, setRecurringCount] = useState<number>(4);
 
+  // Session value (price)
+  const [sessionValue, setSessionValue] = useState<string>('');
+  const [defaultSessionValue, setDefaultSessionValue] = useState<number>(0);
+
   // Room selection
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -66,7 +71,35 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
     if (!preSelectedPatient) {
       loadPatients();
     }
+    loadDefaultSessionValue();
   }, []);
+
+  const loadDefaultSessionValue = async () => {
+    try {
+      const psych = await psychologistService.getPsychologist(psychologistId);
+      let value = 0;
+
+      if (psych?.useClinicValue && psych?.clinicId) {
+        try {
+          const clinic = await clinicService.getClinic(
+            typeof psych.clinicId === 'string' ? psych.clinicId : psych.clinicId._id
+          );
+          value = clinic?.paymentSettings?.defaultSessionValue || 0;
+        } catch {
+          value = psych?.defaultSessionValue || 0;
+        }
+      } else {
+        value = psych?.defaultSessionValue || 0;
+      }
+
+      setDefaultSessionValue(value);
+      if (value > 0) {
+        setSessionValue(value.toFixed(2).replace('.', ','));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar valor padrao da sessao:', error);
+    }
+  };
 
   // Recarregar pacientes quando voltar da tela de adicionar paciente
   useEffect(() => {
@@ -157,6 +190,11 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
       // Use local timezone offset to ensure the selected time matches what's displayed
       const localDate = new Date(`${selectedDate}T${selectedSlot}:00`);
 
+      // Parse session value
+      const parsedSessionValue = sessionValue
+        ? parseFloat(sessionValue.replace(',', '.'))
+        : undefined;
+
       if (isRecurring) {
         // Criar múltiplas consultas recorrentes
         const appointmentsToCreate = [];
@@ -173,6 +211,7 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
             type: appointmentType,
             notes: notes.trim() || undefined,
             roomId: selectedRoomId || undefined,
+            sessionValue: parsedSessionValue && parsedSessionValue > 0 ? parsedSessionValue : undefined,
           });
         }
 
@@ -215,6 +254,7 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
           type: appointmentType,
           notes: notes.trim() || undefined,
           roomId: selectedRoomId || undefined,
+          sessionValue: parsedSessionValue && parsedSessionValue > 0 ? parsedSessionValue : undefined,
         });
 
         Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
@@ -445,6 +485,28 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
           </View>
         </View>
       </View>
+
+      {/* Valor da Sessao */}
+      <Text style={[styles.fieldLabel, { color: colors.textPrimary }]}>Valor da Sessao (R$)</Text>
+      <View style={[styles.priceInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.currencyPrefix, { color: colors.textSecondary }]}>R$</Text>
+        <TextInput
+          style={[styles.priceInput, { color: colors.textPrimary }]}
+          placeholder="0,00"
+          placeholderTextColor={colors.textTertiary}
+          value={sessionValue}
+          onChangeText={(text) => {
+            const cleaned = text.replace(/[^0-9.,]/g, '');
+            setSessionValue(cleaned);
+          }}
+          keyboardType="decimal-pad"
+        />
+      </View>
+      {defaultSessionValue > 0 && (
+        <Text style={[styles.priceHint, { color: colors.textTertiary }]}>
+          Valor padrao: R$ {defaultSessionValue.toFixed(2).replace('.', ',')}
+        </Text>
+      )}
 
       <Text style={[styles.fieldLabel, { color: colors.textPrimary }]}>Tipo de Consulta</Text>
       <View style={styles.typeSelector}>
@@ -972,6 +1034,28 @@ const styles = StyleSheet.create({
   },
   typeOptionTextSelected: {
     color: '#fff',
+  },
+  priceInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  currencyPrefix: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  priceInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  priceHint: {
+    fontSize: 12,
+    marginBottom: 16,
   },
   notesInput: {
     borderRadius: 8,

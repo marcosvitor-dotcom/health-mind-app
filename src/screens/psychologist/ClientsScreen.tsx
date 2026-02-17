@@ -16,6 +16,7 @@ import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
+import NotificationBell from '../../components/NotificationBell';
 
 interface PatientStats {
   sessionsCount: number;
@@ -191,6 +192,7 @@ export default function ClientsScreen({ navigation }: any) {
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Meus Pacientes</Text>
         <View style={styles.headerButtons}>
+          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
           <TouchableOpacity
             style={[styles.invitationsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8FFF0' }]}
             onPress={() => navigation.navigate('Invitations')}

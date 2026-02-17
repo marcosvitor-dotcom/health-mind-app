@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as subleaseService from '../../services/subleaseService';
+import NotificationBell from '../../components/NotificationBell';
 import { SubleaseSummary, RoomSublease } from '../../services/subleaseService';
 
 interface FinancialData {
@@ -175,12 +176,15 @@ export default function ReportsScreen({ navigation }: any) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Relatórios Financeiros</Text>
-        {user?.clinicId && (
-          <View style={[styles.clinicBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
-            <Ionicons name="business" size={14} color="#50C878" />
-            <Text style={styles.clinicBadgeText}>Vinculado</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {user?.clinicId && (
+            <View style={[styles.clinicBadge, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFF0' }]}>
+              <Ionicons name="business" size={14} color="#50C878" />
+              <Text style={styles.clinicBadgeText}>Vinculado</Text>
+            </View>
+          )}
+          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
+        </View>
       </View>
 
       <ScrollView

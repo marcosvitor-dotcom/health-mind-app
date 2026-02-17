@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as appointmentService from '../../services/appointmentService';
 import { AppointmentData } from '../../services/appointmentService';
+import NotificationBell from '../../components/NotificationBell';
 
 export default function AppointmentsScreen({ navigation }: any) {
   const { user } = useAuth();
@@ -282,6 +283,10 @@ export default function AppointmentsScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.screenHeader, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.screenHeaderTitle, { color: colors.textPrimary }]}>Consultas</Text>
+        <NotificationBell onPress={() => navigation.navigate('Notifications')} />
+      </View>
       <TouchableOpacity
         style={styles.newAppointmentButton}
         onPress={() => navigation.navigate('BookAppointment')}
@@ -468,6 +473,16 @@ export default function AppointmentsScreen({ navigation }: any) {
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity
+                      style={[styles.modalActionButton, { backgroundColor: '#4A90E2' }]}
+                      onPress={() => {
+                        setShowDetailModal(false);
+                        navigation.navigate('BookAppointment', { rescheduleId: selectedAppointment._id });
+                      }}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#fff" />
+                      <Text style={styles.modalActionText}>Sugerir Nova Data</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                       style={[styles.modalActionButton, { backgroundColor: '#FF6B6B' }]}
                       onPress={() => {
                         setShowDetailModal(false);
@@ -491,6 +506,18 @@ export default function AppointmentsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  screenHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  screenHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

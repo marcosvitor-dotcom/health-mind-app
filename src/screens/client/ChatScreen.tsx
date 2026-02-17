@@ -22,6 +22,7 @@ import {
 import * as chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import NotificationBell from '../../components/NotificationBell';
 
 interface LocalMessage {
   id: string;
@@ -279,6 +280,7 @@ export default function ChatScreen() {
             </View>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Seu diario pessoal</Text>
           </View>
+          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
         </View>
         <View style={styles.loadingHistoryContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -308,6 +310,7 @@ export default function ChatScreen() {
             </View>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Seu diario pessoal</Text>
           </View>
+          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
         </View>
 
         <ScrollView

@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
+import NotificationBell from '../../components/NotificationBell';
 
 export default function OverviewScreen({ navigation }: any) {
   const { user } = useAuth();
@@ -86,7 +87,7 @@ export default function OverviewScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={[styles.greeting, { color: colors.textPrimary }]}>Olá, {user?.name?.split(' ')[0]}!</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Aqui está um resumo do seu dia</Text>
           </View>
@@ -96,6 +97,7 @@ export default function OverviewScreen({ navigation }: any) {
               <Text style={styles.clinicBadgeText}>Vinculado</Text>
             </View>
           )}
+          <NotificationBell onPress={() => navigation.navigate('Clients', { screen: 'Notifications' })} />
         </View>
 
         {/* Quick Stats */}

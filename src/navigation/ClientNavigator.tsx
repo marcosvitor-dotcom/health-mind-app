@@ -14,15 +14,26 @@ import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import ClinicInfoScreen from '../screens/client/ClinicInfoScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
+import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+function ChatStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ChatMain" component={ChatScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
+    </Stack.Navigator>
+  );
+}
 
 function AppointmentsStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="AppointmentsMain" component={AppointmentsScreen} />
       <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );
 }
@@ -32,6 +43,7 @@ function EmergencyStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="EmergencyMain" component={EmergencyScreen} />
       <Stack.Screen name="DirectChat" component={DirectChatScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );
 }
@@ -67,7 +79,7 @@ export default function ClientNavigator() {
     >
       <Tab.Screen
         name="Chat"
-        component={ChatScreen}
+        component={ChatStack}
         options={{
           title: 'Diário',
           tabBarIcon: ({ color, size }) => (

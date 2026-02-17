@@ -65,6 +65,7 @@ export interface CreateAppointmentRequest {
   type?: 'online' | 'in_person';
   notes?: string;
   roomId?: string;
+  sessionValue?: number;
 }
 
 export interface TimeSlot {

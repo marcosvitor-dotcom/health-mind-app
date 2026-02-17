@@ -15,6 +15,7 @@ import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
 import RoomsScreen from '../screens/clinic/RoomsScreen';
 import RoomDetailScreen from '../screens/clinic/RoomDetailScreen';
 import RoomScheduleScreen from '../screens/clinic/RoomScheduleScreen';
+import ClinicFinancialScreen from '../screens/clinic/ClinicFinancialScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 
@@ -62,6 +63,14 @@ function PsychologistsStack() {
           },
         }}
       />
+    </Stack.Navigator>
+  );
+}
+
+function FinancialStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="FinancialMain" component={ClinicFinancialScreen} />
     </Stack.Navigator>
   );
 }
@@ -139,6 +148,16 @@ export default function ClinicNavigator() {
           title: 'Agenda',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Financial"
+        component={FinancialStack}
+        options={{
+          title: 'Financeiro',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={size} color={color} />
           ),
         }}
       />
