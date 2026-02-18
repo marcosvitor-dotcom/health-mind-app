@@ -20,6 +20,7 @@ import TherapeuticReportDetailScreen from '../screens/psychologist/TherapeuticRe
 import MedicalRecordScreen from '../screens/psychologist/MedicalRecordScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
+import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
 import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 import PsychologistFinancialScreen from '../screens/psychologist/PsychologistFinancialScreen';
@@ -135,6 +136,7 @@ function ProfileStack() {
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
     </Stack.Navigator>
   );
 }

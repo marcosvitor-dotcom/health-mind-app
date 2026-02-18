@@ -31,7 +31,7 @@ interface LocalMessage {
   timestamp: Date;
 }
 
-export default function ChatScreen() {
+export default function ChatScreen({ navigation }: any) {
   const { user } = useAuth();
   const { colors } = useTheme();
   const [message, setMessage] = useState('');

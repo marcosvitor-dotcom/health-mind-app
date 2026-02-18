@@ -162,7 +162,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Suporte</Text>
 
         <Card>
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('HelpSupport')}>
             <View style={styles.menuLeft}>
               <Ionicons name="help-circle" size={20} color={colors.textSecondary} />
               <Text style={[styles.menuText, { color: colors.textPrimary }]}>Central de Ajuda</Text>

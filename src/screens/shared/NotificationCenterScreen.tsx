@@ -31,10 +31,21 @@ export default function NotificationCenterScreen({ navigation }: any) {
         await markAsRead(notification._id);
       }
 
-      // Navegar para a tela relevante
+      // Navegar para a tela relevante — usa o navegador pai (tab) para navegar entre abas
       const screen = notification.data?.screen;
       if (screen) {
-        navigation.navigate(screen);
+        try {
+          const parentNav = navigation.getParent();
+          if (parentNav) {
+            parentNav.navigate(screen);
+          } else {
+            navigation.goBack();
+          }
+        } catch {
+          navigation.goBack();
+        }
+      } else {
+        navigation.goBack();
       }
     },
     [markAsRead, navigation]

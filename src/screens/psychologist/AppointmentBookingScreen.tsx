@@ -450,7 +450,7 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
   );
 
   const renderConfirmation = () => (
-    <ScrollView style={styles.stepContent}>
+    <ScrollView style={styles.stepContent} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>Confirmar Agendamento</Text>
 
       <View style={[styles.summaryCard, { backgroundColor: colors.surface }]}>

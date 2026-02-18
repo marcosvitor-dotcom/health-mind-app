@@ -14,6 +14,7 @@ import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import ClinicInfoScreen from '../screens/client/ClinicInfoScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
+import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 
 const Tab = createBottomTabNavigator();
@@ -58,6 +59,7 @@ function ProfileStack() {
       <Stack.Screen name="DirectChat" component={DirectChatScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
     </Stack.Navigator>
   );
 }
