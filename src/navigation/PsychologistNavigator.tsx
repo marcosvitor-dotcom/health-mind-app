@@ -25,6 +25,7 @@ import AboutScreen from '../screens/shared/AboutScreen';
 import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 import PsychologistFinancialScreen from '../screens/psychologist/PsychologistFinancialScreen';
+import DocumentRequestsScreen from '../screens/psychologist/DocumentRequestsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -92,6 +93,11 @@ function ClientsStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="DocumentRequests"
+        component={DocumentRequestsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="Notifications"
         component={NotificationCenterScreen}
         options={{ headerShown: false }}
@@ -105,6 +111,17 @@ function ScheduleStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ScheduleMain" component={PsychScheduleScreen} />
       <Stack.Screen name="AppointmentBooking" component={AppointmentBookingScreen} />
+      <Stack.Screen
+        name="InvitePatient"
+        component={InvitePatientScreen}
+        options={{
+          headerShown: true,
+          title: 'Convidar Paciente',
+          headerStyle: { backgroundColor: '#50C878' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
       <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   Modal,
   ActivityIndicator,
   RefreshControl,
@@ -37,6 +38,14 @@ export default function PsychScheduleScreen({ navigation }: any) {
   const [selectedAppointment, setSelectedAppointment] =
     useState<psychologistService.Appointment | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Edit mode states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editType, setEditType] = useState<'online' | 'in_person'>('in_person');
+  const [editNotes, setEditNotes] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadAppointments();
@@ -138,6 +147,75 @@ export default function PsychScheduleScreen({ navigation }: any) {
         },
       ]
     );
+  };
+
+  const handleEditAppointment = () => {
+    if (!selectedAppointment) return;
+    const dateTime = getDateTime(selectedAppointment);
+    if (dateTime) {
+      const d = new Date(dateTime);
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = (d.getMonth() + 1).toString().padStart(2, '0');
+      const year = d.getFullYear();
+      setEditDate(`${day}/${month}/${year}`);
+      setEditTime(d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+    } else {
+      setEditDate('');
+      setEditTime('');
+    }
+    setEditType((selectedAppointment.type as 'online' | 'in_person') || 'in_person');
+    setEditNotes(selectedAppointment.notes || '');
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedAppointment) return;
+    const appointmentId = selectedAppointment._id || selectedAppointment.id || '';
+    if (!appointmentId) return;
+
+    // Parse date DD/MM/YYYY
+    const dateParts = editDate.split('/');
+    if (dateParts.length !== 3) {
+      Alert.alert('Erro', 'Data inválida. Use o formato DD/MM/AAAA');
+      return;
+    }
+    const [day, month, year] = dateParts;
+
+    // Parse time HH:MM
+    const timeParts = editTime.split(':');
+    if (timeParts.length !== 2) {
+      Alert.alert('Erro', 'Horário inválido. Use o formato HH:MM');
+      return;
+    }
+    const [hours, minutes] = timeParts;
+
+    // Build ISO date
+    const newDate = new Date(
+      parseInt(year), parseInt(month) - 1, parseInt(day),
+      parseInt(hours), parseInt(minutes)
+    );
+
+    if (isNaN(newDate.getTime())) {
+      Alert.alert('Erro', 'Data ou horário inválido');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await appointmentService.updateAppointment(appointmentId, {
+        date: newDate.toISOString(),
+        type: editType,
+        notes: editNotes.trim() || undefined,
+      });
+      Alert.alert('Sucesso', 'Consulta atualizada! O paciente será notificado.');
+      setIsEditing(false);
+      setShowDetailModal(false);
+      loadAppointments();
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Não foi possível atualizar a consulta');
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Marcar datas com compromissos
@@ -383,19 +461,21 @@ export default function PsychScheduleScreen({ navigation }: any) {
         visible={showDetailModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowDetailModal(false)}
+        onRequestClose={() => { setShowDetailModal(false); setIsEditing(false); }}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Detalhes da Consulta</Text>
-              <TouchableOpacity onPress={() => setShowDetailModal(false)}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                {isEditing ? 'Editar Consulta' : 'Detalhes da Consulta'}
+              </Text>
+              <TouchableOpacity onPress={() => { setShowDetailModal(false); setIsEditing(false); }}>
                 <Ionicons name="close" size={28} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
-              {selectedAppointment && (
+              {selectedAppointment && !isEditing && (
                 <>
                   <View style={styles.modalSection}>
                     <View style={styles.modalInfoRow}>
@@ -502,6 +582,13 @@ export default function PsychScheduleScreen({ navigation }: any) {
                   {/* Ações */}
                   {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled' && (
                     <View style={styles.modalActions}>
+                      <TouchableOpacity
+                        style={[styles.modalActionButton, styles.editButton]}
+                        onPress={handleEditAppointment}
+                      >
+                        <Ionicons name="create-outline" size={20} color="#fff" />
+                        <Text style={styles.modalActionText}>Editar Consulta</Text>
+                      </TouchableOpacity>
                       {(selectedAppointment.status === 'awaiting_psychologist' || selectedAppointment.status === 'scheduled' || selectedAppointment.status === 'awaiting_patient') && (
                         <TouchableOpacity
                           style={[styles.modalActionButton, styles.confirmButton]}
@@ -529,6 +616,113 @@ export default function PsychScheduleScreen({ navigation }: any) {
                     </View>
                   )}
                 </>
+              )}
+
+              {/* Edit Mode */}
+              {selectedAppointment && isEditing && (
+                <View style={styles.editForm}>
+                  <View style={styles.editField}>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Paciente</Text>
+                    <Text style={[styles.editPatientName, { color: colors.textPrimary }]}>
+                      {selectedAppointment.patient?.name || 'Não informado'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.editField}>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Data (DD/MM/AAAA)</Text>
+                    <TextInput
+                      style={[styles.editInput, { backgroundColor: colors.surfaceSecondary, color: colors.textPrimary, borderColor: colors.border }]}
+                      value={editDate}
+                      onChangeText={setEditDate}
+                      placeholder="DD/MM/AAAA"
+                      placeholderTextColor={colors.textTertiary}
+                      keyboardType="numeric"
+                      maxLength={10}
+                    />
+                  </View>
+
+                  <View style={styles.editField}>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Horário (HH:MM)</Text>
+                    <TextInput
+                      style={[styles.editInput, { backgroundColor: colors.surfaceSecondary, color: colors.textPrimary, borderColor: colors.border }]}
+                      value={editTime}
+                      onChangeText={setEditTime}
+                      placeholder="HH:MM"
+                      placeholderTextColor={colors.textTertiary}
+                      keyboardType="numeric"
+                      maxLength={5}
+                    />
+                  </View>
+
+                  <View style={styles.editField}>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Tipo de Consulta</Text>
+                    <View style={styles.editTypeSelector}>
+                      <TouchableOpacity
+                        style={[
+                          styles.editTypeOption,
+                          { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                          editType === 'in_person' && styles.editTypeOptionSelected,
+                        ]}
+                        onPress={() => setEditType('in_person')}
+                      >
+                        <Ionicons name="business" size={18} color={editType === 'in_person' ? '#fff' : '#4A90E2'} />
+                        <Text style={[styles.editTypeText, editType === 'in_person' && styles.editTypeTextSelected]}>
+                          Presencial
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.editTypeOption,
+                          { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                          editType === 'online' && styles.editTypeOptionSelected,
+                        ]}
+                        onPress={() => setEditType('online')}
+                      >
+                        <Ionicons name="videocam" size={18} color={editType === 'online' ? '#fff' : '#4A90E2'} />
+                        <Text style={[styles.editTypeText, editType === 'online' && styles.editTypeTextSelected]}>
+                          Online
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.editField}>
+                    <Text style={[styles.editLabel, { color: colors.textSecondary }]}>Observações</Text>
+                    <TextInput
+                      style={[styles.editInput, styles.editNotesInput, { backgroundColor: colors.surfaceSecondary, color: colors.textPrimary, borderColor: colors.border }]}
+                      value={editNotes}
+                      onChangeText={setEditNotes}
+                      placeholder="Adicione observações..."
+                      placeholderTextColor={colors.textTertiary}
+                      multiline
+                      numberOfLines={3}
+                      textAlignVertical="top"
+                    />
+                  </View>
+
+                  <View style={styles.editActions}>
+                    <TouchableOpacity
+                      style={[styles.editCancelBtn, { borderColor: colors.border }]}
+                      onPress={() => setIsEditing(false)}
+                    >
+                      <Text style={[styles.editCancelBtnText, { color: colors.textPrimary }]}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.editSaveBtn, saving && { opacity: 0.6 }]}
+                      onPress={handleSaveEdit}
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <>
+                          <Ionicons name="checkmark" size={20} color="#fff" />
+                          <Text style={styles.editSaveBtnText}>Salvar</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
               )}
             </ScrollView>
           </View>
@@ -715,6 +909,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
   },
+  editButton: {
+    backgroundColor: '#4A90E2',
+  },
   confirmButton: {
     backgroundColor: '#50C878',
   },
@@ -758,6 +955,90 @@ const styles = StyleSheet.create({
   },
   paymentBadgeText: {
     fontSize: 12,
+    fontWeight: '600',
+  },
+  // Edit form styles
+  editForm: {
+    gap: 16,
+  },
+  editField: {
+    gap: 6,
+  },
+  editLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  editPatientName: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  editInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  editNotesInput: {
+    minHeight: 80,
+  },
+  editTypeSelector: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  editTypeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  editTypeOptionSelected: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  editTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4A90E2',
+  },
+  editTypeTextSelected: {
+    color: '#fff',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  editCancelBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  editCancelBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  editSaveBtn: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: '#50C878',
+    gap: 8,
+  },
+  editSaveBtnText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

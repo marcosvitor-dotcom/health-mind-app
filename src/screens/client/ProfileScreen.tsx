@@ -111,22 +111,12 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('RequestDocument')}>
             <View style={styles.menuLeft}>
               <View style={[styles.menuIcon, { backgroundColor: isDark ? '#3D3020' : '#FFF5E6' }]}>
                 <Ionicons name="document-text" size={20} color="#FFB347" />
               </View>
-              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Solicitar Relatorio</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
-            <View style={styles.menuLeft}>
-              <View style={[styles.menuIcon, { backgroundColor: isDark ? '#1F3D1F' : '#E8FFE8' }]}>
-                <Ionicons name="stats-chart" size={20} color="#50C878" />
-              </View>
-              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Meu Progresso</Text>
+              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Solicitar Documento</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>

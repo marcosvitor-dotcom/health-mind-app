@@ -186,6 +186,37 @@ export const confirmAppointment = async (appointmentId: string): Promise<Appoint
 };
 
 /**
+ * Atualizar uma consulta (data, tipo, notas, etc.)
+ */
+export interface UpdateAppointmentRequest {
+  date?: string;
+  duration?: number;
+  type?: 'online' | 'in_person';
+  notes?: string;
+  status?: string;
+  roomId?: string | null;
+}
+
+export const updateAppointment = async (
+  appointmentId: string,
+  updateData: UpdateAppointmentRequest
+): Promise<AppointmentData> => {
+  try {
+    const { data } = await api.put<ApiResponse<AppointmentData>>(
+      `/appointments/${appointmentId}`,
+      updateData
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao atualizar consulta');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
  * Solicitar reagendamento de consulta
  */
 export const requestReschedule = async (appointmentId: string): Promise<AppointmentData> => {

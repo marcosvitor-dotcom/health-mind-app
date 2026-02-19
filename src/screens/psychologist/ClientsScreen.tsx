@@ -194,6 +194,12 @@ export default function ClientsScreen({ navigation }: any) {
         <View style={styles.headerButtons}>
           <NotificationBell onPress={() => navigation.navigate('Notifications')} />
           <TouchableOpacity
+            style={[styles.invitationsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#FFF5E6' }]}
+            onPress={() => navigation.navigate('DocumentRequests')}
+          >
+            <Ionicons name="document-text" size={18} color="#FFB347" />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.invitationsButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8FFF0' }]}
             onPress={() => navigation.navigate('Invitations')}
           >
@@ -431,6 +437,19 @@ export default function ClientsScreen({ navigation }: any) {
                       <Ionicons name="calendar" size={20} color="#50C878" />
                       <Text style={[styles.modalActionText, { color: '#50C878' }]}>
                         Agendar Consulta
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
+                      onPress={() => {
+                        setShowModal(false);
+                        const patientId = selectedPatient?._id || selectedPatient?.id;
+                        navigation.navigate('DocumentRequests', { patientId });
+                      }}
+                    >
+                      <Ionicons name="document-text" size={20} color="#FFB347" />
+                      <Text style={[styles.modalActionText, { color: '#FFB347' }]}>
+                        Solicitações de Documentos
                       </Text>
                     </TouchableOpacity>
                   </View>
