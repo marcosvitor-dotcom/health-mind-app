@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as medicalRecordService from '../../services/medicalRecordService';
-// import * as DocumentPicker from 'expo-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import Card from '../../components/Card';
 
 export default function MedicalRecordScreen({ navigation, route }: any) {
@@ -71,21 +71,15 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
   };
 
   const handlePickDocument = async () => {
-    // Temporariamente desabilitado - requer build nativo
-    Alert.alert('Em breve', 'A funcionalidade de upload de arquivos estará disponível em breve. Por enquanto, use apenas o campo de conteúdo de texto.');
-    return;
-
-    /* DESCOMENTAR APÓS FAZER EAS BUILD
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        type: ['application/pdf'],
         copyToCacheDirectory: true,
       });
 
-      if (result.canceled === false && result.assets && result.assets[0]) {
+      if (!result.canceled && result.assets && result.assets[0]) {
         const file = result.assets[0];
 
-        // Validar tamanho (10MB)
         if (file.size && file.size > 10 * 1024 * 1024) {
           Alert.alert('Erro', 'O arquivo deve ter no máximo 10MB');
           return;
@@ -97,7 +91,6 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
       console.error('Erro ao selecionar arquivo:', error);
       Alert.alert('Erro', 'Não foi possível selecionar o arquivo');
     }
-    */
   };
 
   const handleSaveRecord = async () => {
@@ -113,29 +106,23 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
 
     setSaving(true);
     try {
-      let fileData = undefined;
-      let fileName = undefined;
-      let fileType = undefined;
-
-      // Converter arquivo para base64 se foi selecionado
-      if (newRecord.file) {
-        const response = await fetch(newRecord.file.uri);
-        const blob = await response.blob();
-        fileData = await blobToBase64(blob);
-        fileName = newRecord.file.name;
-        fileType = medicalRecordService.getFileType(fileName);
-      }
-
-      await medicalRecordService.createMedicalRecord({
+      // Criar registro primeiro (sem arquivo)
+      const record = await medicalRecordService.createMedicalRecord({
         patientId: patient._id || patient.id,
         category: newRecord.category,
         title: newRecord.title.trim(),
         description: newRecord.description.trim() || undefined,
         content: newRecord.content.trim() || undefined,
-        fileName,
-        fileType,
-        fileData,
       });
+
+      // Se tem arquivo, fazer upload via Firebase
+      if (newRecord.file && record._id) {
+        await medicalRecordService.uploadMedicalRecordFile(
+          record._id,
+          newRecord.file.uri,
+          newRecord.file.name
+        );
+      }
 
       Alert.alert('Sucesso', 'Registro adicionado ao prontuário com sucesso!');
       setShowAddModal(false);
@@ -152,18 +139,6 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
     } finally {
       setSaving(false);
     }
-  };
-
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result.split(',')[1]);
-      };
-      reader.readAsDataURL(blob);
-    });
   };
 
   const handleViewRecord = (record: medicalRecordService.MedicalRecord) => {

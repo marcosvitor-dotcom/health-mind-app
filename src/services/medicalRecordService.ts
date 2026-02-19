@@ -256,6 +256,41 @@ export const downloadMedicalRecordFile = async (recordId: string): Promise<void>
 };
 
 /**
+ * Upload de arquivo para registro médico (Firebase Storage)
+ */
+export const uploadMedicalRecordFile = async (
+  recordId: string,
+  fileUri: string,
+  fileName: string
+): Promise<MedicalRecord> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      name: fileName,
+      type: 'application/pdf',
+    } as any);
+
+    const response = await api.post<ApiResponse<MedicalRecord>>(
+      `/medical-records/${recordId}/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || 'Erro ao enviar arquivo');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
  * Converter arquivo para Base64
  */
 export const fileToBase64 = (file: File): Promise<string> => {
