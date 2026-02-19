@@ -1146,6 +1146,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   recurringHeaderLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,

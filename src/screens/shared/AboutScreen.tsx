@@ -39,9 +39,11 @@ export default function AboutScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* App Info */}
         <View style={styles.appInfoSection}>
-          <View style={[styles.logoContainer, { backgroundColor: colors.primary }]}>
-            <Ionicons name="heart" size={40} color="#fff" />
-          </View>
+          <Image
+            source={require('../../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={[styles.appName, { color: colors.textPrimary }]}>Health Mind</Text>
           <Text style={[styles.appDescription, { color: colors.textSecondary }]}>
             Cuidando da sua saude mental
@@ -59,28 +61,28 @@ export default function AboutScreen({ navigation }: Props) {
 
           <TouchableOpacity
             style={[styles.linkItem, { borderBottomColor: colors.borderLight }]}
-            onPress={() => openLink('https://healthmind.app')}
+            onPress={() => openLink('https://www.losningtech.com.br')}
           >
             <View style={[styles.linkIcon, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
               <Ionicons name="globe-outline" size={22} color={colors.primary} />
             </View>
             <View style={styles.linkContent}>
               <Text style={[styles.linkTitle, { color: colors.textPrimary }]}>Site Oficial</Text>
-              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>healthmind.app</Text>
+              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>www.losningtech.com.br</Text>
             </View>
             <Ionicons name="open-outline" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.linkItem, { borderBottomColor: colors.borderLight }]}
-            onPress={() => openLink('https://instagram.com/healthmind.app')}
+            onPress={() => openLink('https://instagram.com/health.mind.app')}
           >
             <View style={[styles.linkIcon, { backgroundColor: isDark ? '#2D1A3D' : '#F3E8FD' }]}>
               <Ionicons name="logo-instagram" size={22} color="#C13584" />
             </View>
             <View style={styles.linkContent}>
               <Text style={[styles.linkTitle, { color: colors.textPrimary }]}>Instagram</Text>
-              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>@healthmind.app</Text>
+              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>@health.mind.app</Text>
             </View>
             <Ionicons name="open-outline" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
@@ -184,12 +186,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  logoContainer: {
+  logo: {
     width: 80,
     height: 80,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 16,
   },
   appName: {
