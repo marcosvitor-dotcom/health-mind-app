@@ -19,6 +19,7 @@ import ClinicFinancialScreen from '../screens/clinic/ClinicFinancialScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
+import AboutScreen from '../screens/shared/AboutScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -94,6 +95,7 @@ function ProfileStack() {
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <Stack.Screen name="About" component={AboutScreen} />
     </Stack.Navigator>
   );
 }
