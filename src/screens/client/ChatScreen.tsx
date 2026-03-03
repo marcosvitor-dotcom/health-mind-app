@@ -313,6 +313,13 @@ export default function ChatScreen({ navigation }: any) {
           <NotificationBell onPress={() => navigation.navigate('Notifications')} />
         </View>
 
+        <View style={styles.disclaimerBanner}>
+          <Ionicons name="information-circle-outline" size={14} color="#7A6000" style={{ marginRight: 5, marginTop: 1 }} />
+          <Text style={styles.disclaimerText}>
+            Este assistente não substitui consulta com profissional de saúde. Para diagnóstico ou tratamento, procure um especialista.
+          </Text>
+        </View>
+
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
@@ -468,6 +475,21 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     marginTop: 2,
+  },
+  disclaimerBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFF8DC',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8D44D',
+  },
+  disclaimerText: {
+    flex: 1,
+    fontSize: 11,
+    color: '#7A6000',
+    lineHeight: 16,
   },
   messagesContainer: {
     flex: 1,

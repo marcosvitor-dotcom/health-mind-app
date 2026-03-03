@@ -145,6 +145,18 @@ export default function AboutScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
+        {/* Disclaimer de Saúde */}
+        <View style={[styles.disclaimerSection, { backgroundColor: colors.surface }]}>
+          <View style={styles.disclaimerHeader}>
+            <Ionicons name="alert-circle-outline" size={20} color="#E07B00" />
+            <Text style={[styles.disclaimerTitle, { color: colors.textPrimary }]}>Aviso Importante</Text>
+          </View>
+          <Text style={[styles.disclaimerBody, { color: colors.textSecondary }]}>
+            O Health Mind é um app de apoio emocional e não substitui a consulta com um profissional de saúde qualificado. Não oferece diagnóstico, tratamento ou aconselhamento médico.{'\n\n'}
+            Para orientações médicas, diagnóstico ou tratamento, consulte sempre um profissional de saúde habilitado.
+          </Text>
+        </View>
+
         {/* Credits */}
         <View style={styles.creditsSection}>
           <Text style={[styles.creditsText, { color: colors.textTertiary }]}>
@@ -244,6 +256,28 @@ const styles = StyleSheet.create({
   linkSubtitle: {
     fontSize: 13,
     marginTop: 2,
+  },
+  disclaimerSection: {
+    borderRadius: 12,
+    marginBottom: 20,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#E07B00',
+  },
+  disclaimerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 8,
+  },
+  disclaimerTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  disclaimerBody: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   creditsSection: {
     alignItems: 'center',
