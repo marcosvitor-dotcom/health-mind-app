@@ -2,7 +2,7 @@
   "expo": {
     "name": "health-mind-app",
     "slug": "health-mind-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -31,6 +31,7 @@
       },
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.healthmindapp",
+      "versionCode": 2,
       "intentFilters": [
         {
           "action": "VIEW",
