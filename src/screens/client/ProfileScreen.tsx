@@ -135,16 +135,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
-            <View style={styles.menuLeft}>
-              <Ionicons name="language" size={20} color={colors.textSecondary} />
-              <Text style={[styles.menuText, { color: colors.textPrimary }]}>Idioma</Text>
-            </View>
-            <View style={styles.menuRight}>
-              <Text style={[styles.menuValue, { color: colors.textSecondary }]}>Portugues</Text>
-              <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
-            </View>
-          </TouchableOpacity>
         </Card>
       </View>
 
