@@ -1,3 +1,4 @@
+import axios from 'axios';
 import api, { ApiResponse, getErrorMessage } from './api';
 import {
   LoginRequest,
@@ -17,6 +18,14 @@ import {
 // AUTENTICAÇÃO
 // ========================================
 
+export class LoginError extends Error {
+  errorCode: string;
+  constructor(message: string, errorCode: string) {
+    super(message);
+    this.errorCode = errorCode;
+  }
+}
+
 /**
  * Login de usuário
  */
@@ -34,6 +43,37 @@ export const login = async (
       return data.data;
     }
     throw new Error(data.message || 'Erro ao fazer login');
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const body = error.response?.data;
+      throw new LoginError(
+        body?.message || 'Erro ao fazer login',
+        body?.errorCode || 'UNKNOWN'
+      );
+    }
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Solicitar link de redefinição de senha
+ */
+export const forgotPassword = async (email: string): Promise<void> => {
+  try {
+    const { data } = await api.post<ApiResponse<null>>('/auth/forgot-password', { email });
+    if (!data.success) throw new Error(data.message);
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Redefinir senha com token
+ */
+export const resetPassword = async (token: string, password: string): Promise<void> => {
+  try {
+    const { data } = await api.post<ApiResponse<null>>('/auth/reset-password', { token, password });
+    if (!data.success) throw new Error(data.message);
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

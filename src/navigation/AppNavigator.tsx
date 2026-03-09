@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import LoginScreen from '../screens/auth/LoginScreen';
 import FirstAccessScreen from '../screens/auth/FirstAccessScreen';
 import CompleteRegistrationScreen from '../screens/auth/CompleteRegistrationScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import ClinicNavigator from './ClinicNavigator';
 import PsychologistNavigator from './PsychologistNavigator';
 import ClientNavigator from './ClientNavigator';
@@ -16,6 +17,7 @@ type RootStackParamList = {
   Login: undefined;
   FirstAccess: undefined;
   CompleteRegistration: { token: string };
+  ForgotPassword: { token?: string } | undefined;
   Main: undefined;
 };
 
@@ -30,6 +32,7 @@ const linking: LinkingOptions<any> = {
   config: {
     screens: {
       CompleteRegistration: 'auth/complete-registration/:token',
+      ForgotPassword: 'reset-password/:token',
       Login: 'login',
     },
   },
@@ -95,6 +98,11 @@ export default function AppNavigator() {
                   fontWeight: '600',
                 },
               }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+              options={{ headerShown: false }}
             />
           </>
         ) : (

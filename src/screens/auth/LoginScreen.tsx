@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { LoginError } from '../../services/authService';
 
 export default function LoginScreen() {
   const navigation = useNavigation<any>();
@@ -24,11 +24,20 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+    setEmailError('');
+    setPasswordError('');
+
+    if (!email) {
+      setEmailError('Digite seu e-mail');
+      return;
+    }
+    if (!password) {
+      setPasswordError('Digite sua senha');
       return;
     }
 
@@ -36,10 +45,17 @@ export default function LoginScreen() {
     try {
       await login(email, password);
     } catch (error: any) {
-      Alert.alert(
-        'Erro ao fazer login',
-        error.message || 'Verifique suas credenciais e tente novamente'
-      );
+      if (error instanceof LoginError) {
+        if (error.errorCode === 'EMAIL_NOT_FOUND') {
+          setEmailError('E-mail não cadastrado');
+        } else if (error.errorCode === 'WRONG_PASSWORD') {
+          setPasswordError('Senha incorreta');
+        } else {
+          setEmailError(error.message || 'Erro ao fazer login');
+        }
+      } else {
+        setEmailError(error.message || 'Erro ao conectar com o servidor');
+      }
     } finally {
       setLoading(false);
     }
@@ -68,24 +84,25 @@ export default function LoginScreen() {
         <View style={[styles.form, { backgroundColor: colors.surface }]}>
           <Text style={[styles.label, { color: colors.textPrimary }]}>Email</Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
+            style={[styles.input, { borderColor: emailError ? '#E53935' : colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
             placeholder="seu@email.com"
             placeholderTextColor={colors.textTertiary}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => { setEmail(v); setEmailError(''); }}
             autoCapitalize="none"
             keyboardType="email-address"
             editable={!loading}
           />
+          {emailError ? <Text style={styles.fieldError}>{emailError}</Text> : null}
 
           <Text style={[styles.label, { color: colors.textPrimary }]}>Senha</Text>
-          <View style={[styles.passwordContainer, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}>
+          <View style={[styles.passwordContainer, { borderColor: passwordError ? '#E53935' : colors.border, backgroundColor: colors.surfaceSecondary }]}>
             <TextInput
               style={[styles.passwordInput, { color: colors.textPrimary }]}
               placeholder="********"
               placeholderTextColor={colors.textTertiary}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(v) => { setPassword(v); setPasswordError(''); }}
               secureTextEntry={!showPassword}
               editable={!loading}
             />
@@ -101,6 +118,7 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
+          {passwordError ? <Text style={styles.fieldError}>{passwordError}</Text> : null}
 
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -116,6 +134,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.forgotPassword}
+            onPress={() => navigation.navigate('ForgotPassword')}
             disabled={loading}
           >
             <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>Esqueceu a senha?</Text>
@@ -219,6 +238,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  fieldError: {
+    color: '#E53935',
+    fontSize: 12,
+    marginTop: -6,
+    marginBottom: 8,
+    marginLeft: 2,
   },
   forgotPassword: {
     alignItems: 'center',
