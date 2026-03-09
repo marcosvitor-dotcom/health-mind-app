@@ -26,6 +26,7 @@ function ChatStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ChatMain" component={ChatScreen} />
+      <Stack.Screen name="PsychologistProfile" component={PsychologistProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );

@@ -61,28 +61,28 @@ export default function AboutScreen({ navigation }: Props) {
 
           <TouchableOpacity
             style={[styles.linkItem, { borderBottomColor: colors.borderLight }]}
-            onPress={() => openLink('https://www.losningtech.com.br')}
+            onPress={() => openLink('https://www.losningtech.com.br/health-mind-app')}
           >
             <View style={[styles.linkIcon, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
               <Ionicons name="globe-outline" size={22} color={colors.primary} />
             </View>
             <View style={styles.linkContent}>
               <Text style={[styles.linkTitle, { color: colors.textPrimary }]}>Site Oficial</Text>
-              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>www.losningtech.com.br</Text>
+              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>www.losningtech.com.br/health-mind-app</Text>
             </View>
             <Ionicons name="open-outline" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.linkItem, { borderBottomColor: colors.borderLight }]}
-            onPress={() => openLink('https://instagram.com/health.mind.app')}
+            onPress={() => openLink('https://instagram.com/healthmindpsi')}
           >
             <View style={[styles.linkIcon, { backgroundColor: isDark ? '#2D1A3D' : '#F3E8FD' }]}>
               <Ionicons name="logo-instagram" size={22} color="#C13584" />
             </View>
             <View style={styles.linkContent}>
               <Text style={[styles.linkTitle, { color: colors.textPrimary }]}>Instagram</Text>
-              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>@health.mind.app</Text>
+              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>@healthmindpsi</Text>
             </View>
             <Ionicons name="open-outline" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
@@ -103,14 +103,14 @@ export default function AboutScreen({ navigation }: Props) {
 
           <TouchableOpacity
             style={[styles.linkItem, { borderBottomColor: colors.borderLight }]}
-            onPress={() => openLink('mailto:admin@losningtech.com')}
+            onPress={() => openLink('mailto:contato@losningtech.com')}
           >
             <View style={[styles.linkIcon, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FD' }]}>
               <Ionicons name="mail-outline" size={22} color="#4A90E2" />
             </View>
             <View style={styles.linkContent}>
               <Text style={[styles.linkTitle, { color: colors.textPrimary }]}>E-mail</Text>
-              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>admin@losningtech.com</Text>
+              <Text style={[styles.linkSubtitle, { color: colors.textTertiary }]}>contato@losningtech.com</Text>
             </View>
             <Ionicons name="open-outline" size={20} color={colors.textTertiary} />
           </TouchableOpacity>

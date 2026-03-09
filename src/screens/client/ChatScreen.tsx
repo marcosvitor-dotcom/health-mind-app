@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -40,6 +40,11 @@ export default function ChatScreen({ navigation }: any) {
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Disclaimer banner
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const disclaimerOpacity = useRef(new Animated.Value(0)).current;
+  const disclaimerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Voice-to-text state
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -67,6 +72,25 @@ export default function ChatScreen({ navigation }: any) {
     };
     checkSpeech();
   }, []);
+
+  // Exibe o disclaimer ao entrar na tela e some após 10s
+  const showDisclaimerBanner = useCallback(() => {
+    if (disclaimerTimer.current) clearTimeout(disclaimerTimer.current);
+    setShowDisclaimer(true);
+    Animated.timing(disclaimerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    disclaimerTimer.current = setTimeout(() => {
+      Animated.timing(disclaimerOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
+        setShowDisclaimer(false);
+      });
+    }, 10000);
+  }, [disclaimerOpacity]);
+
+  useEffect(() => {
+    showDisclaimerBanner();
+    return () => {
+      if (disclaimerTimer.current) clearTimeout(disclaimerTimer.current);
+    };
+  }, [showDisclaimerBanner]);
 
   // Pulse animation helpers
   const startPulseAnimation = () => {
@@ -313,12 +337,21 @@ export default function ChatScreen({ navigation }: any) {
           <NotificationBell onPress={() => navigation.navigate('Notifications')} />
         </View>
 
-        <View style={styles.disclaimerBanner}>
-          <Ionicons name="information-circle-outline" size={14} color="#7A6000" style={{ marginRight: 5, marginTop: 1 }} />
-          <Text style={styles.disclaimerText}>
-            Este assistente não substitui consulta com profissional de saúde. Para diagnóstico ou tratamento, procure um especialista.
-          </Text>
-        </View>
+        {showDisclaimer && (
+          <Animated.View style={[styles.disclaimerBanner, { opacity: disclaimerOpacity }]}>
+            <Ionicons name="information-circle-outline" size={14} color="#7A6000" style={{ marginRight: 5, marginTop: 1 }} />
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              onPress={() => navigation.navigate('PsychologistProfile')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.disclaimerText}>
+                Este assistente não substitui consulta com profissional de saúde. Para diagnóstico ou tratamento,{' '}
+                <Text style={styles.disclaimerLink}>fale com seu psicólogo.</Text>
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         <ScrollView
           ref={scrollViewRef}
@@ -490,6 +523,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#7A6000',
     lineHeight: 16,
+  },
+  disclaimerLink: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+    color: '#5A4000',
   },
   messagesContainer: {
     flex: 1,
