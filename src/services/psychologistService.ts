@@ -78,6 +78,7 @@ export const getMyAppointments = async (
     let url = `/appointments/psychologist/${psychologistId}`;
     const params = new URLSearchParams();
 
+    params.append('limit', '500');
     if (filters?.startDate) params.append('startDate', filters.startDate);
     if (filters?.endDate) params.append('endDate', filters.endDate);
     if (filters?.status) params.append('status', filters.status);

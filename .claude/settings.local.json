@@ -35,7 +35,8 @@
       "WebFetch(domain:github.com)",
       "Bash(del \"c:\\\\Users\\\\marco\\\\OneDrive\\\\Desktop\\\\health_mind_ai\\\\health-mind-app\\\\src\\\\screens\\\\client\\\\PsychologistChatScreen.tsx\")",
       "Bash(grep:*)",
-      "Bash(npx expo-doctor:*)"
+      "Bash(npx expo-doctor:*)",
+      "Bash(find /c/Users/marco/OneDrive/Desktop/health_mind_ai -type f \\\\\\(-name *notification* -o -name *push* -o -name *chat* \\\\\\) -not -path */node_modules/*)"
     ]
   }
 }
