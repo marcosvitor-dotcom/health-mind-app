@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Alert } from 'react-native';
+import * as Updates from 'expo-updates';
 import { User } from '../types';
 import * as authService from '../services/authService';
 import * as storage from '../utils/storage';
@@ -19,6 +21,28 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Verificar atualizações OTA ao iniciar
+  useEffect(() => {
+    checkForUpdates();
+  }, []);
+
+  const checkForUpdates = async () => {
+    try {
+      if (!Updates.isEmbeddedLaunch) return;
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        Alert.alert(
+          'Atualização disponível',
+          'Uma nova versão foi baixada. O app será reiniciado.',
+          [{ text: 'OK', onPress: () => Updates.reloadAsync() }]
+        );
+      }
+    } catch (_) {
+      // não crítico
+    }
+  };
 
   // Carregar usuário do storage ao iniciar
   useEffect(() => {
