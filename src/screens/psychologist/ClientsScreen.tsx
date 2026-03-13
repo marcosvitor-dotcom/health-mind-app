@@ -452,6 +452,22 @@ export default function ClientsScreen({ navigation }: any) {
                         Solicitações de Documentos
                       </Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
+                      onPress={() => {
+                        setShowModal(false);
+                        const patientId = selectedPatient?._id || selectedPatient?.id;
+                        navigation.navigate('PatientMood', {
+                          patientId,
+                          patientName: selectedPatient?.name,
+                        });
+                      }}
+                    >
+                      <Ionicons name="happy-outline" size={20} color="#9C27B0" />
+                      <Text style={[styles.modalActionText, { color: '#9C27B0' }]}>
+                        Histórico de Humor
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </>
               )}

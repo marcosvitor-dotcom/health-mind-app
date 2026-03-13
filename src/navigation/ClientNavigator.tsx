@@ -18,6 +18,7 @@ import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
 import AboutScreen from '../screens/shared/AboutScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 import RequestDocumentScreen from '../screens/client/RequestDocumentScreen';
+import MoodScreen from '../screens/client/MoodScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -37,6 +38,15 @@ function AppointmentsStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="AppointmentsMain" component={AppointmentsScreen} />
       <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+      <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function MoodStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MoodMain" component={MoodScreen} />
       <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );
@@ -101,6 +111,16 @@ export default function ClientNavigator() {
           title: 'Consultas',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Mood"
+        component={MoodStack}
+        options={{
+          title: 'Humor',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="happy-outline" size={size} color={color} />
           ),
         }}
       />

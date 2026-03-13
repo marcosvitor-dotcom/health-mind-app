@@ -26,6 +26,7 @@ import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
 import PsychologistFinancialScreen from '../screens/psychologist/PsychologistFinancialScreen';
 import DocumentRequestsScreen from '../screens/psychologist/DocumentRequestsScreen';
+import PatientMoodScreen from '../screens/psychologist/PatientMoodScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -100,6 +101,11 @@ function ClientsStack() {
       <Stack.Screen
         name="Notifications"
         component={NotificationCenterScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PatientMood"
+        component={PatientMoodScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
