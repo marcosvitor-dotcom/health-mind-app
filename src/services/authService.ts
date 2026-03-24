@@ -92,6 +92,16 @@ export const logout = async (): Promise<void> => {
 };
 
 /**
+ * Excluir conta do usuário (soft delete)
+ */
+export const deleteAccount = async (): Promise<void> => {
+  const { data } = await api.delete<ApiResponse<null>>('/auth/delete-account');
+  if (!data.success) {
+    throw new Error(data.message || 'Erro ao excluir conta');
+  }
+};
+
+/**
  * Obter dados do usuário logado
  */
 export const getMe = async (): Promise<User> => {

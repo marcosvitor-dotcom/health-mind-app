@@ -70,7 +70,18 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
     setRefreshing(false);
   };
 
-  const handlePickDocument = async () => {
+  const handlePickDocument = () => {
+    Alert.alert(
+      'Acessar Arquivos',
+      'O Health Mind irá acessar o armazenamento do seu dispositivo para que você possa selecionar um arquivo PDF para anexar ao prontuário do paciente.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Continuar', onPress: pickDocumentFromStorage },
+      ]
+    );
+  };
+
+  const pickDocumentFromStorage = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf'],

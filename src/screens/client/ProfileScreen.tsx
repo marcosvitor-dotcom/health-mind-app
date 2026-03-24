@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import * as authService from '../../services/authService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
@@ -19,6 +20,41 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [loadingData, setLoadingData] = useState(true);
 
   const patientId = user?._id || user?.id || '';
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Excluir Conta',
+      'Tem certeza que deseja excluir sua conta? Você perderá o acesso ao aplicativo. Seus dados clínicos são mantidos por obrigação legal (CFP Res. 001/2009).',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Continuar',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Confirmar Exclusão',
+              'Esta ação não pode ser desfeita. Sua conta será desativada imediatamente.',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                  text: 'Excluir Definitivamente',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await authService.deleteAccount();
+                      await logout();
+                    } catch (error) {
+                      Alert.alert('Erro', 'Não foi possível excluir a conta. Tente novamente.');
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
     loadPatientData();
@@ -181,6 +217,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <Text style={styles.logoutText}>Sair</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.deleteAccountButton} onPress={handleDeleteAccount}>
+        <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+        <Text style={styles.deleteAccountText}>Excluir Conta</Text>
+      </TouchableOpacity>
+
       <Text style={[styles.version, { color: colors.textTertiary }]}>Versao 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
@@ -291,6 +332,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FF6B6B',
+  },
+  deleteAccountButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    padding: 14,
+    gap: 8,
+  },
+  deleteAccountText: {
+    fontSize: 14,
+    color: '#FF3B30',
   },
   version: {
     fontSize: 12,

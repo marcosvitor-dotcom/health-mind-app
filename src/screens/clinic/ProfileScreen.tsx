@@ -6,7 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
+import * as authService from '../../services/authService';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -22,6 +24,41 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Excluir Conta',
+      'Tem certeza que deseja excluir sua conta? Você perderá o acesso ao aplicativo. Seus dados clínicos são mantidos por obrigação legal (CFP Res. 001/2009).',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Continuar',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Confirmar Exclusão',
+              'Esta ação não pode ser desfeita. Sua conta será desativada imediatamente.',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                  text: 'Excluir Definitivamente',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await authService.deleteAccount();
+                      await logout();
+                    } catch (error) {
+                      Alert.alert('Erro', 'Não foi possível excluir a conta. Tente novamente.');
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -107,6 +144,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#fff" />
           <Text style={styles.logoutText}>Sair da Conta</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteAccountButton} onPress={handleDeleteAccount}>
+          <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+          <Text style={styles.deleteAccountText}>Excluir Conta</Text>
         </TouchableOpacity>
 
         <Text style={[styles.version, { color: colors.textTertiary }]}>Versão 1.0.0</Text>
@@ -202,6 +244,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
     marginLeft: 8,
+  },
+  deleteAccountButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    padding: 14,
+    gap: 8,
+  },
+  deleteAccountText: {
+    fontSize: 14,
+    color: '#FF3B30',
   },
   version: {
     textAlign: 'center',
