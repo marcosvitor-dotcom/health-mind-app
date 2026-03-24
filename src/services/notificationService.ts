@@ -59,6 +59,9 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#4A90E2',
+      sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
     });
   }
 
