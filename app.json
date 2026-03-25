@@ -21,7 +21,7 @@
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "Permitir que o Health Mind use o reconhecimento de fala para transcrever sua voz em texto.",
         "NSMicrophoneUsageDescription": "Permitir que o Health Mind acesse o microfone para transcrever sua voz em texto.",
-        "NSPhotoLibraryUsageDescription": "O Health Mind acessa sua biblioteca de fotos para que você possa escolher uma imagem de perfil personalizada.",
+        "NSPhotoLibraryUsageDescription": "O Health Mind acessa sua biblioteca de fotos exclusivamente para que você escolha uma foto de perfil. A imagem selecionada é exibida no seu perfil e visível para os profissionais de saúde vinculados à sua conta, como seu psicólogo ou clínica.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
