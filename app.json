@@ -33,7 +33,8 @@
       },
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.healthmindapp",
-      "versionCode": 4,
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 5,
       "intentFilters": [
         {
           "action": "VIEW",
