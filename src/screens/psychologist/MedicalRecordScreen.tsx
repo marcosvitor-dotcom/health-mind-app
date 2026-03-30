@@ -28,6 +28,8 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
   const [stats, setStats] = useState<medicalRecordService.MedicalRecordStats | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<medicalRecordService.MedicalRecordCategory | 'all'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [viewRecord, setViewRecord] = useState<medicalRecordService.MedicalRecord | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Form states
   const [newRecord, setNewRecord] = useState<{
@@ -152,11 +154,21 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
     }
   };
 
-  const handleViewRecord = (record: medicalRecordService.MedicalRecord) => {
-    // Navegar para tela de detalhes
-    // TODO: Criar tela de detalhes do registro
-    Alert.alert('Visualizar Registro', record.title);
+  const handleViewRecord = async (record: medicalRecordService.MedicalRecord) => {
+    setLoadingDetail(true);
+    setViewRecord(record);
+    try {
+      const full = await medicalRecordService.getMedicalRecord(record._id);
+      setViewRecord(full);
+    } catch {
+      // keep the list version
+    } finally {
+      setLoadingDetail(false);
+    }
   };
+
+  const hasAnamnesis = records.some((r) => r.category === 'anamnesis') ||
+    (stats?.byCategory?.anamnesis ?? 0) > 0;
 
   const categories: { value: medicalRecordService.MedicalRecordCategory | 'all'; label: string; icon: string }[] = [
     { value: 'all', label: 'Todos', icon: 'apps' },
@@ -165,7 +177,8 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
     { value: 'declaration', label: 'Declarações', icon: 'document' },
     { value: 'report', label: 'Relatórios', icon: 'stats-chart' },
     { value: 'evaluation', label: 'Laudos', icon: 'ribbon' },
-    { value: 'prescription', label: 'Prescrições', icon: 'medical' },
+    { value: 'referral', label: 'Encaminhamentos', icon: 'arrow-redo' },
+    { value: 'closure', label: 'Encerramento', icon: 'lock-closed' },
     { value: 'other', label: 'Outros', icon: 'folder' },
   ];
 
@@ -244,6 +257,20 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
         </View>
       </ScrollView>
 
+      {/* Banner: anamnese pendente */}
+      {!hasAnamnesis && selectedCategory === 'all' && (
+        <TouchableOpacity
+          style={styles.anamneseBanner}
+          onPress={() => navigation.navigate('AnamneseForm', { clientData: patient })}
+        >
+          <Ionicons name="warning" size={20} color="#fff" />
+          <Text style={styles.anamneseBannerText}>
+            Paciente sem ficha de anamnese — toque para criar agora
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color="#fff" />
+        </TouchableOpacity>
+      )}
+
       {/* Lista de registros */}
       <ScrollView
         style={styles.recordsList}
@@ -264,7 +291,9 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
             </TouchableOpacity>
           </View>
         ) : (
-          records.map((record) => (
+          [...records]
+            .sort((a, b) => (a.category === 'anamnesis' ? -1 : b.category === 'anamnesis' ? 1 : 0))
+            .map((record) => (
             <Card key={record._id} style={styles.recordCard}>
               <TouchableOpacity onPress={() => handleViewRecord(record)}>
                 <View style={styles.recordHeader}>
@@ -313,6 +342,70 @@ export default function MedicalRecordScreen({ navigation, route }: any) {
           ))
         )}
       </ScrollView>
+
+      {/* Modal Visualizar Registro */}
+      <Modal
+        visible={!!viewRecord}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setViewRecord(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]} numberOfLines={2}>
+                {viewRecord?.title || ''}
+              </Text>
+              <TouchableOpacity onPress={() => setViewRecord(null)}>
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {loadingDetail ? (
+                <ActivityIndicator size="large" color="#4A90E2" style={{ marginVertical: 32 }} />
+              ) : (
+                <>
+                  <View style={styles.detailMeta}>
+                    <Text style={[styles.detailMetaText, { color: colors.textSecondary }]}>
+                      {medicalRecordService.getCategoryLabel(viewRecord?.category || 'other')}
+                    </Text>
+                    <Text style={[styles.detailMetaText, { color: colors.textSecondary }]}>
+                      {viewRecord?.date ? new Date(viewRecord.date).toLocaleDateString('pt-BR') : ''}
+                    </Text>
+                  </View>
+
+                  {viewRecord?.description ? (
+                    <Text style={[styles.detailDescription, { color: colors.textSecondary }]}>
+                      {viewRecord.description}
+                    </Text>
+                  ) : null}
+
+                  {viewRecord?.content ? (
+                    <Text style={[styles.detailContent, { color: colors.textPrimary }]}>
+                      {viewRecord.content}
+                    </Text>
+                  ) : null}
+
+                  <View style={[styles.detailSignature, { borderTopColor: colors.border }]}>
+                    <Ionicons name="ribbon-outline" size={16} color={colors.textTertiary} />
+                    <Text style={[styles.detailSignatureText, { color: colors.textTertiary }]}>
+                      Psicólogo responsável — {
+                        typeof viewRecord?.psychologistId === 'object'
+                          ? viewRecord?.psychologistId?.name
+                          : 'não identificado'
+                      }
+                      {typeof viewRecord?.psychologistId === 'object' && viewRecord?.psychologistId?.crp
+                        ? `  •  CRP ${viewRecord.psychologistId.crp}`
+                        : ''}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal Adicionar Registro */}
       <Modal
@@ -694,5 +787,50 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  anamneseBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E67E22',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  anamneseBannerText: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  detailMetaText: {
+    fontSize: 13,
+  },
+  detailDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+    fontStyle: 'italic',
+  },
+  detailContent: {
+    fontSize: 15,
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  detailSignature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderTopWidth: 1,
+    paddingTop: 16,
+    marginBottom: 24,
+  },
+  detailSignatureText: {
+    fontSize: 13,
+    flex: 1,
   },
 });

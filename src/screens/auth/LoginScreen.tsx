@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -50,6 +51,15 @@ export default function LoginScreen() {
           setEmailError('E-mail não cadastrado');
         } else if (error.errorCode === 'WRONG_PASSWORD') {
           setPasswordError('Senha incorreta');
+        } else if (error.errorCode === 'INCOMPLETE_REGISTRATION') {
+          Alert.alert(
+            'Cadastro não finalizado',
+            'Você foi convidado mas ainda não finalizou seu cadastro. Deseja completar agora?',
+            [
+              { text: 'Agora não', style: 'cancel' },
+              { text: 'Completar cadastro', onPress: () => navigation.navigate('FirstAccess') },
+            ]
+          );
         } else {
           setEmailError(error.message || 'Erro ao fazer login');
         }

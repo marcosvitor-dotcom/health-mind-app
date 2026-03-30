@@ -9,6 +9,7 @@ import {
   Modal,
   ActivityIndicator,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
+import * as medicalRecordService from '../../services/medicalRecordService';
 import NotificationBell from '../../components/NotificationBell';
 
 interface PatientStats {
@@ -36,6 +38,15 @@ export default function ClientsScreen({ navigation }: any) {
   const [selectedPatient, setSelectedPatient] = useState<psychologistService.Patient | null>(null);
   const [patientStats, setPatientStats] = useState<PatientStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+
+  // Estados para encerramento de acompanhamento
+  const [showClosureModal, setShowClosureModal] = useState(false);
+  const [closureForm, setClosureForm] = useState({
+    reason: '',
+    referralsMade: '',
+    finalObservations: '',
+  });
+  const [savingClosure, setSavingClosure] = useState(false);
 
   useEffect(() => {
     loadPatients();
@@ -130,6 +141,46 @@ export default function ClientsScreen({ navigation }: any) {
       console.error('Erro ao carregar estatísticas:', error);
     } finally {
       setLoadingStats(false);
+    }
+  };
+
+  const handleSaveClosure = async () => {
+    if (!closureForm.reason.trim()) {
+      Alert.alert('Campo obrigatório', 'Informe o motivo do encerramento.');
+      return;
+    }
+    setSavingClosure(true);
+    try {
+      const patientId = selectedPatient?._id || selectedPatient?.id;
+      const content = [
+        `MOTIVO DO ENCERRAMENTO\n${closureForm.reason.trim()}`,
+        closureForm.referralsMade.trim()
+          ? `\n\nENCaminhamentos realizados\n${closureForm.referralsMade.trim()}`
+          : '',
+        closureForm.finalObservations.trim()
+          ? `\n\nOBSERVAÇÕES FINAIS\n${closureForm.finalObservations.trim()}`
+          : '',
+      ].join('');
+
+      await medicalRecordService.createMedicalRecord({
+        patientId: patientId!,
+        category: 'closure',
+        title: `Encerramento de Acompanhamento — ${new Date().toLocaleDateString('pt-BR')}`,
+        description: closureForm.reason.trim().slice(0, 200),
+        content,
+        date: new Date().toISOString(),
+      });
+
+      Alert.alert(
+        'Acompanhamento Encerrado',
+        'O registro de encerramento foi adicionado ao prontuário do paciente.',
+        [{ text: 'OK', onPress: () => setShowClosureModal(false) }]
+      );
+      setClosureForm({ reason: '', referralsMade: '', finalObservations: '' });
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Não foi possível salvar o encerramento.');
+    } finally {
+      setSavingClosure(false);
     }
   };
 
@@ -468,9 +519,122 @@ export default function ClientsScreen({ navigation }: any) {
                         Histórico de Humor
                       </Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
+                      onPress={() => {
+                        setShowModal(false);
+                        setClosureForm({ reason: '', referralsMade: '', finalObservations: '' });
+                        setShowClosureModal(true);
+                      }}
+                    >
+                      <Ionicons name="lock-closed" size={20} color="#E74C3C" />
+                      <Text style={[styles.modalActionText, { color: '#E74C3C' }]}>
+                        Encerrar Acompanhamento
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </>
               )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Encerramento de Acompanhamento */}
+      <Modal
+        visible={showClosureModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowClosureModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Encerrar Acompanhamento</Text>
+              <TouchableOpacity onPress={() => setShowClosureModal(false)}>
+                <Ionicons name="close" size={28} color={colors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
+              <View style={[styles.closureWarning, { backgroundColor: '#FFF3F3', borderColor: '#E74C3C' }]}>
+                <Ionicons name="warning" size={18} color="#E74C3C" />
+                <Text style={styles.closureWarningText}>
+                  Este registro será adicionado permanentemente ao prontuário do paciente conforme exigido pelo CFP (Res. 01/2009).
+                </Text>
+              </View>
+
+              <Text style={[styles.closurePatientName, { color: colors.textPrimary }]}>
+                Paciente: {selectedPatient?.name}
+              </Text>
+
+              <Text style={[styles.closureLabel, { color: colors.textPrimary }]}>
+                Motivo do Encerramento *
+              </Text>
+              <TextInput
+                style={[styles.closureInput, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+                placeholder="Ex: Alta terapêutica, solicitação do paciente, término de contrato..."
+                placeholderTextColor={colors.textTertiary}
+                value={closureForm.reason}
+                onChangeText={(text) => setClosureForm({ ...closureForm, reason: text })}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                editable={!savingClosure}
+              />
+
+              <Text style={[styles.closureLabel, { color: colors.textPrimary }]}>
+                Encaminhamentos Realizados
+              </Text>
+              <TextInput
+                style={[styles.closureInput, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+                placeholder="Ex: Encaminhado para psiquiatra, grupo de apoio..."
+                placeholderTextColor={colors.textTertiary}
+                value={closureForm.referralsMade}
+                onChangeText={(text) => setClosureForm({ ...closureForm, referralsMade: text })}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                editable={!savingClosure}
+              />
+
+              <Text style={[styles.closureLabel, { color: colors.textPrimary }]}>
+                Observações Finais
+              </Text>
+              <TextInput
+                style={[styles.closureInput, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+                placeholder="Observações clínicas relevantes para o encerramento..."
+                placeholderTextColor={colors.textTertiary}
+                value={closureForm.finalObservations}
+                onChangeText={(text) => setClosureForm({ ...closureForm, finalObservations: text })}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+                editable={!savingClosure}
+              />
+
+              <View style={styles.closureButtons}>
+                <TouchableOpacity
+                  style={[styles.closureCancelButton, { borderColor: colors.border }]}
+                  onPress={() => setShowClosureModal(false)}
+                  disabled={savingClosure}
+                >
+                  <Text style={[styles.closureCancelText, { color: colors.textSecondary }]}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.closureConfirmButton, savingClosure && { opacity: 0.6 }]}
+                  onPress={handleSaveClosure}
+                  disabled={savingClosure}
+                >
+                  {savingClosure
+                    ? <ActivityIndicator size="small" color="#fff" />
+                    : <>
+                        <Ionicons name="lock-closed" size={16} color="#fff" />
+                        <Text style={styles.closureConfirmText}>Registrar Encerramento</Text>
+                      </>
+                  }
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
         </View>
@@ -729,5 +893,71 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
     fontWeight: '500',
+  },
+  // Encerramento de acompanhamento
+  closureWarning: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  closureWarningText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#E74C3C',
+    lineHeight: 18,
+  },
+  closurePatientName: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  closureLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  closureInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    minHeight: 80,
+  },
+  closureButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  closureCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  closureCancelText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  closureConfirmButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#E74C3C',
+    gap: 6,
+  },
+  closureConfirmText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

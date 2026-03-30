@@ -73,7 +73,13 @@ Ultima atualizacao: Fevereiro de 2026
 
 7.2. A Losning Tech pode suspender ou encerrar contas que violem estes Termos de Uso, mediante notificacao previa quando possivel.
 
-7.3. Dados de prontuario e registros terapeuticos serao mantidos pelo periodo minimo exigido pela legislacao vigente (Resolucao CFP n. 001/2009).
+7.3. Encerramento de conta pelo paciente: dados de cadastro e conversas serao excluidos em ate 30 dias. Prontuarios, relatorios terapeuticos e demais documentos clinicos serao retidos pelo prazo legal obrigatorio antes da exclusao definitiva.
+
+7.4. Retencao de prontuarios: em conformidade com a Resolucao CFP n. 001/2009, os prontuarios psicologicos serao mantidos pelo prazo minimo de 20 (vinte) anos apos o encerramento do acompanhamento quando em formato digital. Apos esse prazo, o descarte sera realizado de forma segura, com emissao de termo de eliminacao conforme a norma.
+
+7.5. Retencao de outros documentos clinicos (relatorios, laudos, declaracoes): prazo minimo de 5 (cinco) anos apos o encerramento do acompanhamento, conforme legislacao vigente.
+
+7.6. O encerramento da conta pelo psicologo ou pela clinica nao implica exclusao imediata dos prontuarios dos pacientes vinculados, que permanecrao armazenados pelo prazo legal antes do descarte seguro.
 
 8. DISPOSICOES GERAIS
 
@@ -175,9 +181,13 @@ Para exercer seus direitos, entre em contato pelo telefone: (61) 98373-0910 ou a
 
 7.1. Dados de cadastro: mantidos enquanto a conta estiver ativa.
 
-7.2. Registros terapeuticos: mantidos pelo periodo minimo de 5 (cinco) anos apos o encerramento do acompanhamento, conforme Resolucao CFP n. 001/2009.
+7.2. Prontuarios psicologicos (anamnese, relatos de sessao, relatorios terapeuticos, laudos e documentos clinicos): mantidos pelo prazo minimo de 20 (vinte) anos apos o encerramento do acompanhamento, em conformidade com a Resolucao CFP n. 001/2009 para documentos digitais. Apos esse prazo, o descarte e realizado de forma segura com registro de eliminacao.
 
-7.3. Dados de acesso e logs: mantidos por 6 (seis) meses para fins de seguranca.
+7.3. Outros documentos clinicos (declaracoes, encaminhamentos): mantidos pelo prazo minimo de 5 (cinco) anos apos o encerramento do acompanhamento.
+
+7.4. Encerramento de conta pelo usuario: dados de cadastro e conversas sao excluidos em ate 30 dias. Os prontuarios e documentos clinicos permanecem armazenados pelo prazo legal antes do descarte seguro, independentemente do encerramento da conta.
+
+7.5. Dados de acesso e logs: mantidos por 6 (seis) meses para fins de seguranca.
 
 8. COOKIES E TECNOLOGIAS DE RASTREAMENTO
 

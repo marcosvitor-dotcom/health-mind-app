@@ -9,16 +9,20 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import { useTheme } from '../../contexts/ThemeContext';
+import * as medicalRecordService from '../../services/medicalRecordService';
 
 export default function AnamneseFormScreen({ navigation, route }: any) {
   const { colors, isDark } = useTheme();
 
   const { clientData } = route.params || {};
+
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     mainComplaint: '',
@@ -37,17 +41,52 @@ export default function AnamneseFormScreen({ navigation, route }: any) {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSave = () => {
-    Alert.alert(
-      'Sucesso!',
-      'Ficha de anamnese salva com sucesso!',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
+  const handleSave = async () => {
+    if (!formData.mainComplaint.trim()) {
+      Alert.alert('Campo obrigatório', 'Preencha ao menos a Queixa Principal.');
+      return;
+    }
+
+    if (!clientData?._id) {
+      Alert.alert('Erro', 'ID do paciente não encontrado.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const content = [
+        formData.mainComplaint && `QUEIXA PRINCIPAL\n${formData.mainComplaint}`,
+        formData.medicalHistory && `HISTÓRICO MÉDICO\n${formData.medicalHistory}`,
+        formData.medications && `MEDICAÇÕES EM USO\n${formData.medications}`,
+        formData.allergies && `ALERGIAS\n${formData.allergies}`,
+        formData.familyHistory && `HISTÓRICO FAMILIAR\n${formData.familyHistory}`,
+        formData.lifestyle && `ESTILO DE VIDA\n${formData.lifestyle}`,
+        formData.sleepPattern && `PADRÃO DE SONO\n${formData.sleepPattern}`,
+        formData.previousTreatments && `TRATAMENTOS ANTERIORES\n${formData.previousTreatments}`,
+        formData.expectations && `EXPECTATIVAS COM O TRATAMENTO\n${formData.expectations}`,
+        formData.additionalNotes && `OBSERVAÇÕES ADICIONAIS\n${formData.additionalNotes}`,
       ]
-    );
+        .filter(Boolean)
+        .join('\n\n');
+
+      await medicalRecordService.createMedicalRecord({
+        patientId: clientData._id,
+        category: 'anamnesis',
+        title: `Ficha de Anamnese — ${clientData.name || 'Paciente'}`,
+        description: formData.mainComplaint.slice(0, 200),
+        content,
+        tags: ['anamnese'],
+        isPrivate: true,
+      } as any);
+
+      Alert.alert('Sucesso!', 'Ficha de anamnese salva com sucesso!', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Não foi possível salvar a anamnese.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -212,9 +251,15 @@ export default function AnamneseFormScreen({ navigation, route }: any) {
         >
           <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Ionicons name="save" size={24} color="#fff" />
-          <Text style={styles.saveButtonText}>Salvar Anamnese</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="save" size={24} color="#fff" />
+              <Text style={styles.saveButtonText}>Salvar Anamnese</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

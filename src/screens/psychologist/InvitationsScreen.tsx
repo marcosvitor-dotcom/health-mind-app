@@ -8,6 +8,11 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -28,6 +33,14 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
   const [refreshing, setRefreshing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Estados do modal de edição
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingInvitation, setEditingInvitation] = useState<Invitation | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editBirthDate, setEditBirthDate] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
 
   const loadInvitations = async () => {
     try {
@@ -99,6 +112,56 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
     );
   };
 
+  const formatDateToBR = (isoDate?: string): string => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '';
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatDateToISO = (brDate: string): string | undefined => {
+    if (!brDate || brDate.length < 10) return undefined;
+    const parts = brDate.split('/');
+    if (parts.length !== 3) return undefined;
+    const [day, month, year] = parts;
+    if (!day || !month || !year || year.length !== 4) return undefined;
+    return `${year}-${month}-${day}`;
+  };
+
+  const openEditModal = (invitation: Invitation) => {
+    setEditingInvitation(invitation);
+    setEditName(invitation.preFilledData?.name || '');
+    setEditPhone(invitation.preFilledData?.phone || '');
+    setEditBirthDate(formatDateToBR(invitation.preFilledData?.birthDate));
+    setEditModalVisible(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingInvitation || !editName.trim()) {
+      Alert.alert('Atenção', 'O nome é obrigatório.');
+      return;
+    }
+    setEditLoading(true);
+    try {
+      const id = editingInvitation._id || editingInvitation.id;
+      await authService.updateInvitation(id, {
+        name: editName.trim(),
+        phone: editPhone.trim() || undefined,
+        birthDate: formatDateToISO(editBirthDate) || undefined,
+      });
+      setEditModalVisible(false);
+      loadInvitations();
+      Alert.alert('Sucesso', 'Convite atualizado! O prazo foi renovado por 7 dias e um novo e-mail foi enviado.');
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Erro ao atualizar convite');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const getStatusColor = (status: InvitationStatus) => {
     switch (status) {
       case 'pending':
@@ -162,7 +225,16 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
         {item.status === 'pending' && (
           <View style={[styles.cardActions, { borderTopColor: colors.border }]}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.resendButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#F0F8EE' }]}
+              onPress={() => openEditModal(item)}
+              disabled={isLoading}
+            >
+              <Ionicons name="pencil-outline" size={16} color="#50C878" />
+              <Text style={[styles.actionButtonText, { color: '#50C878' }]}>Editar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FF' }]}
               onPress={() => handleResend(item)}
               disabled={isLoading}
             >
@@ -171,18 +243,18 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
               ) : (
                 <>
                   <Ionicons name="refresh" size={16} color="#4A90E2" />
-                  <Text style={styles.resendButtonText}>Reenviar</Text>
+                  <Text style={[styles.actionButtonText, { color: '#4A90E2' }]}>Reenviar</Text>
                 </>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton, { backgroundColor: isDark ? '#3D1F1F' : '#FFEBEE' }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? '#3D1F1F' : '#FFEBEE' }]}
               onPress={() => handleCancel(item)}
               disabled={isLoading}
             >
               <Ionicons name="close" size={16} color="#E74C3C" />
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
+              <Text style={[styles.actionButtonText, { color: '#E74C3C' }]}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -272,6 +344,94 @@ export default function InvitationsScreen({ navigation }: InvitationsScreenProps
       >
         <Ionicons name="person-add" size={24} color="#fff" />
       </TouchableOpacity>
+
+      {/* Modal de Edição */}
+      <Modal
+        visible={editModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Editar Convite</Text>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)} disabled={editLoading}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={[styles.modalEmailLabel, { color: colors.textSecondary }]}>Email</Text>
+              <Text style={[styles.modalEmailValue, { color: colors.textPrimary, backgroundColor: colors.surfaceSecondary }]}>
+                {editingInvitation?.email}
+              </Text>
+
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>Nome *</Text>
+              <TextInput
+                style={[styles.modalInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
+                value={editName}
+                onChangeText={setEditName}
+                placeholder="Nome completo"
+                placeholderTextColor={colors.textTertiary}
+                editable={!editLoading}
+              />
+
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>Telefone</Text>
+              <TextInput
+                style={[styles.modalInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
+                value={editPhone}
+                onChangeText={setEditPhone}
+                placeholder="(11) 99999-9999"
+                placeholderTextColor={colors.textTertiary}
+                keyboardType="phone-pad"
+                editable={!editLoading}
+              />
+
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>Data de Nascimento</Text>
+              <TextInput
+                style={[styles.modalInput, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, color: colors.textPrimary }]}
+                value={editBirthDate}
+                onChangeText={setEditBirthDate}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={colors.textTertiary}
+                keyboardType="numeric"
+                maxLength={10}
+                editable={!editLoading}
+              />
+
+              <Text style={[styles.modalHint, { color: colors.textTertiary }]}>
+                Ao salvar, o prazo do convite será renovado por 7 dias e um novo e-mail será enviado ao paciente.
+              </Text>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalCancelButton, { borderColor: colors.border }]}
+                  onPress={() => setEditModalVisible(false)}
+                  disabled={editLoading}
+                >
+                  <Text style={[styles.modalCancelButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalSaveButton, editLoading && styles.modalButtonDisabled]}
+                  onPress={handleSaveEdit}
+                  disabled={editLoading}
+                >
+                  {editLoading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={styles.modalSaveButtonText}>Salvar</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -388,7 +548,7 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     borderTopWidth: 1,
     paddingTop: 12,
   },
@@ -399,18 +559,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 8,
     borderRadius: 8,
-    gap: 6,
+    gap: 4,
   },
-  resendButton: {},
-  resendButtonText: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  cancelButton: {},
-  cancelButtonText: {
-    color: '#E74C3C',
-    fontSize: 14,
+  actionButtonText: {
+    fontSize: 13,
     fontWeight: '500',
   },
   emptyContainer: {
@@ -438,5 +590,89 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalEmailLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  modalEmailValue: {
+    fontSize: 14,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+    marginTop: 4,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 14,
+  },
+  modalHint: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 20,
+    marginTop: 4,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingBottom: 8,
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  modalCancelButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  modalSaveButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: '#50C878',
+    alignItems: 'center',
+  },
+  modalButtonDisabled: {
+    opacity: 0.6,
+  },
+  modalSaveButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

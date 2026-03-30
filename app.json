@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.healthmindapp",
+      "buildNumber": "2",
       "associatedDomains": [
         "applinks:health-mind-app.vercel.app"
       ],

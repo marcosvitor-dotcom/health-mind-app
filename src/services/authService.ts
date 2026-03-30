@@ -253,6 +253,27 @@ export const resendInvitation = async (invitationId: string): Promise<void> => {
 };
 
 /**
+ * Editar convite pendente (atualiza dados e renova prazo)
+ */
+export const updateInvitation = async (
+  invitationId: string,
+  data: { name?: string; phone?: string; birthDate?: string; psychologistId?: string }
+): Promise<Invitation> => {
+  try {
+    const response = await api.patch<ApiResponse<{ invitation: Invitation }>>(
+      `/invitations/${invitationId}`,
+      data
+    );
+    if (response.data.success && response.data.data) {
+      return response.data.data.invitation;
+    }
+    throw new Error(response.data.message || 'Erro ao atualizar convite');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
  * Cancelar convite
  */
 export const cancelInvitation = async (invitationId: string): Promise<void> => {

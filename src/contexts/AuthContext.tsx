@@ -95,8 +95,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    */
   const login = async (email: string, password: string) => {
     try {
-      setLoading(true);
-
       // Chamar API de login
       const response = await authService.login(email, password);
 
@@ -123,8 +121,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

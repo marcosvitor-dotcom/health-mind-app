@@ -10,7 +10,8 @@ export type MedicalRecordCategory =
   | 'declaration'
   | 'report'
   | 'evaluation'
-  | 'prescription'
+  | 'referral'
+  | 'closure'
   | 'other';
 
 export type FileType = 'pdf' | 'doc' | 'docx' | 'text' | null;
@@ -348,7 +349,8 @@ export const getCategoryLabel = (category: MedicalRecordCategory): string => {
     declaration: 'Declarações',
     report: 'Relatórios',
     evaluation: 'Laudos e Pareceres',
-    prescription: 'Prescrições',
+    referral: 'Encaminhamentos',
+    closure: 'Encerramento de Caso',
     other: 'Outros',
   };
   return labels[category] || category;
@@ -364,7 +366,8 @@ export const getCategoryIcon = (category: MedicalRecordCategory): string => {
     declaration: 'document',
     report: 'stats-chart',
     evaluation: 'ribbon',
-    prescription: 'medical',
+    referral: 'arrow-redo',
+    closure: 'lock-closed',
     other: 'folder',
   };
   return icons[category] || 'document';

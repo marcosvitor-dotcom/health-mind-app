@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { getTherapeuticReport, TherapeuticReport } from '../../services/reportService';
 
 interface SectionConfig {
@@ -75,6 +76,7 @@ const SECTIONS: SectionConfig[] = [
 export default function TherapeuticReportDetailScreen({ route, navigation }: any) {
   const { reportId, patientName } = route.params;
   const { colors, isDark } = useTheme();
+  const { user } = useAuth();
 
   const [report, setReport] = useState<TherapeuticReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -244,13 +246,35 @@ export default function TherapeuticReportDetailScreen({ route, navigation }: any
           );
         })}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Ionicons name="shield-checkmark" size={16} color={colors.textTertiary} />
-          <Text style={[styles.footerText, { color: colors.textTertiary }]}>
-            Este relatório foi gerado por IA e criptografado. Ele não contém
-            citações diretas das conversas do paciente.
-          </Text>
+        {/* Rodapé de assinatura — CFP Res. 06/2019 */}
+        <View style={[styles.signatureCard, { backgroundColor: colors.surface }]}>
+          <View style={styles.signatureRow}>
+            <Ionicons name="shield-checkmark" size={16} color={colors.textTertiary} />
+            <Text style={[styles.footerText, { color: colors.textTertiary }]}>
+              Relatório gerado por IA e criptografado. Não contém citações diretas das conversas.
+            </Text>
+          </View>
+          <View style={[styles.signatureDivider, { borderTopColor: colors.border }]} />
+          <View style={styles.signatureRow}>
+            <Ionicons name="ribbon-outline" size={16} color="#9C27B0" />
+            <View style={styles.signatureInfo}>
+              <Text style={[styles.signatureName, { color: colors.textPrimary }]}>
+                {user?.name || 'Psicólogo responsável'}
+              </Text>
+              {user?.crp ? (
+                <Text style={[styles.signatureCrp, { color: colors.textSecondary }]}>
+                  CRP {user.crp}
+                </Text>
+              ) : null}
+              <Text style={[styles.signatureDate, { color: colors.textTertiary }]}>
+                Emitido em {new Date(report.createdAt).toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </Text>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -389,17 +413,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
   },
-  footer: {
+  signatureCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 32,
+    gap: 12,
+  },
+  signatureDivider: {
+    borderTopWidth: 1,
+  },
+  signatureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    paddingVertical: 20,
-    paddingHorizontal: 4,
-    marginBottom: 20,
   },
   footerText: {
     flex: 1,
     fontSize: 12,
     lineHeight: 17,
+  },
+  signatureInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  signatureName: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  signatureCrp: {
+    fontSize: 13,
+  },
+  signatureDate: {
+    fontSize: 12,
+    marginTop: 4,
   },
 });
