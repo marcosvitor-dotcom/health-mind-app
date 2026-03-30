@@ -49,12 +49,10 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-  const token = tokenData.data;
-
-  // Configurar canal de notificação no Android
+  // Configurar canal de notificação no Android ANTES de obter o token
+  // O Android exige que o canal exista antes de receber notificações
   if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('default', {
+    await Notifications.setNotificationChannelAsync('default', {
       name: 'Padrão',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
@@ -64,6 +62,9 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       showBadge: true,
     });
   }
+
+  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+  const token = tokenData.data;
 
   return token;
 }
