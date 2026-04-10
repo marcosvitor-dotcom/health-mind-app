@@ -19,7 +19,7 @@ import { AdminPsychologist, AdminPatient, AdminUser } from '../../types';
 
 type TabType = 'psychologists' | 'patients' | 'admins';
 
-export default function UsersScreen() {
+export default function UsersScreen({ navigation }: any) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('psychologists');
   const [psychologists, setPsychologists] = useState<AdminPsychologist[]>([]);
@@ -298,6 +298,15 @@ export default function UsersScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Usuários</Text>
+        {activeTab === 'psychologists' && (
+          <TouchableOpacity
+            style={styles.inviteButton}
+            onPress={() => navigation.navigate('InvitePsychologist')}
+          >
+            <Ionicons name="person-add" size={16} color="#fff" />
+            <Text style={styles.inviteButtonText}>Convidar</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Tabs */}
@@ -360,6 +369,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -367,6 +379,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#9B59B6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  inviteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   tabsContainer: {
     flexDirection: 'row',

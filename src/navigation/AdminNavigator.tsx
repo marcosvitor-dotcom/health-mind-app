@@ -7,6 +7,7 @@ import OverviewScreen from '../screens/admin/OverviewScreen';
 import ClinicsScreen from '../screens/admin/ClinicsScreen';
 import ClinicDetailScreen from '../screens/admin/ClinicDetailScreen';
 import InviteClinicScreen from '../screens/admin/InviteClinicScreen';
+import InvitePsychologistScreen from '../screens/admin/InvitePsychologistScreen';
 import UsersScreen from '../screens/admin/UsersScreen';
 import SettingsScreen from '../screens/admin/SettingsScreen';
 
@@ -41,6 +42,11 @@ function UsersStack() {
       <Stack.Screen
         name="UsersList"
         component={UsersScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InvitePsychologist"
+        component={InvitePsychologistScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

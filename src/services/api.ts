@@ -1,8 +1,18 @@
 import axios, { AxiosError } from 'axios';
 import { getToken, getRefreshToken, setToken, setRefreshToken, clearTokens } from '../utils/storage';
+import { EventEmitter } from '../utils/eventEmitter';
 
 // Base URL da API
 const BASE_URL = 'https://health-mind-app.vercel.app/api';
+
+// Códigos de erro de assinatura retornados pela API em respostas 403
+export type SubscriptionErrorCode =
+  | 'SUBSCRIPTION_BLOCKED'
+  | 'NO_SUBSCRIPTION'
+  | 'TRIAL_EXPIRED'
+  | 'PATIENT_LIMIT_REACHED'
+  | 'PLAN_NO_INVITES'
+  | 'PSYCHOLOGIST_LIMIT_REACHED';
 
 // Criar instância do axios
 const api = axios.create({
@@ -41,29 +51,43 @@ api.interceptors.response.use(
         const refreshToken = await getRefreshToken();
 
         if (!refreshToken) {
-          // Não tem refresh token, fazer logout
           await clearTokens();
           throw error;
         }
 
-        // Tentar renovar o token
         const { data } = await axios.post(`${BASE_URL}/auth/refresh-token`, {
           refreshToken,
         });
 
         if (data.success) {
-          // Salvar novos tokens
           await setToken(data.data.token);
           await setRefreshToken(data.data.refreshToken);
 
-          // Refazer a requisição original com novo token
           originalRequest.headers.Authorization = `Bearer ${data.data.token}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh token também expirou - fazer logout
         await clearTokens();
         throw refreshError;
+      }
+    }
+
+    // Assinatura bloqueada / expirada — emite evento global para a navegação tratar
+    if (error.response?.status === 403) {
+      const responseData = error.response.data as any;
+      const code: SubscriptionErrorCode | undefined = responseData?.code;
+
+      const subscriptionCodes: SubscriptionErrorCode[] = [
+        'SUBSCRIPTION_BLOCKED',
+        'NO_SUBSCRIPTION',
+        'TRIAL_EXPIRED',
+      ];
+
+      if (code && subscriptionCodes.includes(code)) {
+        EventEmitter.emit('subscription:blocked', {
+          code,
+          message: responseData?.message,
+        });
       }
     }
 
@@ -82,6 +106,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError {
   success: false;
   message: string;
+  code?: SubscriptionErrorCode;
 }
 
 // Helper para extrair mensagem de erro

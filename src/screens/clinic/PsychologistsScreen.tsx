@@ -170,15 +170,6 @@ export default function PsychologistsScreen({ navigation }: any) {
           <Ionicons name="mail-open" size={18} color="#4A90E2" />
           <Text style={styles.actionBarButtonText}>Convites</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionBarButton, { backgroundColor: isDark ? '#1A2E3D' : '#E8F4FF' }]}
-          onPress={() => navigation.navigate('InvitePsychologist')}
-        >
-          <Ionicons name="send" size={18} color="#4A90E2" />
-          <Text style={styles.actionBarButtonText}>Convidar</Text>
-        </TouchableOpacity>
-
       </View>
 
       <ScrollView

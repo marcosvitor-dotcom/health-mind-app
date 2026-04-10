@@ -3,6 +3,8 @@ import api from './api';
 // Exportar api para uso em outros arquivos
 export { api };
 
+export type PatientType = 'registered_only' | 'invited';
+
 export interface Patient {
   _id: string;
   id?: string;
@@ -10,9 +12,33 @@ export interface Patient {
   email: string;
   phone?: string;
   status?: string;
+  type?: PatientType;
   avatar?: string;
   clinicId?: string | null;
 }
+
+export interface CreatePatientData {
+  name: string;
+  email: string;
+  phone?: string;
+  birthDate?: string;
+  cpf?: string;
+  /** Obrigatório apenas quando quem cria é uma clínica */
+  psychologistId?: string;
+}
+
+/**
+ * Cadastra um paciente para gestão interna (agenda/financeiro).
+ * Cria com type='registered_only' — não conta no limite de convidados do plano.
+ * Para convidar o paciente para o app, use authService.invitePatient() depois.
+ */
+export const createPatient = async (data: CreatePatientData): Promise<Patient> => {
+  const response = await api.post('/patients', data);
+  if (response.data?.data?.patient) {
+    return response.data.data.patient;
+  }
+  return response.data.data;
+};
 
 export interface Appointment {
   _id: string;

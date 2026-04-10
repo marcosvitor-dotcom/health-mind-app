@@ -1,6 +1,8 @@
 // Tipos de usuário
 export type UserRole = 'clinic' | 'psychologist' | 'client' | 'patient' | 'admin';
 
+export type SubscriptionStatus = 'active' | 'overdue' | 'blocked' | 'cancelled' | 'none';
+
 export interface User {
   _id: string;
   id: string;
@@ -18,7 +20,13 @@ export interface User {
   cpf?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** Presente em psicólogos e clínicas — status denormalizado da assinatura */
+  subscriptionStatus?: SubscriptionStatus;
+  subscriptionId?: string;
 }
+
+/** Tipo do paciente: só para gestão interna ou convidado para o app */
+export type PatientType = 'registered_only' | 'invited';
 
 // Tipos para Clínica
 export interface Clinic {

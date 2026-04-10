@@ -9,7 +9,6 @@ import PatientsScreen from '../screens/clinic/PatientsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
 import EditProfileScreen from '../screens/clinic/EditProfileScreen';
-import InvitePsychologistScreen from '../screens/clinic/InvitePsychologistScreen';
 import InvitationsScreen from '../screens/clinic/InvitationsScreen';
 import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
 import RoomsScreen from '../screens/clinic/RoomsScreen';
@@ -31,20 +30,6 @@ function PsychologistsStack() {
         name="PsychologistsList"
         component={PsychologistsScreen}
         options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="InvitePsychologist"
-        component={InvitePsychologistScreen}
-        options={{
-          title: 'Convidar Psicólogo',
-          headerStyle: {
-            backgroundColor: '#4A90E2',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-        }}
       />
       <Stack.Screen
         name="Invitations"

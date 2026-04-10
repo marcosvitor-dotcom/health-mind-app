@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as medicalRecordService from '../../services/medicalRecordService';
+import * as subscriptionService from '../../services/subscriptionService';
 import NotificationBell from '../../components/NotificationBell';
 
 interface PatientStats {
@@ -39,6 +40,10 @@ export default function ClientsScreen({ navigation }: any) {
   const [patientStats, setPatientStats] = useState<PatientStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
+  // Limite e contagem de pacientes convidados (plano)
+  const [invitedCount, setInvitedCount] = useState(0);
+  const [inviteLimit, setInviteLimit] = useState<number | null>(null);
+
   // Estados para encerramento de acompanhamento
   const [showClosureModal, setShowClosureModal] = useState(false);
   const [closureForm, setClosureForm] = useState({
@@ -50,6 +55,7 @@ export default function ClientsScreen({ navigation }: any) {
 
   useEffect(() => {
     loadPatients();
+    loadSubscriptionLimits();
   }, []);
 
   const loadPatients = async () => {
@@ -62,10 +68,22 @@ export default function ClientsScreen({ navigation }: any) {
       }
       const data = await psychologistService.getMyPatients(psychologistId);
       setPatients(data);
+      // Calcular contagem de convidados localmente a partir dos dados retornados
+      const invited = data.filter((p) => p.type === 'invited').length;
+      setInvitedCount(invited);
     } catch (error) {
       console.error('Erro ao carregar pacientes:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSubscriptionLimits = async () => {
+    try {
+      const { subscription } = await subscriptionService.getMySubscription();
+      setInviteLimit(subscription.limits.invitedPatients);
+    } catch {
+      // Não crítico — o contador simplesmente não aparece se a assinatura falhar
     }
   };
 
@@ -272,6 +290,19 @@ export default function ClientsScreen({ navigation }: any) {
         </View>
       </View>
 
+      {inviteLimit !== null && (
+        <View style={[styles.planBanner, { backgroundColor: isDark ? colors.surfaceSecondary : '#F0F8FF', borderColor: colors.border }]}>
+          <Ionicons name="people" size={16} color="#4A90E2" />
+          <Text style={[styles.planBannerText, { color: colors.textSecondary }]}>
+            Pacientes no app:{' '}
+            <Text style={{ color: invitedCount >= inviteLimit ? '#E74C3C' : '#4A90E2', fontWeight: '700' }}>
+              {invitedCount}/{inviteLimit}
+            </Text>
+            {inviteLimit === 0 && '  (plano sem convites — faça upgrade)'}
+          </Text>
+        </View>
+      )}
+
       <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Ionicons name="search" size={20} color={colors.textTertiary} />
         <TextInput
@@ -304,23 +335,36 @@ export default function ClientsScreen({ navigation }: any) {
               <View style={styles.clientInfo}>
                 <View style={styles.nameRow}>
                   <Text style={[styles.name, { color: colors.textPrimary }]}>{patient.name}</Text>
-                  {patient.status && (
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        { backgroundColor: getStatusColor(patient.status) + '20' },
-                      ]}
-                    >
-                      <Text
+                  <View style={styles.badgesRow}>
+                    {patient.type === 'invited' ? (
+                      <View style={[styles.typeBadge, { backgroundColor: '#E8FFF0' }]}>
+                        <Ionicons name="phone-portrait-outline" size={10} color="#50C878" />
+                        <Text style={[styles.typeBadgeText, { color: '#50C878' }]}>App</Text>
+                      </View>
+                    ) : (
+                      <View style={[styles.typeBadge, { backgroundColor: isDark ? colors.surfaceSecondary : '#F5F5F5' }]}>
+                        <Ionicons name="document-outline" size={10} color={colors.textTertiary} />
+                        <Text style={[styles.typeBadgeText, { color: colors.textTertiary }]}>Gestão</Text>
+                      </View>
+                    )}
+                    {patient.status && (
+                      <View
                         style={[
-                          styles.statusText,
-                          { color: getStatusColor(patient.status) },
+                          styles.statusBadge,
+                          { backgroundColor: getStatusColor(patient.status) + '20' },
                         ]}
                       >
-                        {getStatusLabel(patient.status)}
-                      </Text>
-                    </View>
-                  )}
+                        <Text
+                          style={[
+                            styles.statusText,
+                            { color: getStatusColor(patient.status) },
+                          ]}
+                        >
+                          {getStatusLabel(patient.status)}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
                 <Text style={[styles.email, { color: colors.textSecondary }]}>{patient.email}</Text>
               </View>
@@ -433,6 +477,21 @@ export default function ClientsScreen({ navigation }: any) {
                   {/* Ações */}
                   <View style={styles.modalSection}>
                     <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ações</Text>
+
+                    {/* Convidar para o app — apenas para pacientes de gestão */}
+                    {selectedPatient?.type === 'registered_only' && (
+                      <TouchableOpacity
+                        style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
+                        onPress={() => {
+                          setShowModal(false);
+                          navigation.navigate('InvitePatient');
+                        }}
+                      >
+                        <Ionicons name="mail" size={20} color="#50C878" />
+                        <Text style={[styles.modalActionText, { color: '#50C878' }]}>Convidar para o App</Text>
+                      </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity
                       style={[styles.modalActionButton, { borderBottomColor: colors.borderLight }]}
                       onPress={() => {
@@ -693,6 +752,20 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 4,
   },
+  planBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 10,
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  planBannerText: {
+    fontSize: 13,
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -742,6 +815,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
+    gap: 3,
+  },
+  typeBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
   },
   name: {
     fontSize: 18,

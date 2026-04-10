@@ -1,13 +1,15 @@
-import React from 'react';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import React, { useEffect, useRef } from 'react';
+import { NavigationContainer, LinkingOptions, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
+import { EventEmitter } from '../utils/eventEmitter';
 import LoginScreen from '../screens/auth/LoginScreen';
 import FirstAccessScreen from '../screens/auth/FirstAccessScreen';
 import CompleteRegistrationScreen from '../screens/auth/CompleteRegistrationScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import SubscriptionBlockedScreen from '../screens/shared/SubscriptionBlockedScreen';
 import ClinicNavigator from './ClinicNavigator';
 import PsychologistNavigator from './PsychologistNavigator';
 import ClientNavigator from './ClientNavigator';
@@ -19,6 +21,7 @@ type RootStackParamList = {
   CompleteRegistration: { token: string };
   ForgotPassword: { token?: string } | undefined;
   Main: undefined;
+  SubscriptionBlocked: { code?: string; message?: string } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +43,18 @@ const linking: LinkingOptions<any> = {
 
 export default function AppNavigator() {
   const { isAuthenticated, user, loading } = useAuth();
+  const navRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
+
+  // Ouvir evento global de bloqueio de assinatura emitido pelo interceptor da API
+  useEffect(() => {
+    const unsub = EventEmitter.on(
+      'subscription:blocked',
+      ({ code, message }: { code: string; message: string }) => {
+        navRef.current?.navigate('SubscriptionBlocked', { code, message });
+      }
+    );
+    return unsub;
+  }, []);
 
   // Mostrar loading enquanto verifica autenticação
   if (loading) {
@@ -71,7 +86,7 @@ export default function AppNavigator() {
   };
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer linking={linking} ref={navRef}>
       <Stack.Navigator>
         {!isAuthenticated ? (
           <>
@@ -108,6 +123,12 @@ export default function AppNavigator() {
         ) : (
           getMainNavigator()
         )}
+        {/* Tela global de assinatura bloqueada — acessível em qualquer estado */}
+        <Stack.Screen
+          name="SubscriptionBlocked"
+          component={SubscriptionBlockedScreen}
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

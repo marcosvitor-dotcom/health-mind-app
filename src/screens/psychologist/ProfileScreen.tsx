@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import SubscriptionCard from '../../components/SubscriptionCard';
 
 interface ProfileScreenProps {
   navigation: any;
@@ -87,6 +88,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Text style={styles.badgeText}>Psicólogo(a)</Text>
           </View>
         </View>
+
+        <SubscriptionCard />
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary, backgroundColor: colors.surfaceSecondary }]}>Conta</Text>

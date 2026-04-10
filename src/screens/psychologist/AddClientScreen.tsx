@@ -9,65 +9,46 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { createPatient } from '../../services/psychologistService';
+import { getErrorMessage } from '../../services/api';
 
 interface ClientFormData {
   name: string;
   email: string;
   phone: string;
-  address: string;
   birthDate: string;
-  emergencyContact: string;
-  emergencyPhone: string;
+  cpf: string;
 }
 
 export default function AddClientScreen({ navigation }: any) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState<ClientFormData>({
     name: '',
     email: '',
     phone: '',
-    address: '',
     birthDate: '',
-    emergencyContact: '',
-    emergencyPhone: '',
+    cpf: '',
   });
-
-  const [anamneseAttached, setAnamneseAttached] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleAttachAnamnese = () => {
-    // Simulação de anexar ficha de anamnese
-    Alert.alert(
-      'Anexar Ficha de Anamnese',
-      'Escolha uma opção:',
-      [
-        {
-          text: 'Preencher agora',
-          onPress: () => {
-            setAnamneseAttached(true);
-            navigation.navigate('AnamneseForm', { clientData: formData });
-          },
-        },
-        {
-          text: 'Enviar arquivo',
-          onPress: () => {
-            // Aqui seria implementado o picker de documentos
-            setAnamneseAttached(true);
-            Alert.alert('Sucesso', 'Arquivo anexado com sucesso!');
-          },
-        },
-        { text: 'Cancelar', style: 'cancel' },
-      ]
-    );
+  const formatBirthDate = (text: string) => {
+    const numbers = text.replace(/\D/g, '');
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
   };
 
   const validateForm = () => {
@@ -79,27 +60,44 @@ export default function AddClientScreen({ navigation }: any) {
       Alert.alert('Erro', 'Por favor, preencha o email do paciente');
       return false;
     }
-    if (!formData.phone.trim()) {
-      Alert.alert('Erro', 'Por favor, preencha o telefone do paciente');
-      return false;
-    }
     return true;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return;
 
-    // Aqui você salvaria os dados no backend
-    Alert.alert(
-      'Sucesso!',
-      'Paciente cadastrado com sucesso!',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+    setSaving(true);
+    try {
+      // Converter data de DD/MM/YYYY para YYYY-MM-DD
+      let formattedBirthDate: string | undefined;
+      if (formData.birthDate && formData.birthDate.includes('/')) {
+        const [day, month, year] = formData.birthDate.split('/');
+        if (year?.length === 4) {
+          formattedBirthDate = `${year}-${month}-${day}`;
+        }
+      }
+
+      await createPatient({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        birthDate: formattedBirthDate,
+        cpf: formData.cpf.trim() || undefined,
+      });
+
+      Alert.alert(
+        'Paciente Cadastrado!',
+        'Paciente cadastrado para gestão. Para convidar para o app, use o botão "Convidar" na lista de pacientes.',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+    } catch (error: any) {
+      const message = getErrorMessage(error);
+      // Erros de limite de plano já são tratados globalmente (SubscriptionBlockedScreen),
+      // mas exibimos o texto da API para erros específicos como PATIENT_LIMIT_REACHED
+      Alert.alert('Erro', message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -110,12 +108,19 @@ export default function AddClientScreen({ navigation }: any) {
     >
       <Header
         title="Novo Paciente"
-        subtitle="Cadastre um novo paciente"
+        subtitle="Cadastre para gestão interna (agenda e financeiro)"
         onBack={() => navigation.goBack()}
       />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Card style={styles.section}>
+          <View style={[styles.infoBox, { backgroundColor: '#E8F4FF' }]}>
+            <Ionicons name="information-circle" size={18} color="#4A90E2" />
+            <Text style={styles.infoText}>
+              Pacientes cadastrados aqui são para uso interno (agenda e financeiro) e não têm acesso ao app. Para convidar um paciente para o app, use o botão "Convidar" na lista de pacientes.
+            </Text>
+          </View>
+
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Dados Pessoais</Text>
 
           <Text style={[styles.label, { color: colors.textPrimary }]}>Nome Completo *</Text>
@@ -125,6 +130,7 @@ export default function AddClientScreen({ navigation }: any) {
             placeholderTextColor={colors.textTertiary}
             value={formData.name}
             onChangeText={(text) => handleInputChange('name', text)}
+            editable={!saving}
           />
 
           <Text style={[styles.label, { color: colors.textPrimary }]}>Email *</Text>
@@ -136,9 +142,10 @@ export default function AddClientScreen({ navigation }: any) {
             onChangeText={(text) => handleInputChange('email', text)}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!saving}
           />
 
-          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
           <TextInput
             style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
             placeholder="(00) 00000-0000"
@@ -146,6 +153,7 @@ export default function AddClientScreen({ navigation }: any) {
             value={formData.phone}
             onChangeText={(text) => handleInputChange('phone', text)}
             keyboardType="phone-pad"
+            editable={!saving}
           />
 
           <Text style={[styles.label, { color: colors.textPrimary }]}>Data de Nascimento</Text>
@@ -154,92 +162,22 @@ export default function AddClientScreen({ navigation }: any) {
             placeholder="DD/MM/AAAA"
             placeholderTextColor={colors.textTertiary}
             value={formData.birthDate}
-            onChangeText={(text) => handleInputChange('birthDate', text)}
+            onChangeText={(text) => handleInputChange('birthDate', formatBirthDate(text))}
             keyboardType="number-pad"
+            maxLength={10}
+            editable={!saving}
           />
 
-          <Text style={[styles.label, { color: colors.textPrimary }]}>Endereço</Text>
-          <TextInput
-            style={[styles.input, styles.multilineInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
-            placeholder="Rua, número, complemento, bairro, cidade - UF"
-            placeholderTextColor={colors.textTertiary}
-            value={formData.address}
-            onChangeText={(text) => handleInputChange('address', text)}
-            multiline
-            numberOfLines={3}
-          />
-        </Card>
-
-        <Card style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Contato de Emergência</Text>
-
-          <Text style={[styles.label, { color: colors.textPrimary }]}>Nome do Contato</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>CPF</Text>
           <TextInput
             style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
-            placeholder="Nome completo"
+            placeholder="000.000.000-00"
             placeholderTextColor={colors.textTertiary}
-            value={formData.emergencyContact}
-            onChangeText={(text) => handleInputChange('emergencyContact', text)}
+            value={formData.cpf}
+            onChangeText={(text) => handleInputChange('cpf', text)}
+            keyboardType="number-pad"
+            editable={!saving}
           />
-
-          <Text style={[styles.label, { color: colors.textPrimary }]}>Telefone</Text>
-          <TextInput
-            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
-            placeholder="(00) 00000-0000"
-            placeholderTextColor={colors.textTertiary}
-            value={formData.emergencyPhone}
-            onChangeText={(text) => handleInputChange('emergencyPhone', text)}
-            keyboardType="phone-pad"
-          />
-        </Card>
-
-        <Card style={styles.section}>
-          <View style={styles.anamneseHeader}>
-            <View style={styles.anamneseTitleContainer}>
-              <Ionicons name="document-text" size={24} color="#4A90E2" />
-              <View style={styles.anamneseTextContainer}>
-                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ficha de Anamnese</Text>
-                <Text style={[styles.anamneseSubtitle, { color: colors.textSecondary }]}>
-                  {anamneseAttached ? 'Anexada' : 'Opcional'}
-                </Text>
-              </View>
-            </View>
-            {anamneseAttached && (
-              <Ionicons name="checkmark-circle" size={28} color="#50C878" />
-            )}
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.anamneseButton,
-              anamneseAttached && [styles.anamneseButtonAttached, { backgroundColor: isDark ? colors.surfaceSecondary : '#E8F4FD' }],
-            ]}
-            onPress={handleAttachAnamnese}
-          >
-            <Ionicons
-              name={anamneseAttached ? 'create' : 'add-circle'}
-              size={20}
-              color={anamneseAttached ? '#4A90E2' : '#fff'}
-            />
-            <Text
-              style={[
-                styles.anamneseButtonText,
-                anamneseAttached && styles.anamneseButtonTextAttached,
-              ]}
-            >
-              {anamneseAttached ? 'Editar Anamnese' : 'Anexar Anamnese'}
-            </Text>
-          </TouchableOpacity>
-
-          {anamneseAttached && (
-            <View style={[styles.anamneseInfo, { backgroundColor: colors.surfaceSecondary }]}>
-              <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
-              <Text style={[styles.anamneseInfoText, { color: colors.textSecondary }]}>
-                A ficha de anamnese pode ser preenchida ou modificada após o
-                cadastro
-              </Text>
-            </View>
-          )}
         </Card>
 
         <Text style={[styles.requiredNote, { color: colors.textTertiary }]}>* Campos obrigatórios</Text>
@@ -249,12 +187,23 @@ export default function AddClientScreen({ navigation }: any) {
         <TouchableOpacity
           style={[styles.cancelButton, { borderColor: colors.border }]}
           onPress={() => navigation.goBack()}
+          disabled={saving}
         >
           <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancelar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Ionicons name="checkmark-circle" size={24} color="#fff" />
-          <Text style={styles.saveButtonText}>Salvar Paciente</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, saving && { opacity: 0.6 }]}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="checkmark-circle" size={24} color="#fff" />
+              <Text style={styles.saveButtonText}>Salvar Paciente</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -262,98 +211,23 @@ export default function AddClientScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    margin: 16,
-    marginBottom: 0,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  multilineInput: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  anamneseHeader: {
+  container: { flex: 1 },
+  content: { flex: 1 },
+  section: { margin: 16, marginBottom: 0 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 16 },
+  infoBox: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  anamneseTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  anamneseTextContainer: {
-    marginLeft: 12,
-  },
-  anamneseSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  anamneseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4A90E2',
-    padding: 14,
-    borderRadius: 8,
-  },
-  anamneseButtonAttached: {
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  anamneseButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  anamneseButtonTextAttached: {
-    color: '#4A90E2',
-  },
-  anamneseInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
+    alignItems: 'flex-start',
+    gap: 8,
     padding: 12,
     borderRadius: 8,
+    marginBottom: 16,
   },
-  anamneseInfoText: {
-    fontSize: 12,
-    marginLeft: 8,
-    flex: 1,
-    lineHeight: 16,
-  },
-  requiredNote: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: 16,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: 16,
-    borderTopWidth: 1,
-  },
+  infoText: { flex: 1, fontSize: 13, color: '#4A90E2', lineHeight: 18 },
+  label: { fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 12 },
+  input: { borderWidth: 1, borderRadius: 8, padding: 12, fontSize: 16 },
+  requiredNote: { fontSize: 12, fontStyle: 'italic', textAlign: 'center', marginVertical: 16 },
+  footer: { flexDirection: 'row', padding: 16, borderTopWidth: 1 },
   cancelButton: {
     flex: 1,
     padding: 16,
@@ -363,10 +237,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 8,
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  cancelButtonText: { fontSize: 16, fontWeight: '600' },
   saveButton: {
     flex: 2,
     flexDirection: 'row',
@@ -376,10 +247,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     marginLeft: 4,
+    gap: 8,
   },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
+  saveButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });
