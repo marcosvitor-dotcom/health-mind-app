@@ -25,7 +25,9 @@ import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
 import AboutScreen from '../screens/shared/AboutScreen';
 import DirectChatScreen from '../screens/shared/DirectChatScreen';
 import NotificationCenterScreen from '../screens/shared/NotificationCenterScreen';
-import PsychologistFinancialScreen from '../screens/psychologist/PsychologistFinancialScreen';
+import FinancialHubScreen from '../screens/shared/financial/FinancialHubScreen';
+import ExpenseFormScreen from '../screens/shared/financial/ExpenseFormScreen';
+import InsuranceBatchDetailScreen from '../screens/shared/financial/InsuranceBatchDetailScreen';
 import DocumentRequestsScreen from '../screens/psychologist/DocumentRequestsScreen';
 import PatientMoodScreen from '../screens/psychologist/PatientMoodScreen';
 
@@ -148,7 +150,9 @@ function ReportsStack() {
 function FinancialStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="FinancialMain" component={PsychologistFinancialScreen} />
+      <Stack.Screen name="FinancialMain" component={FinancialHubScreen} />
+      <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
+      <Stack.Screen name="InsuranceBatchDetail" component={InsuranceBatchDetailScreen} />
       <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
     </Stack.Navigator>
   );

@@ -63,7 +63,7 @@ const PAYMENT_METHODS = [
   { key: 'other', label: 'Outro', icon: 'ellipsis-horizontal' as const },
 ];
 
-export default function PsychologistFinancialScreen({ navigation }: any) {
+export default function PsychologistFinancialScreen({ navigation, showHeader = true }: any) {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
   const psychologistId = user?._id || user?.id || '';
@@ -190,13 +190,15 @@ export default function PsychologistFinancialScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Financeiro</Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>Resumo dos seus ganhos</Text>
+        {showHeader && (
+          <View style={styles.header}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Financeiro</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>Resumo dos seus ganhos</Text>
+            </View>
+            <NotificationBell onPress={() => navigation.navigate('Notifications')} />
           </View>
-          <NotificationBell onPress={() => navigation.navigate('Notifications')} />
-        </View>
+        )}
 
         {/* Date Range Selector */}
         <View style={styles.dateRangeSelector}>

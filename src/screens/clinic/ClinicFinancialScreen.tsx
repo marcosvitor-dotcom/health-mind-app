@@ -53,7 +53,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   refunded: { label: 'Reembolsado', color: '#95A5A6', bg: '#F0F0F0', bgDark: '#2D2D2D' },
 };
 
-export default function ClinicFinancialScreen({ navigation }: any) {
+export default function ClinicFinancialScreen({ navigation, showHeader = true }: any) {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
   const clinicId = user?._id || user?.id || '';
@@ -230,14 +230,16 @@ export default function ClinicFinancialScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Financeiro</Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-              Visao geral da clinica
-            </Text>
+        {showHeader && (
+          <View style={styles.header}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Financeiro</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                Visao geral da clinica
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Date Range Selector */}
         <View style={styles.dateRangeSelector}>

@@ -15,7 +15,9 @@ import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
 import RoomsScreen from '../screens/clinic/RoomsScreen';
 import RoomDetailScreen from '../screens/clinic/RoomDetailScreen';
 import RoomScheduleScreen from '../screens/clinic/RoomScheduleScreen';
-import ClinicFinancialScreen from '../screens/clinic/ClinicFinancialScreen';
+import FinancialHubScreen from '../screens/shared/financial/FinancialHubScreen';
+import ExpenseFormScreen from '../screens/shared/financial/ExpenseFormScreen';
+import InsuranceBatchDetailScreen from '../screens/shared/financial/InsuranceBatchDetailScreen';
 import LegalDocumentScreen from '../screens/shared/LegalDocumentScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 import HelpSupportScreen from '../screens/shared/HelpSupportScreen';
@@ -58,7 +60,9 @@ function PsychologistsStack() {
 function FinancialStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="FinancialMain" component={ClinicFinancialScreen} />
+      <Stack.Screen name="FinancialMain" component={FinancialHubScreen} />
+      <Stack.Screen name="ExpenseForm" component={ExpenseFormScreen} />
+      <Stack.Screen name="InsuranceBatchDetail" component={InsuranceBatchDetailScreen} />
     </Stack.Navigator>
   );
 }
