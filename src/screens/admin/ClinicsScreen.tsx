@@ -213,12 +213,6 @@ export default function ClinicsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Clínicas</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('InviteClinic')}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       {/* Search */}
@@ -322,14 +316,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-  },
-  addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#E74C3C',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   searchContainer: {
     paddingHorizontal: 16,

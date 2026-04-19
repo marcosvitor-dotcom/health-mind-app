@@ -4,8 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 import OverviewScreen from '../screens/admin/OverviewScreen';
+import SubscriptionsScreen from '../screens/admin/SubscriptionsScreen';
 import ClinicsScreen from '../screens/admin/ClinicsScreen';
 import ClinicDetailScreen from '../screens/admin/ClinicDetailScreen';
+import AdminInvitesScreen from '../screens/admin/AdminInvitesScreen';
 import InviteClinicScreen from '../screens/admin/InviteClinicScreen';
 import InvitePsychologistScreen from '../screens/admin/InvitePsychologistScreen';
 import UsersScreen from '../screens/admin/UsersScreen';
@@ -27,9 +29,27 @@ function ClinicsStack() {
         component={ClinicDetailScreen}
         options={{ headerShown: false }}
       />
+    </Stack.Navigator>
+  );
+}
+
+/** Aba dedicada de convites — única forma de adicionar clínicas e psicólogos */
+function InvitesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="InvitesList"
+        component={AdminInvitesScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="InviteClinic"
         component={InviteClinicScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InvitePsychologist"
+        component={InvitePsychologistScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
@@ -44,11 +64,15 @@ function UsersStack() {
         component={UsersScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="InvitePsychologist"
-        component={InvitePsychologistScreen}
-        options={{ headerShown: false }}
-      />
+    </Stack.Navigator>
+  );
+}
+
+function OverviewStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="OverviewMain" component={OverviewScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Subscriptions" component={SubscriptionsScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -64,7 +88,7 @@ export default function AdminNavigator() {
     >
       <Tab.Screen
         name="Overview"
-        component={OverviewScreen}
+        component={OverviewStack}
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
@@ -79,6 +103,16 @@ export default function AdminNavigator() {
           title: 'Clínicas',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="business" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Invites"
+        component={InvitesStack}
+        options={{
+          title: 'Convites',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="mail" size={size} color={color} />
           ),
         }}
       />

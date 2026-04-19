@@ -109,7 +109,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Subscription')}>
             <Ionicons name="card-outline" size={24} color={colors.textPrimary} />
             <Text style={[styles.menuText, { color: colors.textPrimary }]}>Faturamento</Text>
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />

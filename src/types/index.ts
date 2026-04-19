@@ -285,6 +285,7 @@ export interface InviteClinicRequest {
   email: string;
   name: string;
   cnpj: string;
+  planKey?: string;
 }
 
 export interface InvitePsychologistRequest {
@@ -293,6 +294,7 @@ export interface InvitePsychologistRequest {
   crp: string;
   specialties?: string[];
   phone?: string;
+  planKey?: string;
 }
 
 export interface InvitePatientRequest {

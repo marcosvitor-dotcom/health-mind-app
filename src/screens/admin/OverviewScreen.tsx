@@ -206,6 +206,15 @@ export default function OverviewScreen() {
             </View>
             <Text style={styles.actionText}>Ver Usuários</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('Subscriptions')}
+          >
+            <View style={[styles.actionIcon, { backgroundColor: '#E67E22' }]}>
+              <Ionicons name="card" size={24} color="#fff" />
+            </View>
+            <Text style={styles.actionText}>Assinaturas</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

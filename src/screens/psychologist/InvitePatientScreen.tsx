@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import * as authService from '../../services/authService';
+import { ApiErrorWithCode } from '../../services/authService';
 
 interface InvitePatientScreenProps {
   navigation: any;
@@ -92,7 +93,19 @@ export default function InvitePatientScreen({ navigation, route }: any) {
         );
       }
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao enviar convite');
+      if (error instanceof ApiErrorWithCode && error.code === 'PATIENT_LIMIT_REACHED') {
+        Alert.alert(
+          'Limite atingido',
+          'Você atingiu o limite de pacientes com acesso ao app do seu plano. Entre em contato com o suporte para fazer upgrade.'
+        );
+      } else if (error instanceof ApiErrorWithCode && error.code === 'PLAN_NO_INVITES') {
+        Alert.alert(
+          'Plano sem convites',
+          'Seu plano atual não inclui acesso de pacientes ao app. Entre em contato com o suporte para fazer upgrade.'
+        );
+      } else {
+        Alert.alert('Erro', error.message || 'Erro ao enviar convite');
+      }
     } finally {
       setLoading(false);
     }

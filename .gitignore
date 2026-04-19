@@ -58,3 +58,6 @@ yarn-error.*
 estrutura.txt
 com.facebook.*
 nul
+
+google-services.json
+health-mind-app-firebase-adminsdk-fbsvc-dc7df82cb8.json

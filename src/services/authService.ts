@@ -26,6 +26,14 @@ export class LoginError extends Error {
   }
 }
 
+export class ApiErrorWithCode extends Error {
+  code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
 /**
  * Login de usuário
  */
@@ -192,6 +200,12 @@ export const invitePatient = async (data: InvitePatientRequest): Promise<Invitat
     }
     throw new Error('Erro ao enviar convite');
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const body = error.response?.data;
+      const code: string | undefined = body?.code;
+      const message = body?.message || 'Erro ao enviar convite';
+      if (code) throw new ApiErrorWithCode(message, code);
+    }
     throw new Error(getErrorMessage(error));
   }
 };

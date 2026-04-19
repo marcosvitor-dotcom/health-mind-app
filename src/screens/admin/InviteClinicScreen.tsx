@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,19 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as adminService from '../../services/adminService';
+import { getPlans, Plan } from '../../services/subscriptionService';
+
+const PLAN_NAMES: Record<string, string> = {
+  clinic_essencia: 'Essência',
+  clinic_amplitude: 'Amplitude',
+};
 
 export default function InviteClinicScreen() {
   const navigation = useNavigation<any>();
@@ -22,6 +30,20 @@ export default function InviteClinicScreen() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [cnpj, setCnpj] = useState('');
+
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+
+  useEffect(() => {
+    getPlans()
+      .then(({ plans: allPlans }) => {
+        setPlans(allPlans.filter((p) => p.userType === 'clinic'));
+      })
+      .catch(() => {});
+  }, []);
+
+  const selectedPlan = plans.find((p) => p.key === selectedPlanKey);
 
   const formatCNPJ = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -44,7 +66,6 @@ export default function InviteClinicScreen() {
   };
 
   const handleSubmit = async () => {
-    // Validações
     if (!email.trim()) {
       Alert.alert('Erro', 'Email é obrigatório');
       return;
@@ -67,6 +88,7 @@ export default function InviteClinicScreen() {
         email: email.trim(),
         name: name.trim(),
         cnpj: cnpj.replace(/\D/g, '') || undefined,
+        planKey: selectedPlanKey || undefined,
       });
 
       Alert.alert('Sucesso', 'Convite enviado com sucesso!', [
@@ -89,7 +111,6 @@ export default function InviteClinicScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#333" />
@@ -99,7 +120,6 @@ export default function InviteClinicScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {/* Info Card */}
           <View style={styles.infoCard}>
             <Ionicons name="information-circle" size={24} color="#3498DB" />
             <Text style={styles.infoText}>
@@ -107,7 +127,6 @@ export default function InviteClinicScreen() {
             </Text>
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
@@ -157,9 +176,25 @@ export default function InviteClinicScreen() {
                 />
               </View>
             </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Plano (opcional)</Text>
+              <TouchableOpacity
+                style={styles.inputContainer}
+                onPress={() => setShowPlanModal(true)}
+                disabled={loading}
+              >
+                <Ionicons name="ribbon" size={20} color="#666" style={styles.inputIcon} />
+                <Text style={[styles.input, { color: selectedPlan ? '#333' : '#aaa' }]}>
+                  {selectedPlan
+                    ? `${PLAN_NAMES[selectedPlan.key] ?? selectedPlan.key} — R$ ${selectedPlan.pricing.monthly}/mês`
+                    : 'Sem plano (enviar sem assinatura)'}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#666" style={{ paddingRight: 12 }} />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Submit Button */}
           <TouchableOpacity
             style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             onPress={handleSubmit}
@@ -176,6 +211,53 @@ export default function InviteClinicScreen() {
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal visible={showPlanModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecionar Plano</Text>
+              <TouchableOpacity onPress={() => setShowPlanModal(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={[{ key: '', name: 'Sem plano', pricing: { monthly: 0, setupFee: 0 }, limits: { invitedPatients: 0 } } as any, ...plans]}
+              keyExtractor={(item) => item.key ?? 'none'}
+              renderItem={({ item }) => {
+                const isNone = item.key === '';
+                const isSelected = isNone ? selectedPlanKey === null : selectedPlanKey === item.key;
+                return (
+                  <TouchableOpacity
+                    style={[styles.planItem, isSelected && styles.planItemSelected]}
+                    onPress={() => {
+                      setSelectedPlanKey(isNone ? null : item.key);
+                      setShowPlanModal(false);
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.planItemName, isSelected && styles.planItemNameSelected]}>
+                        {isNone ? 'Sem plano (enviar sem assinatura)' : PLAN_NAMES[item.key] ?? item.key}
+                      </Text>
+                      {!isNone && (
+                        <Text style={styles.planItemDetail}>
+                          R$ {item.pricing.monthly}/mês
+                          {item.pricing.setupFee > 0 ? ` + R$ ${item.pricing.setupFee} setup` : ''}
+                          {'  •  '}
+                          {item.limits.invitedPatients === 0
+                            ? 'Sem convites para app'
+                            : `${item.limits.invitedPatients} pacientes no app`}
+                        </Text>
+                      )}
+                    </View>
+                    {isSelected && <Ionicons name="checkmark-circle" size={22} color="#3498DB" />}
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -273,4 +355,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+    paddingBottom: 32,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#333' },
+  planItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+    backgroundColor: '#fafafa',
+  },
+  planItemSelected: { borderColor: '#3498DB', backgroundColor: '#EBF5FB' },
+  planItemName: { fontSize: 15, fontWeight: '600', color: '#333' },
+  planItemNameSelected: { color: '#3498DB' },
+  planItemDetail: { fontSize: 13, color: '#666', marginTop: 2 },
 });

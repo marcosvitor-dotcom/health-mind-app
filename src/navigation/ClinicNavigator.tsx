@@ -9,6 +9,7 @@ import PatientsScreen from '../screens/clinic/PatientsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
 import EditProfileScreen from '../screens/clinic/EditProfileScreen';
+import SubscriptionScreen from '../screens/clinic/SubscriptionScreen';
 import InvitationsScreen from '../screens/clinic/InvitationsScreen';
 import InvitePatientScreen from '../screens/clinic/InvitePatientScreen';
 import RoomsScreen from '../screens/clinic/RoomsScreen';
@@ -77,6 +78,7 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Subscription" component={SubscriptionScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />

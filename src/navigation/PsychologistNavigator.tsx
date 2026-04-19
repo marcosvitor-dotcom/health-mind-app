@@ -12,6 +12,7 @@ import AddClientScreen from '../screens/psychologist/AddClientScreen';
 import AnamneseFormScreen from '../screens/psychologist/AnamneseFormScreen';
 import ProfileScreen from '../screens/psychologist/ProfileScreen';
 import EditProfileScreen from '../screens/psychologist/EditProfileScreen';
+import SubscriptionScreen from '../screens/psychologist/SubscriptionScreen';
 import InvitePatientScreen from '../screens/psychologist/InvitePatientScreen';
 import InvitationsScreen from '../screens/psychologist/InvitationsScreen';
 import AppointmentBookingScreen from '../screens/psychologist/AppointmentBookingScreen';
@@ -158,6 +159,7 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Subscription" component={SubscriptionScreen} />
       <Stack.Screen name="LegalDocument" component={LegalDocumentScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />

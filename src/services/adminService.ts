@@ -328,6 +328,7 @@ interface InviteClinicData {
   email: string;
   name: string;
   cnpj?: string;
+  planKey?: string;
 }
 
 export const inviteClinic = async (inviteData: InviteClinicData): Promise<any> => {
@@ -337,6 +338,38 @@ export const inviteClinic = async (inviteData: InviteClinicData): Promise<any> =
       return data.data;
     }
     throw new Error(data.message || 'Erro ao enviar convite');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+// ========================================
+// SUBSCRIPTIONS
+// ========================================
+
+export interface AdminSubscription {
+  _id: string;
+  userId: { _id: string; name: string; email: string; role: string };
+  planKey: string;
+  status: 'active' | 'overdue' | 'blocked' | 'cancelled' | 'none';
+  isTrial: boolean;
+  trialEndsAt: string | null;
+  billing: { monthlyAmount: number; nextBillingDate: string };
+}
+
+export const listSubscriptions = async (params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}): Promise<{ subscriptions: AdminSubscription[]; pagination: any }> => {
+  try {
+    const query = new URLSearchParams();
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.limit) query.append('limit', params.limit.toString());
+    if (params?.status) query.append('status', params.status);
+    const { data } = await api.get<ApiResponse<any>>(`/subscriptions?${query}`);
+    if (data.success && data.data) return data.data;
+    throw new Error(data.message || 'Erro ao listar assinaturas');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

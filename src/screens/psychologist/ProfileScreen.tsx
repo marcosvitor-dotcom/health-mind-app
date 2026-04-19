@@ -103,6 +103,15 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.borderLight }]}
+            onPress={() => navigation.navigate('Subscription')}
+          >
+            <Ionicons name="card-outline" size={24} color={colors.textPrimary} />
+            <Text style={[styles.menuText, { color: colors.textPrimary }]}>Minha Assinatura</Text>
+            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
+          </TouchableOpacity>
+
           <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.borderLight }]} onPress={() => navigation.navigate('Settings')}>
             <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
             <Text style={[styles.menuText, { color: colors.textPrimary }]}>Configuração</Text>
