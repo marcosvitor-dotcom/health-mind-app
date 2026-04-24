@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { InvitationData, PsychologistWizardData } from '../../types';
 import { PsychologistFormData } from '../../utils/systemPromptGenerator';
-import { gerarSystemPromptComGemini } from '../../services/geminiService';
+import { generateBlockA, generateBlockB, generateBlockC, generateBlockD, assembleSystemPrompt } from '../../services/geminiService';
 import * as authService from '../../services/authService';
 import * as storage from '../../utils/storage';
 import { useAuth } from '../../contexts/AuthContext';
@@ -51,6 +51,9 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAbordagemDropdown, setShowAbordagemDropdown] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [promptBlocks, setPromptBlocks] = useState<{ a: string | null; b: string | null; c: string | null; d: string | null }>({ a: null, b: null, c: null, d: null });
+  const [blocksGenerating, setBlocksGenerating] = useState({ a: false, b: false, c: false, d: false });
+  const blocksGeneratingRef = useRef({ a: false, b: false, c: false, d: false });
   const [legalModalVisible, setLegalModalVisible] = useState(false);
   const [legalModalType, setLegalModalType] = useState<'terms' | 'privacy'>('terms');
 
@@ -138,10 +141,69 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
   };
 
   const goNext = () => {
-    if (validateCurrentStep()) {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-      setCurrentStep(prev => Math.min(prev + 1, TOTAL_STEPS - 1));
+    if (!validateCurrentStep()) return;
+
+    scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+
+    if (currentStep === 1) {
+      blocksGeneratingRef.current = { ...blocksGeneratingRef.current, a: true };
+      setBlocksGenerating(p => ({ ...p, a: true }));
+      generateBlockA({
+        abordagemPrincipal: wizardData.abordagemPrincipal,
+        descricaoTrabalho: wizardData.descricaoTrabalho,
+        formacaoAcademica: wizardData.formacaoAcademica,
+        tecnicasFavoritas: wizardData.tecnicasFavoritas,
+      })
+        .then(block => setPromptBlocks(p => ({ ...p, a: block })))
+        .catch(() => {})
+        .finally(() => { blocksGeneratingRef.current = { ...blocksGeneratingRef.current, a: false }; setBlocksGenerating(p => ({ ...p, a: false })); });
     }
+
+    if (currentStep === 2) {
+      blocksGeneratingRef.current = { ...blocksGeneratingRef.current, c: true };
+      setBlocksGenerating(p => ({ ...p, c: true }));
+      generateBlockC({
+        publicosEspecificos: wizardData.publicosEspecificos,
+        temasEspecializados: wizardData.temasEspecializados,
+        experienciaViolencia: wizardData.experienciaViolencia,
+        situacoesLimite: wizardData.situacoesLimite,
+      })
+        .then(block => setPromptBlocks(p => ({ ...p, c: block })))
+        .catch(() => {})
+        .finally(() => { blocksGeneratingRef.current = { ...blocksGeneratingRef.current, c: false }; setBlocksGenerating(p => ({ ...p, c: false })); });
+    }
+
+    if (currentStep === 3) {
+      blocksGeneratingRef.current = { ...blocksGeneratingRef.current, b: true };
+      setBlocksGenerating(p => ({ ...p, b: true }));
+      generateBlockB({
+        tonsComunicacao: wizardData.tonsComunicacao,
+        linguagemPreferida: wizardData.linguagemPreferida,
+        diferenciais: wizardData.diferenciais,
+      })
+        .then(block => setPromptBlocks(p => ({ ...p, b: block })))
+        .catch(() => {})
+        .finally(() => { blocksGeneratingRef.current = { ...blocksGeneratingRef.current, b: false }; setBlocksGenerating(p => ({ ...p, b: false })); });
+    }
+
+    if (currentStep === 4) {
+      blocksGeneratingRef.current = { ...blocksGeneratingRef.current, d: true };
+      setBlocksGenerating(p => ({ ...p, d: true }));
+      generateBlockD({
+        nomeCompleto: invitationData.preFilledData.name || '',
+        abordagemPrincipal: wizardData.abordagemPrincipal,
+        publicosEspecificos: wizardData.publicosEspecificos,
+        tonsComunicacao: wizardData.tonsComunicacao,
+        exemploAcolhimento: wizardData.exemploAcolhimento,
+        exemploLimiteEtico: wizardData.exemploLimiteEtico,
+        restricoesTematicas: wizardData.restricoesTematicas,
+      })
+        .then(block => setPromptBlocks(p => ({ ...p, d: block })))
+        .catch(() => {})
+        .finally(() => { blocksGeneratingRef.current = { ...blocksGeneratingRef.current, d: false }; setBlocksGenerating(p => ({ ...p, d: false })); });
+    }
+
+    setCurrentStep(prev => Math.min(prev + 1, TOTAL_STEPS - 1));
   };
 
   const goBack = () => {
@@ -162,10 +224,23 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
     }
 
     setSubmitting(true);
-    setLoadingMessage('Gerando perfil de IA personalizado...');
+
+    if (Object.values(blocksGeneratingRef.current).some(Boolean)) {
+      setLoadingMessage('Aguardando blocos de IA...');
+      await new Promise<void>(resolve => {
+        const check = setInterval(() => {
+          if (!Object.values(blocksGeneratingRef.current).some(Boolean)) {
+            clearInterval(check);
+            resolve();
+          }
+        }, 300);
+        setTimeout(() => { clearInterval(check); resolve(); }, 15000);
+      });
+    }
+
+    setLoadingMessage('Montando perfil de IA...');
 
     try {
-      // Fase 1: Gerar system prompt via Gemini
       const formData: PsychologistFormData = {
         nomeCompleto: invitationData.preFilledData.name || '',
         crp: invitationData.preFilledData.crp || '',
@@ -186,23 +261,18 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
         exemploLimiteEtico: wizardData.exemploLimiteEtico,
       };
 
-      const systemPrompt = await gerarSystemPromptComGemini(formData);
-      const truncatedPrompt = systemPrompt.substring(0, 20000);
+      // Use blocks already generated; missing blocks fall back inside assembleSystemPrompt via fallbacks in generateBlock*
+      const blocks = {
+        a: promptBlocks.a ?? '',
+        b: promptBlocks.b ?? '',
+        c: promptBlocks.c ?? '',
+        d: promptBlocks.d ?? '',
+      };
 
-      // Fase 2: Completar cadastro
-      await completeRegistration(truncatedPrompt);
+      const systemPrompt = assembleSystemPrompt(formData, blocks);
+      await completeRegistration(systemPrompt);
     } catch (error: any) {
-      const msg = error?.message || String(error) || 'Erro desconhecido';
-      Alert.alert(
-        'Erro ao gerar IA',
-        `Não foi possível gerar o perfil de IA. Deseja continuar sem ele?\n\n${msg}`,
-        [
-          { text: 'Tentar Novamente', onPress: () => handleSubmit() },
-          { text: 'Continuar Sem IA', onPress: () => completeRegistration(undefined) },
-          { text: 'Cancelar', style: 'cancel' },
-        ]
-      );
-    } finally {
+      Alert.alert('Erro', error?.message || 'Erro ao finalizar cadastro.');
       setSubmitting(false);
       setLoadingMessage('');
     }
@@ -849,9 +919,34 @@ export default function PsychologistRegistrationWizard({ invitationData, token }
 
       <View style={[styles.aiNote, { backgroundColor: isDark ? colors.surfaceSecondary : '#F0F7FF' }]}>
         <Ionicons name="sparkles" size={18} color={colors.primary} />
-        <Text style={[styles.aiNoteText, { color: colors.textSecondary }]}>
-          Ao finalizar, uma IA irá gerar automaticamente o perfil da sua assistente terapêutica digital com base nas informações acima.
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.aiNoteText, { color: colors.textSecondary, marginBottom: 10 }]}>
+            Seu perfil de IA está sendo gerado em blocos enquanto você preenche o formulário.
+          </Text>
+          <View style={styles.aiBlocksRow}>
+            {([
+              { key: 'a', label: 'Abordagem' },
+              { key: 'b', label: 'Comunicação' },
+              { key: 'c', label: 'Especializações' },
+              { key: 'd', label: 'Exemplos' },
+            ] as { key: 'a' | 'b' | 'c' | 'd'; label: string }[]).map(({ key, label }) => {
+              const isGenerating = blocksGenerating[key];
+              const isDone = !!promptBlocks[key];
+              return (
+                <View key={key} style={[styles.aiBlockBadge, { backgroundColor: isDone ? '#E8F8EE' : isDark ? colors.surface : '#F5F5F5' }]}>
+                  {isGenerating ? (
+                    <ActivityIndicator size="small" color={colors.primary} style={{ marginRight: 4 }} />
+                  ) : (
+                    <Ionicons name={isDone ? 'checkmark-circle' : 'time-outline'} size={14} color={isDone ? '#27AE60' : colors.textTertiary} style={{ marginRight: 4 }} />
+                  )}
+                  <Text style={[styles.aiBlockBadgeText, { color: isDone ? '#27AE60' : isGenerating ? colors.primary : colors.textTertiary }]}>
+                    {label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -1227,6 +1322,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     flex: 1,
     lineHeight: 18,
+  },
+  aiBlocksRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  aiBlockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  aiBlockBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
 
   // Footer
