@@ -9,6 +9,7 @@ export type NotificationType =
   | 'report_request'
   | 'document_request'
   | 'invite_accepted'
+  | 'activity_assigned'
   | 'general';
 
 export interface InAppNotification {
@@ -88,6 +89,7 @@ export const getNotificationIcon = (type: NotificationType): string => {
     case 'report_request': return 'document-text';
     case 'document_request': return 'folder-open';
     case 'invite_accepted': return 'person-add';
+    case 'activity_assigned': return 'clipboard';
     default: return 'notifications';
   }
 };
@@ -102,6 +104,7 @@ export const getNotificationColor = (type: NotificationType): string => {
     case 'report_request': return '#E67E22';
     case 'document_request': return '#1ABC9C';
     case 'invite_accepted': return '#50C878';
+    case 'activity_assigned': return '#6C63FF';
     default: return '#999';
   }
 };

@@ -8,6 +8,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import * as appointmentService from '../../services/appointmentService';
 import { AppointmentData } from '../../services/appointmentService';
 import NotificationBell from '../../components/NotificationBell';
+import SessionActivities from '../../components/SessionActivities';
 
 export default function AppointmentsScreen({ navigation }: any) {
   const { user } = useAuth();
@@ -429,6 +430,16 @@ export default function AppointmentsScreen({ navigation }: any) {
                     </View>
                   )}
                 </View>
+
+                {/* Atividades da Sessão */}
+                {selectedAppointment._id && (
+                  <View style={[styles.paymentSection, { backgroundColor: colors.surface }]}>
+                    <SessionActivities
+                      appointmentId={selectedAppointment._id}
+                      userRole="patient"
+                    />
+                  </View>
+                )}
 
                 {/* Seção de Pagamento */}
                 <View style={[styles.paymentSection, { backgroundColor: colors.surfaceSecondary }]}>

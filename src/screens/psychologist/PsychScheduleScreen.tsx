@@ -20,6 +20,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import * as psychologistService from '../../services/psychologistService';
 import * as appointmentService from '../../services/appointmentService';
 import NotificationBell from '../../components/NotificationBell';
+import SessionActivities from '../../components/SessionActivities';
 
 interface AppointmentsByDate {
   [date: string]: psychologistService.Appointment[];
@@ -848,6 +849,16 @@ export default function PsychScheduleScreen({ navigation }: any) {
                           </Text>
                         </View>
                       )}
+                    </View>
+                  )}
+
+                  {/* Atividades da Sessão */}
+                  {(selectedAppointment._id || selectedAppointment.id) && (
+                    <View style={[styles.modalInfoRow, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                      <SessionActivities
+                        appointmentId={selectedAppointment._id || selectedAppointment.id || ''}
+                        userRole="psychologist"
+                      />
                     </View>
                   )}
 

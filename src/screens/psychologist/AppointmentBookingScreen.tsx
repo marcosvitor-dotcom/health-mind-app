@@ -19,6 +19,9 @@ import * as appointmentService from '../../services/appointmentService';
 import * as roomService from '../../services/roomService';
 import { Room } from '../../services/roomService';
 import * as clinicService from '../../services/clinicService';
+import * as activityService from '../../services/activityService';
+import { CreateActivityRequest } from '../../services/activityService';
+import ActivityForm from '../../components/ActivityForm';
 
 export default function AppointmentBookingScreen({ navigation, route }: any) {
   const { user } = useAuth();
@@ -66,6 +69,11 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [loadingRooms, setLoadingRooms] = useState(false);
   const clinicId = user?.clinicId || '';
+
+  // Atividades a criar após o agendamento
+  const [pendingActivities, setPendingActivities] = useState<CreateActivityRequest[]>([]);
+  const [activityFormVisible, setActivityFormVisible] = useState(false);
+  const [activityFormLoading, setActivityFormLoading] = useState(false);
 
   useEffect(() => {
     if (!preSelectedPatient) {
@@ -247,7 +255,7 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
         // Criar apenas uma consulta
         const dateTime = localDate.toISOString();
 
-        await appointmentService.createAppointment({
+        const createdAppointment = await appointmentService.createAppointment({
           patientId,
           psychologistId,
           date: dateTime,
@@ -256,6 +264,17 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
           roomId: selectedRoomId || undefined,
           sessionValue: parsedSessionValue && parsedSessionValue > 0 ? parsedSessionValue : undefined,
         });
+
+        // Criar atividades pendentes vinculadas ao agendamento
+        if (pendingActivities.length > 0 && createdAppointment?._id) {
+          for (const actData of pendingActivities) {
+            try {
+              await activityService.createActivity(createdAppointment._id, actData);
+            } catch (err) {
+              console.error('Erro ao criar atividade:', err);
+            }
+          }
+        }
 
         Alert.alert('Sucesso', 'Consulta agendada com sucesso!', [
           {
@@ -630,6 +649,57 @@ export default function AppointmentBookingScreen({ navigation, route }: any) {
         multiline
         numberOfLines={3}
         textAlignVertical="top"
+      />
+
+      {/* Atividades */}
+      <View style={[styles.recurringSection, { marginBottom: 4 }]}>
+        <View style={styles.recurringHeader}>
+          <View style={styles.recurringHeaderLeft}>
+            <Ionicons name="clipboard-outline" size={22} color="#4A90E2" />
+            <View style={styles.recurringHeaderText}>
+              <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginBottom: 0 }]}>Atividades</Text>
+              <Text style={[styles.recurringSubtitle, { color: colors.textSecondary }]}>
+                Tarefas entre sessões para o paciente
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.addActivityButton}
+            onPress={() => setActivityFormVisible(true)}
+          >
+            <Ionicons name="add" size={16} color="#4A90E2" />
+            <Text style={styles.addActivityButtonText}>Adicionar</Text>
+          </TouchableOpacity>
+        </View>
+
+        {pendingActivities.length > 0 && (
+          <View style={[styles.recurringOptions, { backgroundColor: colors.surfaceSecondary }]}>
+            {pendingActivities.map((act, index) => (
+              <View key={index} style={[styles.pendingActivityRow, { borderBottomColor: colors.border, borderBottomWidth: index < pendingActivities.length - 1 ? 1 : 0 }]}>
+                <Ionicons name="clipboard-outline" size={16} color="#4A90E2" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.pendingActivityTitle, { color: colors.textPrimary }]} numberOfLines={1}>{act.title}</Text>
+                  <Text style={[styles.pendingActivityType, { color: colors.textSecondary }]}>
+                    {act.type === 'checklist' ? 'Checklist' : act.type === 'reflection' ? 'Reflexão' : act.type === 'mood_tracking' ? 'Registro de Humor' : 'Envio de Arquivo'}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setPendingActivities((prev) => prev.filter((_, i) => i !== index))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      <ActivityForm
+        visible={activityFormVisible}
+        onClose={() => setActivityFormVisible(false)}
+        onSave={async (data) => {
+          setPendingActivities((prev) => [...prev, data]);
+          setActivityFormVisible(false);
+        }}
+        loading={activityFormLoading}
       />
 
       {/* Consulta Recorrente */}
@@ -1245,5 +1315,34 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
+  },
+  addActivityButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1.5,
+    borderColor: '#4A90E2',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  addActivityButtonText: {
+    fontSize: 13,
+    color: '#4A90E2',
+    fontWeight: '600',
+  },
+  pendingActivityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+  },
+  pendingActivityTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  pendingActivityType: {
+    fontSize: 11,
+    marginTop: 1,
   },
 });
