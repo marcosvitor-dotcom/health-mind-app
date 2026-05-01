@@ -5,6 +5,7 @@ import {
   AdminPsychologist,
   AdminPatient,
   AdminUser,
+  AdminInvitation,
 } from '../types';
 
 // ========================================
@@ -323,6 +324,46 @@ export const revokeAdmin = async (id: string): Promise<void> => {
 // ========================================
 // INVITATIONS
 // ========================================
+
+interface ListAllInvitationsParams {
+  status?: string;
+  role?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface ListAllInvitationsResponse {
+  invitations: AdminInvitation[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export const listAllInvitations = async (
+  params?: ListAllInvitationsParams
+): Promise<ListAllInvitationsResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.role) queryParams.append('role', params.role);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const { data } = await api.get<ApiResponse<ListAllInvitationsResponse>>(
+      `/admin/invitations?${queryParams.toString()}`
+    );
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao listar convites');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
 
 interface InviteClinicData {
   email: string;

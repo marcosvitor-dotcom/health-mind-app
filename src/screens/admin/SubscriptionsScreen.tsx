@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../constants/theme';
 import { listSubscriptions, AdminSubscription } from '../../services/adminService';
 
 const PLAN_NAMES: Record<string, string> = {
@@ -42,6 +44,8 @@ const FILTERS = [
 
 export default function SubscriptionsScreen() {
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -90,7 +94,7 @@ export default function SubscriptionsScreen() {
 
         <View style={styles.cardDetails}>
           <View style={styles.detailRow}>
-            <Ionicons name="ribbon-outline" size={14} color="#666" />
+            <Ionicons name="ribbon-outline" size={14} color={colors.textSecondary} />
             <Text style={styles.detailText}>
               {PLAN_NAMES[item.planKey] ?? item.planKey}
               {item.isTrial ? '  (Trial)' : ''}
@@ -99,14 +103,14 @@ export default function SubscriptionsScreen() {
 
           {!item.isTrial && item.billing.monthlyAmount > 0 && (
             <View style={styles.detailRow}>
-              <Ionicons name="card-outline" size={14} color="#666" />
+              <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.detailText}>R$ {item.billing.monthlyAmount}/mês</Text>
             </View>
           )}
 
           {item.billing.nextBillingDate && !item.isTrial && (
             <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={14} color="#666" />
+              <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.detailText}>
                 Próx. venc.: {new Date(item.billing.nextBillingDate).toLocaleDateString('pt-BR')}
               </Text>
@@ -115,7 +119,7 @@ export default function SubscriptionsScreen() {
 
           {item.isTrial && item.trialEndsAt && (
             <View style={styles.detailRow}>
-              <Ionicons name="time-outline" size={14} color="#666" />
+              <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.detailText}>
                 Trial até: {new Date(item.trialEndsAt).toLocaleDateString('pt-BR')}
               </Text>
@@ -130,13 +134,12 @@ export default function SubscriptionsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>Assinaturas</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Filter tabs */}
       <View style={styles.filterContainer}>
         {FILTERS.map((f) => (
           <TouchableOpacity
@@ -164,7 +167,7 @@ export default function SubscriptionsScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="card-outline" size={48} color="#ccc" />
+              <Ionicons name="card-outline" size={48} color={colors.textTertiary} />
               <Text style={styles.emptyText}>Nenhuma assinatura encontrada</Text>
             </View>
           }
@@ -174,58 +177,59 @@ export default function SubscriptionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: '600', color: '#333' },
-  filterContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  filterTab: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
-  },
-  filterTabActive: { backgroundColor: '#4A90E2' },
-  filterTabText: { fontSize: 13, color: '#666', fontWeight: '500' },
-  filterTabTextActive: { color: '#fff' },
-  list: { padding: 16, gap: 12 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
-  userName: { fontSize: 15, fontWeight: '700', color: '#333' },
-  userEmail: { fontSize: 13, color: '#666', marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  statusText: { fontSize: 12, fontWeight: '600' },
-  cardDetails: { gap: 6 },
-  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  detailText: { fontSize: 13, color: '#555' },
-  empty: { alignItems: 'center', paddingVertical: 60, gap: 12 },
-  emptyText: { fontSize: 16, color: '#aaa' },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+    title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
+    filterContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      gap: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    filterTab: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: colors.background,
+    },
+    filterTabActive: { backgroundColor: '#4A90E2' },
+    filterTabText: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
+    filterTabTextActive: { color: '#fff' },
+    list: { padding: 16, gap: 12 },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    cardHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+    userName: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+    userEmail: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    statusText: { fontSize: 12, fontWeight: '600' },
+    cardDetails: { gap: 6 },
+    detailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    detailText: { fontSize: 13, color: colors.textSecondary },
+    empty: { alignItems: 'center', paddingVertical: 60, gap: 12 },
+    emptyText: { fontSize: 16, color: colors.textTertiary },
+  });

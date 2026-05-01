@@ -14,6 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../constants/theme';
 import * as adminService from '../../services/adminService';
 import { AdminPsychologist, AdminPatient, AdminUser } from '../../types';
 
@@ -21,6 +23,8 @@ type TabType = 'psychologists' | 'patients' | 'admins';
 
 export default function UsersScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [activeTab, setActiveTab] = useState<TabType>('psychologists');
   const [psychologists, setPsychologists] = useState<AdminPsychologist[]>([]);
   const [patients, setPatients] = useState<AdminPatient[]>([]);
@@ -150,7 +154,7 @@ export default function UsersScreen({ navigation }: any) {
     <View style={[styles.userCard, item.deletedAt && styles.deletedCard]}>
       <View style={styles.userHeader}>
         <View style={[styles.userIcon, { backgroundColor: '#EDE7F6' }]}>
-          <Ionicons name="medkit" size={24} color={item.deletedAt ? '#999' : '#9B59B6'} />
+          <Ionicons name="medkit" size={24} color={item.deletedAt ? colors.textTertiary : '#9B59B6'} />
         </View>
         <View style={styles.userInfo}>
           <Text style={[styles.userName, item.deletedAt && styles.deletedText]}>{item.name}</Text>
@@ -191,7 +195,7 @@ export default function UsersScreen({ navigation }: any) {
     <View style={[styles.userCard, item.deletedAt && styles.deletedCard]}>
       <View style={styles.userHeader}>
         <View style={[styles.userIcon, { backgroundColor: '#E8F5E9' }]}>
-          <Ionicons name="person" size={24} color={item.deletedAt ? '#999' : '#27AE60'} />
+          <Ionicons name="person" size={24} color={item.deletedAt ? colors.textTertiary : '#27AE60'} />
         </View>
         <View style={styles.userInfo}>
           <Text style={[styles.userName, item.deletedAt && styles.deletedText]}>{item.name}</Text>
@@ -232,7 +236,7 @@ export default function UsersScreen({ navigation }: any) {
     <View style={[styles.userCard, item.deletedAt && styles.deletedCard]}>
       <View style={styles.userHeader}>
         <View style={[styles.userIcon, { backgroundColor: '#FADBD8' }]}>
-          <Ionicons name="shield" size={24} color={item.deletedAt ? '#999' : '#E74C3C'} />
+          <Ionicons name="shield" size={24} color={item.deletedAt ? colors.textTertiary : '#E74C3C'} />
         </View>
         <View style={styles.userInfo}>
           <View style={styles.adminNameRow}>
@@ -273,7 +277,7 @@ export default function UsersScreen({ navigation }: any) {
       <Ionicons
         name={icon as any}
         size={20}
-        color={activeTab === tab ? '#E74C3C' : '#666'}
+        color={activeTab === tab ? '#E74C3C' : colors.textSecondary}
       />
       <Text style={[styles.tabBtnText, activeTab === tab && styles.tabBtnTextActive]}>
         {label}
@@ -295,26 +299,24 @@ export default function UsersScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Usuários</Text>
       </View>
 
-      {/* Tabs */}
       <View style={styles.tabsContainer}>
         <TabButton tab="psychologists" label="Psicólogos" icon="medkit" />
         <TabButton tab="patients" label="Pacientes" icon="people" />
         {canManageAdmins && <TabButton tab="admins" label="Admins" icon="shield" />}
       </View>
 
-      {/* Search */}
       {activeTab !== 'admins' && (
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
-            <Ionicons name="search" size={20} color="#999" />
+            <Ionicons name="search" size={20} color={colors.textTertiary} />
             <TextInput
               style={styles.searchInput}
               placeholder={`Buscar ${activeTab === 'psychologists' ? 'psicólogos' : 'pacientes'}...`}
+              placeholderTextColor={colors.textTertiary}
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={loadData}
@@ -322,21 +324,20 @@ export default function UsersScreen({ navigation }: any) {
             />
             {search.length > 0 && (
               <TouchableOpacity onPress={() => setSearch('')}>
-                <Ionicons name="close-circle" size={20} color="#999" />
+                <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
               </TouchableOpacity>
             )}
           </View>
         </View>
       )}
 
-      {/* List */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#E74C3C" />
         </View>
       ) : getCurrentList().length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="people-outline" size={64} color="#ccc" />
+          <Ionicons name="people-outline" size={64} color={colors.textTertiary} />
           <Text style={styles.emptyTitle}>Nenhum usuário encontrado</Text>
         </View>
       ) : (
@@ -354,188 +355,189 @@ export default function UsersScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    gap: 8,
-  },
-  tabBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    gap: 6,
-  },
-  tabBtnActive: {
-    backgroundColor: '#FADBD8',
-  },
-  tabBtnText: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
-  },
-  tabBtnTextActive: {
-    color: '#E74C3C',
-    fontWeight: '600',
-  },
-  searchContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#333',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
-  },
-  listContent: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  userCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  deletedCard: {
-    backgroundColor: '#f9f9f9',
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  userHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  adminNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  deletedText: {
-    color: '#999',
-    textDecorationLine: 'line-through',
-  },
-  userEmail: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  userMeta: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  deletedBadge: {
-    backgroundColor: '#FADBD8',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  deletedBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#E74C3C',
-  },
-  superAdminBadge: {
-    backgroundColor: '#FEF5E7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  superAdminText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#E67E22',
-  },
-  userActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 12,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 4,
-  },
-  deleteBtn: {
-    backgroundColor: '#FADBD8',
-  },
-  restoreBtn: {
-    backgroundColor: '#D5F5E3',
-  },
-  actionBtnText: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    tabsContainer: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      marginBottom: 12,
+      gap: 8,
+    },
+    tabBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      borderRadius: 12,
+      backgroundColor: colors.surface,
+      gap: 6,
+    },
+    tabBtnActive: {
+      backgroundColor: '#FADBD8',
+    },
+    tabBtnText: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+    tabBtnTextActive: {
+      color: '#E74C3C',
+      fontWeight: '600',
+    },
+    searchContainer: {
+      paddingHorizontal: 16,
+      marginBottom: 12,
+    },
+    searchInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    searchInput: {
+      flex: 1,
+      marginLeft: 8,
+      fontSize: 16,
+      color: colors.textPrimary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    emptyTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginTop: 16,
+    },
+    listContent: {
+      padding: 16,
+      paddingTop: 0,
+    },
+    userCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    deletedCard: {
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    userHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    userIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    userInfo: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    adminNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    userName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    deletedText: {
+      color: colors.textTertiary,
+      textDecorationLine: 'line-through',
+    },
+    userEmail: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    userMeta: {
+      fontSize: 12,
+      color: colors.textTertiary,
+      marginTop: 2,
+    },
+    deletedBadge: {
+      backgroundColor: '#FADBD8',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    deletedBadgeText: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: '#E74C3C',
+    },
+    superAdminBadge: {
+      backgroundColor: '#FEF5E7',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    superAdminText: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: '#E67E22',
+    },
+    userActions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
+      paddingTop: 12,
+    },
+    actionBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+      gap: 4,
+    },
+    deleteBtn: {
+      backgroundColor: '#FADBD8',
+    },
+    restoreBtn: {
+      backgroundColor: '#D5F5E3',
+    },
+    actionBtnText: {
+      fontSize: 13,
+      fontWeight: '500',
+    },
+  });

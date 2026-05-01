@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../contexts/ThemeContext';
 
 import OverviewScreen from '../screens/admin/OverviewScreen';
 import SubscriptionsScreen from '../screens/admin/SubscriptionsScreen';
@@ -78,11 +79,17 @@ function OverviewStack() {
 }
 
 export default function AdminNavigator() {
+  const { colors, isDark } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#E74C3C',
-        tabBarInactiveTintColor: '#999',
+        tabBarInactiveTintColor: isDark ? '#6B7580' : '#999',
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
         headerShown: false,
       }}
     >

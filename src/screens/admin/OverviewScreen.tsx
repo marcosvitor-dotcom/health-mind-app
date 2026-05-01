@@ -12,16 +12,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../constants/theme';
 import * as adminService from '../../services/adminService';
 import { AdminStats } from '../../types';
 
 export default function OverviewScreen() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const navigation = useNavigation<any>();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const styles = createStyles(colors);
 
   const loadStats = useCallback(async () => {
     try {
@@ -103,24 +108,28 @@ export default function OverviewScreen() {
             label="Clínicas"
             value={stats?.totals.clinics || 0}
             color="#3498DB"
+            colors={colors}
           />
           <StatCard
             icon="medkit"
             label="Psicólogos"
             value={stats?.totals.psychologists || 0}
             color="#9B59B6"
+            colors={colors}
           />
           <StatCard
             icon="people"
             label="Pacientes"
             value={stats?.totals.patients || 0}
             color="#27AE60"
+            colors={colors}
           />
           <StatCard
             icon="shield"
             label="Admins"
             value={stats?.totals.admins || 0}
             color="#E74C3C"
+            colors={colors}
           />
         </View>
 
@@ -176,6 +185,39 @@ export default function OverviewScreen() {
           </View>
         </View>
 
+        {/* Convites */}
+        <Text style={styles.sectionTitle}>Convites</Text>
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="time"
+            label="Pendentes"
+            value={stats?.invitations?.pending || 0}
+            color="#E67E22"
+            colors={colors}
+          />
+          <StatCard
+            icon="checkmark-circle"
+            label="Aceitos"
+            value={stats?.invitations?.accepted || 0}
+            color="#27AE60"
+            colors={colors}
+          />
+          <StatCard
+            icon="close-circle"
+            label="Expirados"
+            value={stats?.invitations?.expired || 0}
+            color="#95A5A6"
+            colors={colors}
+          />
+          <StatCard
+            icon="send"
+            label="Este Mês"
+            value={stats?.invitations?.sentThisMonth || 0}
+            color="#3498DB"
+            colors={colors}
+          />
+        </View>
+
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Ações Rápidas</Text>
         <View style={styles.actionsRow}>
@@ -226,9 +268,11 @@ interface StatCardProps {
   label: string;
   value: number;
   color: string;
+  colors: ThemeColors;
 }
 
-function StatCard({ icon, label, value, color }: StatCardProps) {
+function StatCard({ icon, label, value, color, colors }: StatCardProps) {
+  const styles = createStyles(colors);
   return (
     <View style={styles.statCard}>
       <View style={[styles.statIconContainer, { backgroundColor: color }]}>
@@ -240,269 +284,270 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  errorText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: '#E74C3C',
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  headerRight: {
-    padding: 12,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-  },
-  adminBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  adminBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-  statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    width: '47%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  activeUsersCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  activeUsersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  activeUserItem: {
-    alignItems: 'center',
-  },
-  activeUserValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  activeUserLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  totalActiveRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 12,
-  },
-  totalActiveLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  totalActiveValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#E74C3C',
-  },
-  newUsersCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  newUsersContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  newUsersInfo: {
-    marginLeft: 16,
-  },
-  newUsersTotal: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#27AE60',
-  },
-  newUsersLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  newUsersBreakdown: {
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 12,
-  },
-  newUsersBreakdownText: {
-    fontSize: 13,
-    color: '#888',
-    textAlign: 'center',
-  },
-  appointmentsCard: {
-    backgroundColor: '#E74C3C',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  appointmentsIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  appointmentsInfo: {
-    marginLeft: 16,
-  },
-  appointmentsValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  appointmentsLabel: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#333',
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      padding: 16,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      marginTop: 12,
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    errorText: {
+      marginTop: 12,
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    retryButton: {
+      marginTop: 16,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      backgroundColor: '#E74C3C',
+      borderRadius: 8,
+    },
+    retryButtonText: {
+      color: '#fff',
+      fontWeight: '600',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 24,
+    },
+    headerLeft: {
+      flex: 1,
+    },
+    headerRight: {
+      padding: 12,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+    },
+    adminBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#E74C3C',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      alignSelf: 'flex-start',
+      marginBottom: 8,
+    },
+    adminBadgeText: {
+      color: '#fff',
+      fontSize: 12,
+      fontWeight: '600',
+      marginLeft: 4,
+    },
+    welcomeText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    userName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: 12,
+      marginTop: 8,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+      marginBottom: 16,
+    },
+    statCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      width: '47%',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    statIconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    statValue: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    statLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    activeUsersCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    activeUsersRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 16,
+    },
+    activeUserItem: {
+      alignItems: 'center',
+    },
+    activeUserValue: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    activeUserLabel: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    totalActiveRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
+      paddingTop: 12,
+    },
+    totalActiveLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    totalActiveValue: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#E74C3C',
+    },
+    newUsersCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    newUsersContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    newUsersInfo: {
+      marginLeft: 16,
+    },
+    newUsersTotal: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: '#27AE60',
+    },
+    newUsersLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    newUsersBreakdown: {
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
+      paddingTop: 12,
+    },
+    newUsersBreakdownText: {
+      fontSize: 13,
+      color: colors.textTertiary,
+      textAlign: 'center',
+    },
+    appointmentsCard: {
+      backgroundColor: '#E74C3C',
+      borderRadius: 12,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    appointmentsIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    appointmentsInfo: {
+      marginLeft: 16,
+    },
+    appointmentsValue: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: '#fff',
+    },
+    appointmentsLabel: {
+      fontSize: 14,
+      color: 'rgba(255,255,255,0.8)',
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    actionButton: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    actionIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    actionText: {
+      fontSize: 12,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+  });

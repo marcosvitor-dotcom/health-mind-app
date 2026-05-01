@@ -177,6 +177,28 @@ export interface AdminStats {
     total: number;
   };
   appointmentsThisMonth: number;
+  invitations: {
+    pending: number;
+    accepted: number;
+    expired: number;
+    sentThisMonth: number;
+  };
+}
+
+export interface AdminInvitation {
+  _id: string;
+  email: string;
+  role: 'clinic' | 'psychologist' | 'patient';
+  status: 'pending' | 'accepted' | 'expired';
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  invitedBy: {
+    userId: string;
+    userModel: string;
+    userName: string;
+  };
+  name?: string;
 }
 
 export interface AdminClinic {
